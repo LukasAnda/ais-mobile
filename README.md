@@ -1,0 +1,1 @@
+# Akademický informačný systém pre operačný systém Android - Bakalárská práca
