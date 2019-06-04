@@ -11,25 +11,10 @@
  * limitations under the License.
  */
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+package com.lukasanda.aismobile.util
 
-buildscript {
-    apply from: 'versions.gradle'
-    addRepos(repositories)
-    dependencies {
-        classpath deps.android_gradle_plugin
-        classpath deps.kotlin.plugin
-    }
+import java.util.concurrent.Executors
 
-    repositories {
-        google()
-    }
-}
+private val IO_EXECUTOR = Executors.newSingleThreadExecutor()
 
-allprojects {
-    addRepos(repositories)
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
+fun ioThread(f: () -> Unit) = IO_EXECUTOR.execute(f)

@@ -11,25 +11,21 @@
  * limitations under the License.
  */
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+package com.lukasanda.aismobile.core
 
-buildscript {
-    apply from: 'versions.gradle'
-    addRepos(repositories)
-    dependencies {
-        classpath deps.android_gradle_plugin
-        classpath deps.kotlin.plugin
+import androidx.lifecycle.ViewModel
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
+
+open class BaseViewModel : ViewModel() {
+    private val disposables: CompositeDisposable = CompositeDisposable()
+
+    fun addToDisposable(disposable: Disposable) {
+        disposables.add(disposable)
     }
 
-    repositories {
-        google()
+    override fun onCleared() {
+        disposables.clear()
+        super.onCleared()
     }
-}
-
-allprojects {
-    addRepos(repositories)
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
 }

@@ -11,25 +11,27 @@
  * limitations under the License.
  */
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+package com.lukasanda.aismobile.data.db.converter
 
-buildscript {
-    apply from: 'versions.gradle'
-    addRepos(repositories)
-    dependencies {
-        classpath deps.android_gradle_plugin
-        classpath deps.kotlin.plugin
+import androidx.room.TypeConverter
+import org.joda.time.DateTime
+
+class DateConverter {
+    @TypeConverter
+    fun toDate(dateString: String?): DateTime? {
+        return if (dateString == null) {
+            null
+        } else {
+            DateTime.parse(dateString)
+        }
     }
 
-    repositories {
-        google()
+    @TypeConverter
+    fun toDateString(date: DateTime?): String? {
+        return if (date == null) {
+            null
+        } else {
+            date.toString()
+        }
     }
-}
-
-allprojects {
-    addRepos(repositories)
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
 }

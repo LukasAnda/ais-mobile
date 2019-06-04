@@ -11,25 +11,24 @@
  * limitations under the License.
  */
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+package com.lukasanda.aismobile.ui.login
 
-buildscript {
-    apply from: 'versions.gradle'
-    addRepos(repositories)
-    dependencies {
-        classpath deps.android_gradle_plugin
-        classpath deps.kotlin.plugin
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import com.lukasanda.aismobile.R
+import org.koin.androidx.viewmodel.ext.android.viewModel
+
+class LoginActivity : AppCompatActivity() {
+
+    private val viewModel by viewModel<LoginViewModel>()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_login)
     }
 
-    repositories {
-        google()
+    override fun onStart() {
+        super.onStart()
+        viewModel.login("xanda", "jaR.tam.2.uka")
     }
-}
-
-allprojects {
-    addRepos(repositories)
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
 }

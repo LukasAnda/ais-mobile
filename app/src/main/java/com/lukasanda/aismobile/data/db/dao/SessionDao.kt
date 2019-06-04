@@ -11,25 +11,22 @@
  * limitations under the License.
  */
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+package com.lukasanda.aismobile.data.db.dao
 
-buildscript {
-    apply from: 'versions.gradle'
-    addRepos(repositories)
-    dependencies {
-        classpath deps.android_gradle_plugin
-        classpath deps.kotlin.plugin
-    }
+import androidx.room.*
+import com.lukasanda.aismobile.data.db.entity.Session
+import io.reactivex.Single
 
-    repositories {
-        google()
-    }
-}
+@Dao
+interface SessionDao {
 
-allprojects {
-    addRepos(repositories)
-}
+    @Query("SELECT * FROM Session ORDER BY id DESC LIMIT 1")
+    fun findLatest(): Single<Session?>
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(bookmark: Session)
+
+    @Delete
+    fun delete(bookmark: Session)
+
 }

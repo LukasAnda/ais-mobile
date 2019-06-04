@@ -11,25 +11,12 @@
  * limitations under the License.
  */
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+package com.lukasanda.aismobile.di
 
-buildscript {
-    apply from: 'versions.gradle'
-    addRepos(repositories)
-    dependencies {
-        classpath deps.android_gradle_plugin
-        classpath deps.kotlin.plugin
-    }
+import com.lukasanda.aismobile.data.remote.api.AISApi
+import org.koin.dsl.module
+import retrofit2.Retrofit
 
-    repositories {
-        google()
-    }
-}
-
-allprojects {
-    addRepos(repositories)
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
+val apiModule = module {
+    single(createdAtStart = false) { get<Retrofit>().create(AISApi::class.java) }
 }

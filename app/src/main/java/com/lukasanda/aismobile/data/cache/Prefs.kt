@@ -11,25 +11,14 @@
  * limitations under the License.
  */
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+package com.lukasanda.aismobile.data.cache
 
-buildscript {
-    apply from: 'versions.gradle'
-    addRepos(repositories)
-    dependencies {
-        classpath deps.android_gradle_plugin
-        classpath deps.kotlin.plugin
-    }
+import android.content.Context
+import android.content.SharedPreferences
+import com.lukasanda.aismobile.BuildConfig
 
-    repositories {
-        google()
-    }
-}
-
-allprojects {
-    addRepos(repositories)
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
+class Prefs(context: Context) {
+    val PREFS_FILENAME = "${BuildConfig.APPLICATION_ID}.prefs"
+    val SESSION_EXPIRATION = "session_expiration_date"
+    val prefs: SharedPreferences = context.getSharedPreferences(PREFS_FILENAME, 0)
 }
