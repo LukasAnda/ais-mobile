@@ -15,6 +15,8 @@ package com.lukasanda.aismobile.di
 
 import com.google.gson.GsonBuilder
 import com.lukasanda.aismobile.BuildConfig
+import com.lukasanda.aismobile.util.AuthInterceptor
+import com.lukasanda.aismobile.util.EncodingInterceptor
 import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -44,6 +46,8 @@ val networkModule = module {
             followSslRedirects(false)
             followRedirects(false)
             retryOnConnectionFailure(true)
+            addInterceptor(EncodingInterceptor())
+            addInterceptor(AuthInterceptor(get()))
             addInterceptor(get())
             addInterceptor(HttpLoggingInterceptor().apply {
                 if (BuildConfig.DEBUG) {
@@ -55,7 +59,7 @@ val networkModule = module {
 
     single {
         Retrofit.Builder()
-            .baseUrl("https://is.stuba.sk/system/")
+            .baseUrl("https://is.stuba.sk/")
             .addConverterFactory(GsonConverterFactory.create(get()))
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .client(get())

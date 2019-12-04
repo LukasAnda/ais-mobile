@@ -16,9 +16,44 @@ package com.lukasanda.aismobile.data.cache
 import android.content.Context
 import android.content.SharedPreferences
 import com.lukasanda.aismobile.BuildConfig
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
 
 class Prefs(context: Context) {
-    val PREFS_FILENAME = "${BuildConfig.APPLICATION_ID}.prefs"
-    val SESSION_EXPIRATION = "session_expiration_date"
+    private val PREFS_FILENAME = "${BuildConfig.APPLICATION_ID}.prefs"
+    private val SESSION_EXPIRATION = "session_expiration_date"
+    private val COOKIES = "cookies"
+    private val USERNAME = "username"
+    private val PASSWORD = "password"
+    private val AISID = "aisid"
+
     val prefs: SharedPreferences = context.getSharedPreferences(PREFS_FILENAME, 0)
+
+    var sessionCookie: String
+        get() = prefs.getString(COOKIES, "") ?: ""
+        set(value) = prefs.edit().putString(COOKIES, value).apply()
+
+    var expiration: DateTime
+        get() = DateTime.parse(
+            prefs.getString(
+                SESSION_EXPIRATION,
+                DateTime.now().minusDays(1).toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
+            ), DateTimeFormat.forPattern("dd.MM.yyyy hh:mm")
+        )
+        set(value) = prefs.edit().putString(
+            SESSION_EXPIRATION,
+            value.toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
+        ).apply()
+
+    var username: String
+        get() = prefs.getString(USERNAME, "") ?: ""
+        set(value) = prefs.edit().putString(USERNAME, value).apply()
+
+    var password: String
+        get() = prefs.getString(PASSWORD, "") ?: ""
+        set(value) = prefs.edit().putString(PASSWORD, value).apply()
+
+    var id: Int
+        get() = prefs.getInt(AISID, 0)
+        set(value) = prefs.edit().putInt(AISID, value).apply()
 }

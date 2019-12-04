@@ -14,15 +14,15 @@
 package com.lukasanda.aismobile.data.remote.api
 
 import io.reactivex.Single
+import okhttp3.ResponseBody
 import retrofit2.Response
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
-import retrofit2.http.POST
+import retrofit2.http.*
+import sk.lukasanda.dataprovider.data.Schedule
 
 interface AISApi {
 
     @FormUrlEncoded
-    @POST("login.pl")
+    @POST("system/login.pl")
     fun login(
         @Field("lang", encoded = true) lang: String = "sk",
         @Field("login_hidden", encoded = true) loginHidden: String = "1",
@@ -33,6 +33,18 @@ interface AISApi {
         @Field("credential_1", encoded = true) password: String,
         @Field("credential_k", encoded = true) k: String = "",
         @Field("credential_2", encoded = true) validSeconds: String = "86400"
-    ): Single<Response<Unit>>
+    ): Single<Response<ResponseBody>>
+
+
+    @GET("auth/katalog/rozvrhy_view.pl")
+    fun schedule(@Query("rozvrh_student_obec", encoded = true) params: String = "1?zobraz=1;format=json;rozvrh_student=91984"): Single<Response<ResponseBody>>
+
+    @GET("auth/student/studium.pl")
+    fun educationInfo(): Single<Response<ResponseBody>>
+
+    @GET("auth/wifi/heslo_vpn_sit.pl")
+    fun wifiInfo(): Single<Response<ResponseBody>>
+
+
 
 }

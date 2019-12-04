@@ -24,6 +24,8 @@ open class BaseViewModel : ViewModel() {
         disposables.add(disposable)
     }
 
+    fun launchRx(func: ()-> Disposable) = disposables.add(func())
+
     override fun onCleared() {
         disposables.clear()
         super.onCleared()

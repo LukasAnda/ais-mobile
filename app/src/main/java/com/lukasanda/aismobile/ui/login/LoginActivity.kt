@@ -13,14 +13,30 @@
 
 package com.lukasanda.aismobile.ui.login
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.work.*
+import com.google.android.material.snackbar.Snackbar
 import com.lukasanda.aismobile.R
+import com.lukasanda.aismobile.core.State
+import com.lukasanda.aismobile.data.cache.Prefs
+import com.lukasanda.aismobile.data.remote.SyncWorker
+import com.lukasanda.aismobile.ui.login.LoginViewModel.ErrorState.*
+import com.lukasanda.aismobile.ui.main.MainActivity
+import com.lukasanda.aismobile.util.hide
+import com.lukasanda.aismobile.util.show
+import kotlinx.android.synthetic.main.activity_login.*
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.util.concurrent.TimeUnit
 
 class LoginActivity : AppCompatActivity() {
 
     private val viewModel by viewModel<LoginViewModel>()
+    private val prefs by inject<Prefs>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +45,57 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        viewModel.login("xanda", "jaR.tam.2.uka")
+
+        emailEditText.setText(prefs.username)
+        passwordEditText.setText(prefs.password)
+
+        if (prefs.username.isNotEmpty() && prefs.password.isNotEmpty()) {
+            viewModel.login(emailEditText.text.toString(), passwordEditText.text.toString())
+        }
+
+        loginButton.setOnClickListener {
+            viewModel.login(emailEditText.text.toString(), passwordEditText.text.toString())
+        }
+
+        viewModel.state.observe(this, Observer {
+            when(it){
+                is State.Loading -> {
+                    showProgress()
+                }
+                is State.Success -> {
+                    hideProgress()
+
+                    val constraints = Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED)
+
+                    val request = PeriodicWorkRequest.Builder(SyncWorker::class.java, 15, TimeUnit.MINUTES).setConstraints(constraints.build())
+                        .build()
+                    WorkManager.getInstance(applicationContext)
+                        .enqueueUniquePeriodicWork("Sync", ExistingPeriodicWorkPolicy.REPLACE, request)
+                    startActivity(Intent(this, MainActivity::class.java))
+                }
+                is State.Failure -> {
+                    hideProgress()
+                    when(it.errorType){
+                        Auth -> {
+                            emailInputLayout.error = "Zlé meno alebo heslo"
+                            passwordInputLayout.error = "Zlé meno alebo heslo"
+                        }
+                        Network -> {
+                            Snackbar.make(root, R.string.network_error, Snackbar.LENGTH_SHORT)
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    private fun showProgress(){
+        progress.show()
+        loginButton.text = ""
+    }
+
+    private fun hideProgress(){
+        progress.hide()
+        loginButton.setText(R.string.login)
     }
 }

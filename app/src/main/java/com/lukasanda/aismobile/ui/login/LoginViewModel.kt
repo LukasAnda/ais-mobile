@@ -14,59 +14,70 @@
 package com.lukasanda.aismobile.ui.login
 
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.lukasanda.aismobile.core.BaseViewModel
-import com.lukasanda.aismobile.data.db.dao.SessionDao
-import com.lukasanda.aismobile.data.db.entity.Session
+import com.lukasanda.aismobile.core.State
+import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.remote.api.AISApi
 import com.lukasanda.aismobile.extensions.with
 import com.lukasanda.aismobile.util.NotNullMutableLiveData
 import com.lukasanda.aismobile.util.getSessionId
-import com.lukasanda.aismobile.util.ioThread
+import okhttp3.ResponseBody
 import org.joda.time.DateTime
+import retrofit2.Response
+import sk.lukasanda.dataprovider.Parser
 
-class LoginViewModel(private val service: AISApi, private val sessionDao: SessionDao) : BaseViewModel() {
+class LoginViewModel(private val service: AISApi, private val prefs: Prefs) : BaseViewModel() {
+    private val _state = MutableLiveData<State<Int, ErrorState>>()
+    val state: LiveData<State<Int, ErrorState>> = _state
 
-    private val _refreshing = NotNullMutableLiveData(false)
-    val refreshing: NotNullMutableLiveData<Boolean>
-        get() = _refreshing
 
     fun login(name: String, password: String) {
-        addToDisposable(sessionDao.findLatest()
-            .with()
-            .doOnSubscribe { _refreshing.value = true }
-            .subscribe({
-                if (it != null && DateTime.now().isBefore(it.validUntil)) {
-                    println(it.key)
-                    _refreshing.value = false
-                    //We can safely continue
-                } else {
-                    requestNewCookie(name, password)
-                }
-            }, {
-                requestNewCookie(name, password)
-            })
-        )
+        _state.postValue(State.Loading)
 
+        if (prefs.expiration.isBeforeNow || name != prefs.username || password != prefs.password) {
+            //Need new token
+            requestNewCookie(name, password)
+        } else {
+            _state.postValue(State.Success(1))
+        }
     }
 
     private fun requestNewCookie(name: String, password: String) {
         addToDisposable(service.login(login = name, password = password)
             .with()
-            .doOnSubscribe { _refreshing.value = true }
-            .doOnSuccess { _refreshing.value = false }
-            .doOnError { _refreshing.value = false }
             .subscribe({
-                val cookies = it.headers().get("Set-Cookie") ?: ""
-                if (cookies.isNotEmpty()) {
-                    val session = Session(key = getSessionId(cookies), validUntil = DateTime.now().plusDays(1))
-                    ioThread {
-                        sessionDao.insert(session)
+                if(it.code() == 302){
+                    if(saveCookie(name, password, it)){
+                        _state.postValue(State.Success(1))
+                    } else {
+                        _state.postValue(State.Failure(ErrorState.Auth))
                     }
+                } else {
+                    _state.postValue(State.Failure(ErrorState.Auth))
                 }
+
             }, {
+                _state.postValue(State.Failure(ErrorState.Network))
                 Log.e("TAG", "network error", it)
             })
         )
     }
 
+    private fun saveCookie(name: String, password: String, response: Response<ResponseBody>): Boolean{
+        val cookies = response.headers().get("Set-Cookie") ?: return false
+
+        prefs.sessionCookie = getSessionId(cookies)
+        prefs.expiration = DateTime.now().plusDays(1)
+
+        prefs.username = name
+        prefs.password = password
+
+        return true
+    }
+
+    enum class ErrorState{
+        Auth, Network
+    }
 }

@@ -13,6 +13,7 @@
 
 package com.lukasanda.aismobile.di
 
+import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.db.AppDatabase
 import org.koin.android.ext.koin.androidApplication
 import org.koin.dsl.module
@@ -20,4 +21,10 @@ import org.koin.dsl.module
 val roomModule = module {
     single { AppDatabase.getInstance(androidApplication()) }
     single(createdAtStart = false) { get<AppDatabase>().getSessionDao() }
+    single(createdAtStart = false) { get<AppDatabase>().getCourseDao() }
+    single(createdAtStart = false) { get<AppDatabase>().getProfileDao() }
+}
+
+val prefsModule = module {
+    single { Prefs(androidApplication()) }
 }

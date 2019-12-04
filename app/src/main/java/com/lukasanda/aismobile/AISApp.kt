@@ -14,14 +14,14 @@
 package com.lukasanda.aismobile
 
 import android.app.Application
-import com.lukasanda.aismobile.di.apiModule
-import com.lukasanda.aismobile.di.networkModule
-import com.lukasanda.aismobile.di.roomModule
-import com.lukasanda.aismobile.di.viewModelModule
+import androidx.work.*
+import com.lukasanda.aismobile.di.*
+import com.lukasanda.aismobile.util.ThemeHelper
 import net.danlew.android.joda.JodaTimeAndroid
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
+import java.util.concurrent.TimeUnit
 
 @Suppress("Unused")
 class AISApp : Application() {
@@ -38,11 +38,14 @@ class AISApp : Application() {
                     networkModule,
                     apiModule,
                     roomModule,
-                    viewModelModule
+                    viewModelModule,
+                    prefsModule
                 )
             )
             androidLogger()
         }
+
+        ThemeHelper.applyTheme(ThemeHelper.darkMode)
     }
 
 }

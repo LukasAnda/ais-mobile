@@ -13,6 +13,16 @@
 
 package com.lukasanda.aismobile.util
 
+import android.view.View
+
 fun getSessionId(cookies: String): String {
     return cookies.substringBefore(";")
+}
+
+fun View.show(){
+    this.visibility = View.VISIBLE
+}
+
+fun View.hide(){
+    this.visibility = View.GONE
 }

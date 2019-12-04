@@ -18,16 +18,23 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.lukasanda.aismobile.data.db.AppDatabase.Companion.DB_VERSION
+import com.lukasanda.aismobile.data.db.dao.CourseDao
+import com.lukasanda.aismobile.data.db.dao.ProfileDao
 import com.lukasanda.aismobile.data.db.dao.SessionDao
+import com.lukasanda.aismobile.data.db.entity.Course
+import com.lukasanda.aismobile.data.db.entity.Profile
 import com.lukasanda.aismobile.data.db.entity.Session
 
-@Database(entities = [Session::class], version = DB_VERSION, exportSchema = false)
+@Database(entities = [Session::class, Course::class, Profile::class], version = DB_VERSION, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun getSessionDao(): SessionDao
+    abstract fun getCourseDao(): CourseDao
+    abstract fun getProfileDao(): ProfileDao
 
     companion object {
         const val DB_VERSION = 1
         private const val DB_NAME = "aisdb.db"
+
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
@@ -40,11 +47,5 @@ abstract class AppDatabase : RoomDatabase() {
             Room.databaseBuilder(context.applicationContext, AppDatabase::class.java, DB_NAME)
 //                .addMigrations(MIGRATION_1_TO_2)
                 .build()
-
-//        private val MIGRATION_1_TO_2 = object : Migration(1, 2) {
-//            override fun migrate(database: SupportSQLiteDatabase) {
-//
-//            }
-//        }
     }
 }
