@@ -14,24 +14,17 @@
 package com.lukasanda.aismobile.ui.main.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.lukasanda.aismobile.R
-import com.lukasanda.aismobile.core.State
 import com.lukasanda.aismobile.ui.main.MainViewModel
-import com.lukasanda.aismobile.ui.main.adapters.CourseScheduleAdapter
 import com.lukasanda.aismobile.ui.main.adapters.CourseWeekAdapter
-import com.lukasanda.aismobile.util.hide
-import com.lukasanda.aismobile.util.show
 import kotlinx.android.synthetic.main.fragment_schedule.*
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class ScheduleFragment : Fragment() {
 
@@ -59,32 +52,8 @@ class ScheduleFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.getCourses()
-
-        viewModel.courses().observe(this, Observer {
-            when(it){
-                is State.Loading ->{
-                    progress.show()
-                    pager.hide()
-                }
-                is State.Success -> {
-                    progress.hide()
-                    pager.show()
-                    weekAdapter.swapData(it.data)
-
-                    var pageToSelect = Int.MAX_VALUE / 2
-                    while (pageToSelect % 7 != viewModel.actualDay - 1) {
-                        pageToSelect++
-                    }
-                    pager.unregisterOnPageChangeCallback(pageChangeCallback)
-                    pager.setCurrentItem(pageToSelect, false)
-                    pager.registerOnPageChangeCallback(pageChangeCallback)
-                }
-            }
-        })
-
         viewModel.days().observe(this, Observer {
-            if(it !in 0..6) return@Observer
+            if (it !in 0..6) return@Observer
             day.text = viewModel.days[it]
         })
 
@@ -106,8 +75,18 @@ class ScheduleFragment : Fragment() {
             offscreenPageLimit = 7
             adapter = weekAdapter
             orientation = ViewPager2.ORIENTATION_HORIZONTAL
+            var pageToSelect = Int.MAX_VALUE / 2
+            while (pageToSelect % 7 != viewModel.actualDay - 1) {
+                pageToSelect++
+            }
+            pager.setCurrentItem(pageToSelect, false)
             pager.registerOnPageChangeCallback(pageChangeCallback)
         }
+
+        viewModel.courses().observe(this, Observer {
+            progress.hide()
+            weekAdapter.swapData(it)
+        })
     }
 
     override fun onDestroyView() {

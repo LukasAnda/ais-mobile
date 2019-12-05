@@ -20,14 +20,11 @@ import androidx.room.RoomDatabase
 import com.lukasanda.aismobile.data.db.AppDatabase.Companion.DB_VERSION
 import com.lukasanda.aismobile.data.db.dao.CourseDao
 import com.lukasanda.aismobile.data.db.dao.ProfileDao
-import com.lukasanda.aismobile.data.db.dao.SessionDao
 import com.lukasanda.aismobile.data.db.entity.Course
 import com.lukasanda.aismobile.data.db.entity.Profile
-import com.lukasanda.aismobile.data.db.entity.Session
 
-@Database(entities = [Session::class, Course::class, Profile::class], version = DB_VERSION, exportSchema = false)
+@Database(entities = [Course::class, Profile::class], version = DB_VERSION, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun getSessionDao(): SessionDao
     abstract fun getCourseDao(): CourseDao
     abstract fun getProfileDao(): ProfileDao
 

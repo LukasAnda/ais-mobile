@@ -20,6 +20,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.db.entity.Course
+import com.lukasanda.aismobile.util.hide
+import com.lukasanda.aismobile.util.show
 import kotlinx.android.synthetic.main.item_week.view.*
 
 class CourseWeekAdapter : RecyclerView.Adapter<CourseWeekAdapter.CourseWeekViewHolder>() {
@@ -34,7 +36,7 @@ class CourseWeekAdapter : RecyclerView.Adapter<CourseWeekAdapter.CourseWeekViewH
     override fun getItemCount() = Int.MAX_VALUE
 
     override fun onBindViewHolder(holder: CourseWeekViewHolder, position: Int) {
-        if(days.size > 0){
+        if (days.size > 0) {
             holder.bind(days[position % days.size])
         }
     }
@@ -48,11 +50,18 @@ class CourseWeekAdapter : RecyclerView.Adapter<CourseWeekAdapter.CourseWeekViewH
     class CourseWeekViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val adapter = CourseScheduleAdapter()
         fun bind(schedule: List<Course>) {
-            itemView.recycler.apply {
-                adapter = this@CourseWeekViewHolder.adapter
-                layoutManager = LinearLayoutManager(context)
+            if (schedule.isEmpty()) {
+                itemView.empty.show()
+                itemView.recycler.hide()
+            } else {
+                itemView.empty.hide()
+                itemView.recycler.show()
+                itemView.recycler.apply {
+                    adapter = this@CourseWeekViewHolder.adapter
+                    layoutManager = LinearLayoutManager(context)
+                }
+                adapter.swapData(schedule)
             }
-            adapter.swapData(schedule)
         }
     }
 

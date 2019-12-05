@@ -13,14 +13,12 @@
 
 package com.lukasanda.aismobile.ui.main.adapters
 
-import android.content.res.ColorStateList
-import android.graphics.Color
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.amulyakhare.textdrawable.TextDrawable
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.db.entity.Course
 import com.lukasanda.aismobile.util.hide
@@ -75,13 +73,17 @@ class CourseScheduleAdapter : RecyclerView.Adapter<CourseScheduleAdapter.CourseV
                     )
                 )
             }
+            val hourBeforeStart = DateTime.now().withHourOfDay(
+                item.startTime.substringBefore(
+                    ":"
+                ).toInt()
+            ).withMinuteOfHour(item.startTime.substringAfter(":").toInt()).minusHours(1)
 
-            if (item.dayOfWeek == actualDay && DateTime.now().withHourOfDay(
-                    item.startTime.substringBefore(
-                        ":"
-                    ).toInt()
-                ).withMinuteOfHour(item.startTime.substringBefore(":").toInt()).minusHours(1).isBeforeNow
+            if (item.dayOfWeek == actualDay && hourBeforeStart.isBeforeNow && hourBeforeStart.plusHours(
+                    1
+                ).isAfterNow
             ) {
+                Log.d("TAG", "ID: ${item.acronym} -> ${hourBeforeStart.toString()}")
                 nextLesson.show()
             } else {
                 nextLesson.hide()

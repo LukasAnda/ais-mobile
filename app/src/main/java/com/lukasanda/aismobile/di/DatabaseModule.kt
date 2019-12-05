@@ -20,7 +20,6 @@ import org.koin.dsl.module
 
 val roomModule = module {
     single { AppDatabase.getInstance(androidApplication()) }
-    single(createdAtStart = false) { get<AppDatabase>().getSessionDao() }
     single(createdAtStart = false) { get<AppDatabase>().getCourseDao() }
     single(createdAtStart = false) { get<AppDatabase>().getProfileDao() }
 }

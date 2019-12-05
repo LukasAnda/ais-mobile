@@ -15,24 +15,21 @@ package com.lukasanda.aismobile.ui.main
 
 import android.content.res.Configuration
 import android.os.Bundle
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
+import com.bumptech.glide.load.model.LazyHeaders
 import com.lukasanda.aismobile.R
+import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.ui.main.fragments.ScheduleFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.item_header_drawer.*
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import com.bumptech.glide.load.model.LazyHeaders
-import com.lukasanda.aismobile.data.cache.Prefs
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
 class MainActivity : AppCompatActivity() {
@@ -88,6 +85,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         viewModel.profile().observe(this, Observer {
+            if (it == null) return@Observer
+
             val builder = LazyHeaders.Builder()
                 .addHeader("Cookie", prefs.sessionCookie)
 
@@ -99,8 +98,6 @@ class MainActivity : AppCompatActivity() {
             wifiName.text = "Wifi username: ${it.email}"
             wifiPassword.text = "Wifi password: ${it.password}"
         })
-
-        viewModel.getProfile()
     }
 
     override fun onBackPressed() {

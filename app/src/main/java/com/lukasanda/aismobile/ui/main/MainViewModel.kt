@@ -13,7 +13,6 @@
 
 package com.lukasanda.aismobile.ui.main
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.lukasanda.aismobile.core.BaseViewModel
@@ -24,14 +23,8 @@ import com.lukasanda.aismobile.data.db.dao.ProfileDao
 import com.lukasanda.aismobile.data.db.entity.Course
 import com.lukasanda.aismobile.data.db.entity.Profile
 import com.lukasanda.aismobile.data.remote.api.AISApi
-import com.lukasanda.aismobile.extensions.singleZip
-import com.lukasanda.aismobile.extensions.with
-import io.reactivex.Completable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import com.snakydesign.livedataextensions.map
 import org.joda.time.DateTime
-import org.joda.time.Days
-import sk.lukasanda.dataprovider.Parser
 
 class MainViewModel(
     private val courseDao: CourseDao,
@@ -41,46 +34,19 @@ class MainViewModel(
 ) :
     BaseViewModel() {
 
-    private val _courses = MutableLiveData<State<List<List<Course>>,Nothing>>()
-    private val _days = MutableLiveData<Int>()
+    internal var actualDay = DateTime.now().dayOfWeek
+
+    private val _courses = MutableLiveData<State<List<List<Course>>, Nothing>>()
+    private val _days = MutableLiveData<Int>(actualDay - 1)
     private val _profile = MutableLiveData<Profile>()
 
     private val allCourses = mutableListOf<Course>()
-    internal var actualDay = DateTime.now().dayOfWeek
     val days = listOf("Pondelok", "Utorok", "Streda", "Štvrtok", "Piatok", "Sobota", "Nedeľa")
 
-    fun courses(): LiveData<State<List<List<Course>>,Nothing>> = _courses
+    fun courses(): LiveData<List<List<Course>>> = courseDao.getAll().map(this::mapCourses)
     fun days(): LiveData<Int> = _days
-    fun profile(): LiveData<Profile> = _profile
+    fun profile(): LiveData<Profile?> = profileDao.getProfile()
 
-    fun getProfile() {
-//        launchRx {
-            profileDao.getProfile().with().subscribe {
-                Log.d("TAG", "Got profile from DB")
-                try {
-                    _profile.postValue(it.first())
-                } catch (e: NoSuchElementException) {
-
-                }
-            }
-//        }
-    }
-
-
-    fun getCourses() {
-        _courses.postValue(State.Loading)
-//        launchRx {
-            courseDao.getAll().subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
-                allCourses.clear()
-                allCourses.addAll(it)
-                filterCourses()
-                _days.postValue(actualDay - 1)
-                Log.d("TAG", "Pulling from db")
-            }, {
-                Log.e("DB Error", "Error", it)
-            })
-//        }
-    }
 
     fun nextDay() {
         actualDay += 1
@@ -102,18 +68,18 @@ class MainViewModel(
         _days.postValue(actualDay - 1)
     }
 
-    fun setDay(day: Int){
-        if(day < 0 || day > 6) return
+    fun setDay(day: Int) {
+        if (day < 0 || day > 6) return
         actualDay = day
         _days.postValue(actualDay)
     }
 
-    private fun filterCourses() {
-        val week = allCourses.groupBy { it.dayOfWeek }.values.toList()
+    private fun mapCourses(courses: List<Course>): List<List<Course>> {
+        val week = courses.groupBy { it.dayOfWeek }.values.toList()
         val realWeek = Array<List<Course>>(7) { emptyList() }
         week.forEach {
             realWeek[it.first().dayOfWeek - 1] = it.sortedBy { it.startTime }
         }
-        _courses.postValue(State.Success(realWeek.toList()))
+        return realWeek.toList()
     }
 }

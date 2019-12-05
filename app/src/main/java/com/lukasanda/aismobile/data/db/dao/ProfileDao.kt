@@ -13,21 +13,25 @@
 
 package com.lukasanda.aismobile.data.db.dao
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.lukasanda.aismobile.data.db.entity.Profile
-import io.reactivex.Completable
-import io.reactivex.Flowable
-import io.reactivex.Single
 
 @Dao
 interface ProfileDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertProfile(profile: Profile): Single<Long>
+    suspend fun insertProfile(profile: Profile)
 
     @Query("DELETE FROM profile")
-    fun deleteAll(): Completable
+    suspend fun deleteAll()
 
-    @Query("SELECT * FROM profile")
-    fun getProfile(): Flowable<List<Profile>>
+    @Query("SELECT * FROM profile LIMIT 1")
+    fun getProfile(): LiveData<Profile?>
+
+    @Transaction
+    suspend fun update(profile: Profile) {
+        deleteAll()
+        insertProfile(profile)
+    }
 }

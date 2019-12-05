@@ -14,11 +14,8 @@
 package com.lukasanda.aismobile.util
 
 import com.lukasanda.aismobile.data.cache.Prefs
-import com.lukasanda.aismobile.data.db.dao.SessionDao
-import okhttp3.*
-import java.util.Collections.emptyList
-import java.util.*
-import kotlin.collections.ArrayList
+import okhttp3.Interceptor
+import okhttp3.Response
 
 class AuthInterceptor(val prefs: Prefs) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {

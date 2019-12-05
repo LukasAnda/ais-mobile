@@ -13,21 +13,25 @@
 
 package com.lukasanda.aismobile.data.db.dao
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.lukasanda.aismobile.data.db.entity.Course
-import io.reactivex.Completable
-import io.reactivex.Flowable
-import io.reactivex.Single
 
 @Dao
 interface CourseDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(courses: List<Course>): Single<List<Long>>
+    suspend fun insertAll(courses: List<Course>)
 
     @Query("DELETE FROM course")
-    fun deleteAll(): Completable
+    suspend fun deleteAll()
 
     @Query("SELECT * FROM course")
-    fun getAll(): Flowable<List<Course>>
+    fun getAll(): LiveData<List<Course>>
+
+    @Transaction
+    suspend fun update(courses: List<Course>) {
+        deleteAll()
+        insertAll(courses)
+    }
 }

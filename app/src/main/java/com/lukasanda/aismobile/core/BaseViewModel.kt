@@ -14,20 +14,18 @@
 package com.lukasanda.aismobile.core
 
 import androidx.lifecycle.ViewModel
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 
 open class BaseViewModel : ViewModel() {
-    private val disposables: CompositeDisposable = CompositeDisposable()
+//    private val disposables: CompositeDisposable = CompositeDisposable()
 
-    fun addToDisposable(disposable: Disposable) {
-        disposables.add(disposable)
-    }
-
-    fun launchRx(func: ()-> Disposable) = disposables.add(func())
+//    fun addToDisposable(disposable: Disposable) {
+//        disposables.add(disposable)
+//    }
+//
+//    fun launchRx(func: ()-> Disposable) = disposables.add(func())
 
     override fun onCleared() {
-        disposables.clear()
+//        disposables.clear()
         super.onCleared()
     }
 }

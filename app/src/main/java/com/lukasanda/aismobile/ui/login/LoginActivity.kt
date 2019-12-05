@@ -13,9 +13,9 @@
 
 package com.lukasanda.aismobile.ui.login
 
+//import com.lukasanda.aismobile.data.remote.SyncWorker
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.work.*
@@ -23,8 +23,9 @@ import com.google.android.material.snackbar.Snackbar
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.core.State
 import com.lukasanda.aismobile.data.cache.Prefs
-import com.lukasanda.aismobile.data.remote.SyncWorker
-import com.lukasanda.aismobile.ui.login.LoginViewModel.ErrorState.*
+import com.lukasanda.aismobile.data.remote.SyncCoroutineWorker
+import com.lukasanda.aismobile.ui.login.LoginViewModel.ErrorState.Auth
+import com.lukasanda.aismobile.ui.login.LoginViewModel.ErrorState.Network
 import com.lukasanda.aismobile.ui.main.MainActivity
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
@@ -58,24 +59,34 @@ class LoginActivity : AppCompatActivity() {
         }
 
         viewModel.state.observe(this, Observer {
-            when(it){
+            when (it) {
                 is State.Loading -> {
                     showProgress()
                 }
                 is State.Success -> {
                     hideProgress()
 
-                    val constraints = Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED)
+                    val constraints =
+                        Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED)
 
-                    val request = PeriodicWorkRequest.Builder(SyncWorker::class.java, 15, TimeUnit.MINUTES).setConstraints(constraints.build())
+                    val request = PeriodicWorkRequest.Builder(
+                        SyncCoroutineWorker::class.java,
+                        15,
+                        TimeUnit.MINUTES
+                    ).setConstraints(constraints.build())
+                        .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
                         .build()
                     WorkManager.getInstance(applicationContext)
-                        .enqueueUniquePeriodicWork("Sync", ExistingPeriodicWorkPolicy.REPLACE, request)
+                        .enqueueUniquePeriodicWork(
+                            "Sync",
+                            ExistingPeriodicWorkPolicy.REPLACE,
+                            request
+                        )
                     startActivity(Intent(this, MainActivity::class.java))
                 }
                 is State.Failure -> {
                     hideProgress()
-                    when(it.errorType){
+                    when (it.errorType) {
                         Auth -> {
                             emailInputLayout.error = "Zlé meno alebo heslo"
                             passwordInputLayout.error = "Zlé meno alebo heslo"
@@ -89,12 +100,12 @@ class LoginActivity : AppCompatActivity() {
         })
     }
 
-    private fun showProgress(){
+    private fun showProgress() {
         progress.show()
         loginButton.text = ""
     }
 
-    private fun hideProgress(){
+    private fun hideProgress() {
         progress.hide()
         loginButton.setText(R.string.login)
     }

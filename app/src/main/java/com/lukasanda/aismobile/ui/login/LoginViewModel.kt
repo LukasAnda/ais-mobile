@@ -16,17 +16,16 @@ package com.lukasanda.aismobile.ui.login
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.lukasanda.aismobile.core.BaseViewModel
 import com.lukasanda.aismobile.core.State
 import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.remote.api.AISApi
-import com.lukasanda.aismobile.extensions.with
-import com.lukasanda.aismobile.util.NotNullMutableLiveData
 import com.lukasanda.aismobile.util.getSessionId
+import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 import org.joda.time.DateTime
 import retrofit2.Response
-import sk.lukasanda.dataprovider.Parser
 
 class LoginViewModel(private val service: AISApi, private val prefs: Prefs) : BaseViewModel() {
     private val _state = MutableLiveData<State<Int, ErrorState>>()
@@ -45,11 +44,11 @@ class LoginViewModel(private val service: AISApi, private val prefs: Prefs) : Ba
     }
 
     private fun requestNewCookie(name: String, password: String) {
-        addToDisposable(service.login(login = name, password = password)
-            .with()
-            .subscribe({
-                if(it.code() == 302){
-                    if(saveCookie(name, password, it)){
+        viewModelScope.launch {
+            kotlin.runCatching {
+                val response = service.login(login = name, password = password)
+                if (response.code() == 302) {
+                    if (saveCookie(name, password, response)) {
                         _state.postValue(State.Success(1))
                     } else {
                         _state.postValue(State.Failure(ErrorState.Auth))
@@ -57,15 +56,18 @@ class LoginViewModel(private val service: AISApi, private val prefs: Prefs) : Ba
                 } else {
                     _state.postValue(State.Failure(ErrorState.Auth))
                 }
-
-            }, {
+            }.onFailure {
                 _state.postValue(State.Failure(ErrorState.Network))
                 Log.e("TAG", "network error", it)
-            })
-        )
+            }
+        }
     }
 
-    private fun saveCookie(name: String, password: String, response: Response<ResponseBody>): Boolean{
+    private fun saveCookie(
+        name: String,
+        password: String,
+        response: Response<ResponseBody>
+    ): Boolean {
         val cookies = response.headers().get("Set-Cookie") ?: return false
 
         prefs.sessionCookie = getSessionId(cookies)
@@ -77,7 +79,7 @@ class LoginViewModel(private val service: AISApi, private val prefs: Prefs) : Ba
         return true
     }
 
-    enum class ErrorState{
+    enum class ErrorState {
         Auth, Network
     }
 }
