@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Lukáš Anda. All rights reserved.
+ * Copyright 2020 Lukáš Anda. All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,22 +16,47 @@ package com.lukasanda.aismobile.data.db.dao
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.lukasanda.aismobile.data.db.entity.Course
+import com.lukasanda.aismobile.data.db.entity.FullCourse
+import com.lukasanda.aismobile.data.db.entity.Sheet
 
 @Dao
 interface CourseDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCourses(courses: List<Course>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(courses: List<Course>)
+    suspend fun insertSheets(sheets: List<Sheet>)
+
+    @Query("DELETE FROM sheet")
+    suspend fun deleteSheets()
 
     @Query("DELETE FROM course")
-    suspend fun deleteAll()
+    suspend fun deleteCourses()
 
-    @Query("SELECT * FROM course")
-    fun getAll(): LiveData<List<Course>>
+    @Query("SELECT * FROM COURSE WHERE id = :courseId")
+    @Transaction
+    fun getCourse(courseId: String): LiveData<FullCourse>
+
+    @Query("SELECT * FROM COURSE")
+    @Transaction
+    fun getCourses(): LiveData<List<FullCourse>>
+
+    @Query("SELECT DISTINCT semester FROM COURSE")
+    @Transaction
+    fun getSemesters(): LiveData<List<String>>
 
     @Transaction
-    suspend fun update(courses: List<Course>) {
-        deleteAll()
-        insertAll(courses)
+    suspend fun update(courses: List<Course>, sheets: List<Sheet>) {
+        deleteSheets()
+        deleteCourses()
+        insertCourses(courses)
+        insertSheets(sheets)
     }
+
+    @Transaction
+    suspend fun updateSingle(courses: List<Course>, sheets: List<Sheet>) {
+        insertCourses(courses)
+        insertSheets(sheets)
+    }
+
 }

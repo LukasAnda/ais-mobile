@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Lukáš Anda. All rights reserved.
+ * Copyright 2020 Lukáš Anda. All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,16 @@
 package com.lukasanda.aismobile.data.remote
 
 import android.content.Context
-import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.lukasanda.aismobile.data.cache.Prefs
-import com.lukasanda.aismobile.data.db.dao.CourseDao
 import com.lukasanda.aismobile.data.db.dao.ProfileDao
-import com.lukasanda.aismobile.data.db.entity.Course
 import com.lukasanda.aismobile.data.db.entity.Profile
 import com.lukasanda.aismobile.data.remote.api.AISApi
+import com.lukasanda.aismobile.data.repository.CourseRepository
+import com.lukasanda.aismobile.data.repository.EmailRepository
+import com.lukasanda.aismobile.data.repository.TimetableRepository
+import com.lukasanda.aismobile.util.authenticatedOrThrow
 import com.lukasanda.aismobile.util.getSessionId
 import kotlinx.coroutines.delay
 import okhttp3.ResponseBody
@@ -37,29 +38,33 @@ class SyncCoroutineWorker(
     workerParameters: WorkerParameters
 ) : CoroutineWorker(context, workerParameters), KoinComponent {
 
-    private val courseDao: CourseDao by inject()
+    private val timetableRepository: TimetableRepository by inject()
+    private val courseRepository: CourseRepository by inject()
     private val service: AISApi by inject()
     private val prefs: Prefs by inject()
     private val profileDao: ProfileDao by inject()
 
+    private val emailRepository: EmailRepository by inject()
+
 
     override suspend fun doWork(): Result {
         return try {
-
             if (runAttemptCount > 3) {
                 return Result.failure()
             }
 
-            val scheduleResponse =
-                service.schedule("1?zobraz=1;format=json;rozvrh_student=${prefs.id}")
-                    .authenticatedOrThrow()
-            saveCourses(scheduleResponse)
+            timetableRepository.update()
             delay(1000)
 
             val educationResponse = service.educationInfo().authenticatedOrThrow()
             delay(1000)
             val wifiResponse = service.wifiInfo().authenticatedOrThrow()
-            saveProfile(listOf(educationResponse, wifiResponse))
+            saveProfile(educationResponse, wifiResponse)
+
+//            courseRepository.update()
+
+            //emailRepository.update()
+
             Result.success()
         } catch (e: Exception) {
             if (e is AuthException) {
@@ -67,13 +72,13 @@ class SyncCoroutineWorker(
                 saveCookie(prefs.username, prefs.password, response)
             }
 
+            println(e.message)
+            println(e.toString())
+            e.printStackTrace()
+
             Result.retry()
         }
     }
-
-
-    private fun Response<ResponseBody>.authenticatedOrThrow(): Response<ResponseBody> =
-        if (this.isSuccessful) this else if (this.code() == 403) throw AuthException() else throw HTTPException()
 
     private fun saveCookie(
         name: String,
@@ -91,39 +96,14 @@ class SyncCoroutineWorker(
         return true
     }
 
-    private suspend fun saveCourses(response: Response<ResponseBody>) {
-        val schedule =
-            Parser.getSchedule(response.body()?.string() ?: "") ?: return
+    private suspend fun saveProfile(educationResponse: String, wifiResponse: String) {
 
-        val courses = schedule.periodicLessons?.map {
-            Course(
-                0,
-                it.courseId,
-                it.courseName,
-                it.room,
-                it.teachers?.first()?.fullName ?: "",
-                it.courseCode,
-                it.dayOfWeek.toInt(),
-                it.startTime,
-                it.endTime,
-                it.isSeminar.toBoolean()
-            )
-        }
-
-        courses?.let { courseDao.update(it) }
-    }
-
-    private suspend fun saveProfile(responses: List<Response<ResponseBody>>) {
-        val items = responses.filter { it.isSuccessful }.map { it.body() }.filterNotNull()
-            .map { it.string() }
-
-        val aisId = Parser.getId(items[0]) ?: return
+        val aisId = Parser.getId(educationResponse) ?: return
         prefs.id = aisId
 
-        val wifiInfo = Parser.getWifiInfo(items[1]) ?: return
+        val wifiInfo = Parser.getWifiInfo(wifiResponse) ?: return
 
-        Log.d("TAG", "AIS id: $aisId wifiInfo: $wifiInfo")
-        profileDao.insertProfile(Profile(aisId, wifiInfo.username, wifiInfo.password))
+        profileDao.update(Profile(aisId, wifiInfo.username, wifiInfo.password))
     }
 
 }

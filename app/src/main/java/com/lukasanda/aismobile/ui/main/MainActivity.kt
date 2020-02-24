@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Lukáš Anda. All rights reserved.
+ * Copyright 2020 Lukáš Anda. All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,108 +13,101 @@
 
 package com.lukasanda.aismobile.ui.main
 
-import android.content.res.Configuration
+import android.content.Intent
 import android.os.Bundle
+import android.view.ViewOutlineProvider
 import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.core.view.GravityCompat
 import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.cache.Prefs
-import com.lukasanda.aismobile.ui.main.fragments.ScheduleFragment
-import kotlinx.android.synthetic.main.activity_main.*
+import com.lukasanda.aismobile.data.db.entity.Email
+import com.lukasanda.aismobile.databinding.ActivityMainBinding
+import com.lukasanda.aismobile.ui.login.LoginActivity
+import com.lukasanda.aismobile.ui.main.email.EmailFragmentDirections
+import com.lukasanda.aismobile.ui.main.email.EmailFragmentHandler
+import com.lukasanda.aismobile.ui.main.emailDetail.EmailDetailHandler
+import com.lukasanda.aismobile.ui.main.subjects.SubjectsFragmentHandler
+import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentHandler
+import com.lukasanda.aismobile.util.startWorker
 import kotlinx.android.synthetic.main.item_header_drawer.*
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
+import sk.lukasanda.base.helpers.navigateSafe
+import sk.lukasanda.base.ui.activity.BaseActivityViews
+import sk.lukasanda.base.ui.activity.BaseUIActivity
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityMainBinding>(),
+    TimetableFragmentHandler, SubjectsFragmentHandler, EmailFragmentHandler, EmailDetailHandler {
 
     private lateinit var toggle: ActionBarDrawerToggle
 
-    private val viewModel by viewModel<MainViewModel>()
+    override val viewModel by viewModel<MainViewModel> { parametersOf(Bundle()) }
     private val prefs by inject<Prefs>()
 
+    inner class Views : BaseActivityViews {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        setSupportActionBar(toolbar)
-
-
-        toggle = ActionBarDrawerToggle(
-            this,
-            drawer,
-            toolbar,
-            R.string.navigation_drawer_open,
-            R.string.navigation_drawer_close
-        )
-        drawer.addDrawerListener(toggle)
-
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-            setHomeButtonEnabled(true)
-            setDisplayShowTitleEnabled(false)
-        }
-
-        windowTitle.text = "Rozvrh"
-
-        val badge = bottomMenu.getOrCreateBadge(R.id.notifications)
-        badge.number = 5
-        badge.backgroundColor = ContextCompat.getColor(this, R.color.color_error)
-
-        supportFragmentManager.beginTransaction().replace(R.id.container, ScheduleFragment())
-            .commit()
-
-        bottomMenu.setOnNavigationItemSelectedListener {
-            return@setOnNavigationItemSelectedListener when (it.itemId) {
-                R.id.timetable -> {
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.container, ScheduleFragment()).commit()
-                    true
-                }
-                else -> {
-                    false
-                }
+        override fun modifyViews() {
+            this@MainActivity.navController?.let {
+                binding.bottomMenu.setupWithNavController(it)
             }
+//            setSupportActionBar(binding.toolbar)
+
+            if (prefs.sessionCookie.isEmpty()) {
+                startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+            } else {
+                startWorker(applicationContext)
+            }
+
+            binding.windowTitle.text = "Rozvrh"
+
+            viewModel.profile().observe(this@MainActivity, Observer {
+                if (it == null) return@Observer
+
+                val builder = LazyHeaders.Builder()
+                    .addHeader("Cookie", prefs.sessionCookie)
+
+                val url =
+                    GlideUrl("https://is.stuba.sk/auth/lide/foto.pl?id=${it.id}", builder.build())
+
+                if (profile == null) return@Observer
+
+
+                Glide.with(this@MainActivity).load(url).circleCrop().into(binding.drawer.profile)
+                binding.drawer.aisId.text = "AIS ID: ${it.id}"
+                binding.drawer.wifiName.text = "Wifi username: ${it.email}"
+                binding.drawer.wifiPassword.text = "Wifi password: ${it.password}"
+            })
         }
 
-        viewModel.profile().observe(this, Observer {
-            if (it == null) return@Observer
-
-            val builder = LazyHeaders.Builder()
-                .addHeader("Cookie", prefs.sessionCookie)
-
-            val url = GlideUrl("https://is.stuba.sk/auth/lide/foto.pl?id=${it.id}", builder.build())
-
-
-            Glide.with(this@MainActivity).load(url).circleCrop().into(profile)
-            aisId.text = "AIS ID: ${it.id}"
-            wifiName.text = "Wifi username: ${it.email}"
-            wifiPassword.text = "Wifi password: ${it.password}"
-        })
+        override fun setNavigationGraph() = R.id.homeNavigationContainer
     }
 
-    override fun onBackPressed() {
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START)
-        } else {
-            super.onBackPressed()
-        }
+    override fun setDrawer() = binding.drawer
+
+    override fun setToolbar() = binding.toolbar
+
+    override fun createViews(): Views = Views()
+
+    override fun setBinding(): ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
+
+    override fun lowerToolbar() {
+        binding.appbar.outlineProvider = null
     }
 
-    override fun onPostCreate(savedInstanceState: Bundle?) {
-        super.onPostCreate(savedInstanceState)
-        toggle.syncState()
+    override fun riseToolbar() {
+        binding.appbar.outlineProvider = ViewOutlineProvider.BOUNDS
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        toggle.onConfigurationChanged(newConfig)
+    override fun showEmailDetail(email: Email) {
+        navController?.navigateSafe(
+            EmailFragmentDirections.actionEmailFragmentToEmailDetailFragment(
+                email
+            )
+        )
     }
 }

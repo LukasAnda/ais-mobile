@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Lukáš Anda. All rights reserved.
+ * Copyright 2020 Lukáš Anda. All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,13 @@
 
 package com.lukasanda.aismobile
 
+//import net.danlew.android.joda.JodaTimeAndroid
 import android.app.Application
-import androidx.work.*
 import com.lukasanda.aismobile.di.*
 import com.lukasanda.aismobile.util.ThemeHelper
-import net.danlew.android.joda.JodaTimeAndroid
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
-import java.util.concurrent.TimeUnit
 
 @Suppress("Unused")
 class AISApp : Application() {
@@ -29,7 +27,8 @@ class AISApp : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        JodaTimeAndroid.init(this);
+
+//        JodaTimeAndroid.init(this);
 
         startKoin {
             androidContext(this@AISApp)
@@ -39,13 +38,14 @@ class AISApp : Application() {
                     apiModule,
                     roomModule,
                     viewModelModule,
-                    prefsModule
+                    prefsModule,
+                    repositoryModule
                 )
             )
             androidLogger()
         }
 
-        ThemeHelper.applyTheme(ThemeHelper.darkMode)
+        ThemeHelper.applyTheme(ThemeHelper.default)
     }
 
 }

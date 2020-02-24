@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Lukáš Anda. All rights reserved.
+ * Copyright 2020 Lukáš Anda. All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,12 @@
 
 package com.lukasanda.aismobile.ui.login
 
+import android.app.Application
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.lukasanda.aismobile.core.BaseViewModel
 import com.lukasanda.aismobile.core.State
 import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.remote.api.AISApi
@@ -26,8 +27,13 @@ import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 import org.joda.time.DateTime
 import retrofit2.Response
+import sk.lukasanda.base.ui.viewmodel.BaseViewModel
 
-class LoginViewModel(private val service: AISApi, private val prefs: Prefs) : BaseViewModel() {
+class LoginViewModel(
+    private val service: AISApi, private val prefs: Prefs,
+    private val context: Application,
+    private val handle: SavedStateHandle
+) : BaseViewModel(handle) {
     private val _state = MutableLiveData<State<Int, ErrorState>>()
     val state: LiveData<State<Int, ErrorState>> = _state
 

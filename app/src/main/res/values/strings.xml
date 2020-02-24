@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2019 Lukáš Anda. All rights reserved.
+  ~ Copyright 2020 Lukáš Anda. All rights reserved.
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
   ~ You may obtain a copy of the License at
@@ -31,4 +31,17 @@
     <string name="network_error">Network error, please try again later</string>
     <string name="next_lesson">Nasledujúca hodina</string>
     <string name="no_classes">Na tento deň nie je\nžiadna rozvrhová akcia</string>
+    <string-array name="days">
+        <item>Pondelok</item>
+        <item>Utorok</item>
+        <item>Streda</item>
+        <item>Štvrtok</item>
+        <item>Piatok</item>
+        <item>Sobota</item>
+        <item>Nedeľa</item>
+    </string-array>
+    <string name="press_twice_exit">Stlačte tlačidlo späť ešte raz na ukončenie</string>
+    <string name="notification_title">AIS Aktualizácia</string>
+    <string name="notification_subtitle">Prebieha aktualizácia</string>
+    <string name="no_subjects">Žiadne predmety pre zvolený semester</string>
 </resources>

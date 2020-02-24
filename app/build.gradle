@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Lukáš Anda. All rights reserved.
+ * Copyright 2020 Lukáš Anda. All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,8 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'org.jetbrains.kotlin.android.extensions'
+apply plugin: "androidx.navigation.safeargs.kotlin"
 
 android {
     compileSdkVersion 29
@@ -30,12 +32,9 @@ android {
         targetSdkVersion 29
     }
 
-    dataBinding {
-        enabled = true
-    }
-
     kapt {
         generateStubs = true
+        correctErrorTypes true
     }
 
     sourceSets {
@@ -52,11 +51,29 @@ android {
         exclude 'META-INF/NOTICE'
         exclude 'META-INF/NOTICE.txt'
         exclude 'META-INF/rxjava.properties'
+        exclude 'org/joda/time/format/*.properties'
     }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    viewBinding {
+        enabled = true
+    }
+
+    androidExtensions {
+        experimental = true
+    }
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 
     lintOptions {
@@ -79,59 +96,90 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    // Support libraries
+    //application
+    def multidex__version = "2.0.1"
+    implementation "androidx.multidex:multidex:$multidex__version"
+
+    //application components
+    implementation "androidx.activity:activity-ktx:$libraries.activity__version"
+    implementation "androidx.fragment:fragment-ktx:$libraries.fragment__version"
+
+    //life cycle
+    implementation "androidx.lifecycle:lifecycle-extensions:$libraries.lifecycle__version"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$libraries.lifecycle_saved_state__version"
+
+    //ui
     implementation "androidx.annotation:annotation:1.1.0"
-    implementation "androidx.appcompat:appcompat:1.1.0"
-    implementation "androidx.recyclerview:recyclerview:1.1.0"
-    implementation "com.google.android.material:material:1.2.0-alpha02"
-    implementation "androidx.legacy:legacy-support-v4:1.0.0"
-    implementation "androidx.constraintlayout:constraintlayout:1.1.3"
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.viewpager2:viewpager2:1.0.0'
+    implementation "androidx.appcompat:appcompat:$libraries.app_compat__version"
+    implementation "com.google.android.material:material:$libraries.material_design_components__version"
+    implementation "androidx.constraintlayout:constraintlayout:$libraries.constraint_layout__version"
+    implementation "androidx.viewpager2:viewpager2:$libraries.view_pager__version"
+    implementation "androidx.recyclerview:recyclerview:$libraries.recycler_view__version"
+    implementation 'me.relex:circleindicator:2.1.4'
 
+    //view binding
+    implementation "androidx.databinding:viewbinding:$libraries.view_binding__version"
 
-    // Architecture components
-    implementation "androidx.lifecycle:lifecycle-runtime:2.1.0"
-    implementation "androidx.lifecycle:lifecycle-extensions:2.1.0"
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0-rc02'
+    //navigation
+    implementation "androidx.navigation:navigation-fragment-ktx:$libraries.navigation__version"
+    implementation "androidx.navigation:navigation-runtime-ktx:$libraries.navigation__version"
+    implementation "androidx.navigation:navigation-ui-ktx:$libraries.navigation__version"
+
+    //kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    //collection
+    implementation "androidx.collection:collection-ktx:$libraries.collection__version"
+
+    //kotlin core
+    implementation "androidx.core:core-ktx:$libraries.core__verison"
+
+    //date time
+    implementation 'joda-time:joda-time:2.10.5'
+
+    //images
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+    kapt 'com.github.bumptech.glide:compiler:4.11.0'
+
+    //firebase
+    implementation 'com.google.firebase:firebase-core:17.2.2'
+    implementation 'com.google.firebase:firebase-analytics:17.2.2'
+
+    implementation 'com.afollestad.material-dialogs:core:3.1.1'
+    implementation 'com.afollestad.material-dialogs:bottomsheets:3.1.1'
+    implementation 'com.afollestad.material-dialogs:lifecycle:3.1.1'
+
+    implementation project(path: ':base')
+
+    // Koin AndroidX Scope features
+    implementation "org.koin:koin-androidx-scope:$libraries.koin_version"
+// Koin AndroidX ViewModel features
+    implementation "org.koin:koin-androidx-viewmodel:$libraries.koin_version"
+// Koin AndroidX Fragment features
+    implementation "org.koin:koin-androidx-fragment:$libraries.koin_version"
+// Koin AndroidX Experimental features
+    implementation "org.koin:koin-androidx-ext:${libraries.koin_version}"
 
     implementation 'com.snakydesign.livedataextensions:lives:1.3.0'
 
-    implementation "androidx.room:room-runtime:2.2.2"
-    implementation "androidx.room:room-rxjava2:2.2.2"
-
-    // Annotation processor
-    kapt "androidx.lifecycle:lifecycle-compiler:2.1.0"
-    kapt "androidx.room:room-compiler:2.2.2"
-
-    // RxJava
-//    implementation "io.reactivex.rxjava2:rxjava:2.2.9"
-//    implementation "io.reactivex.rxjava2:rxandroid:2.1.1"
-
-    // Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.61"
-
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.0'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.0'
-
-    // Coroutines support for Room
-    implementation 'androidx.room:room-ktx:2.2.2'
-
+    implementation "androidx.room:room-runtime:2.2.3"
+    kapt "androidx.room:room-compiler:2.2.3"
+    implementation 'androidx.room:room-ktx:2.2.3'
     // Koin
     implementation "org.koin:koin-core:2.0.1"
     implementation "org.koin:koin-android:2.0.1"
     implementation "org.koin:koin-androidx-viewmodel:2.0.1"
 
     // Retrofit
-    implementation "com.squareup.retrofit2:retrofit:2.6.2"
+    implementation "com.squareup.retrofit2:retrofit:2.7.1"
 //    implementation "com.squareup.retrofit2:adapter-rxjava2:2.5.0"
-    implementation "com.squareup.retrofit2:converter-gson:2.6.2"
+    implementation "com.squareup.retrofit2:converter-gson:2.7.1"
 
     // OkHttp
     implementation "com.squareup.okhttp3:logging-interceptor:3.12.0"
 
     // Joda
-    implementation "net.danlew:android.joda:2.10.1.2"
+//    implementation "net.danlew:android.joda:2.10.1.2"
 
     // Data
     implementation project(path: ':data-provider')
@@ -143,13 +191,10 @@ dependencies {
     implementation 'me.grantland:autofittextview:0.2.1'
 
     // Glide
-    implementation 'com.github.bumptech.glide:glide:4.10.0'
-    kapt 'com.github.bumptech.glide:compiler:4.10.0'
+//    implementation 'com.github.bumptech.glide:glide:4.10.0'
+//    kapt 'com.github.bumptech.glide:compiler:4.10.0'
 
-    // RxWorker
-//    implementation "androidx.work:work-rxjava2:2.2.0"
-
-    implementation "androidx.work:work-runtime-ktx:2.2.0"
+    implementation "androidx.work:work-runtime-ktx:2.3.1"
 
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Lukáš Anda. All rights reserved.
+ * Copyright 2020 Lukáš Anda. All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,6 +48,43 @@ interface AISApi {
     @GET("auth/wifi/heslo_vpn_sit.pl")
     suspend fun wifiInfo(): Response<ResponseBody>
 
+    @GET("/auth/student/list.pl")
+    suspend fun semesters(): Response<ResponseBody>
 
+    @FormUrlEncoded
+    @POST("/auth/student/list.pl")
+    suspend fun subjects(
+        @Field("studium", encoded = true) study: String, @Field(
+            "obdobi",
+            encoded = true
+        ) semester: String
+    ): Response<ResponseBody>
+
+    @FormUrlEncoded
+    @POST("/auth/student/list.pl")
+    suspend fun subjectSheets(
+        @Field("studium", encoded = true) study: String, @Field(
+            "obdobi",
+            encoded = true
+        ) semester: String, @Field(
+            "predmet",
+            encoded = true
+        ) predmet: String, @Field("zobraz_prubezne") zobrazPrubezne: String = "1"
+    ): Response<ResponseBody>
+
+    @POST("/auth/posta/slozka.pl")
+    suspend fun emails(): Response<ResponseBody>
+
+    @FormUrlEncoded
+    @POST("/auth/posta/slozka.pl")
+    suspend fun emailPage(@Field("on", encoded = true) page: String): Response<ResponseBody>
+
+    @GET("/auth/posta/email.pl")
+    suspend fun emailDetail(
+        @Query(
+            "eid",
+            encoded = true
+        ) params: String = "8851469;fid=620955;on=0"
+    ): Response<ResponseBody>
 
 }
