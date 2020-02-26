@@ -16,8 +16,8 @@ package com.lukasanda.aismobile.ui.main.composeEmail
 import android.graphics.Color
 import android.view.ViewGroup
 import com.amulyakhare.textdrawable.TextDrawable
+import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.lukasanda.aismobile.databinding.ContactItemBinding
-import com.lukasanda.aismobile.util.toARGB
 import sk.lukasanda.base.ui.recyclerview.BaseAdapter
 import sk.lukasanda.base.ui.recyclerview.BindingViewHolder
 import sk.lukasanda.base.ui.recyclerview.create
@@ -34,9 +34,16 @@ class ContactItemHolder(binding: ContactItemBinding) :
     override fun bind(item: Suggestion, onClick: ((Suggestion) -> Unit)?) {
         binding.name.text = item.name
         val drawable =
-            TextDrawable.builder().beginConfig().width(40).height(40).textColor(Color.WHITE)
-                .endConfig().buildRound(item.name.first().toString(), item.name.hashCode().toARGB())
+            TextDrawable.builder().beginConfig().textColor(Color.WHITE).bold().toUpperCase()
+                .endConfig().buildRound(
+                    item.name.first().toString(),
+                    ColorGenerator.MATERIAL.getColor(item.name)
+                )
         binding.icon.setImageDrawable(drawable)
+
+        binding.root.setOnClickListener {
+            onClick?.invoke(item)
+        }
     }
 
 }

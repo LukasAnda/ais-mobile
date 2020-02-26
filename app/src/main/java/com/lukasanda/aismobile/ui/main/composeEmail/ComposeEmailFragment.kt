@@ -13,46 +13,114 @@
 
 package com.lukasanda.aismobile.ui.main.composeEmail
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
+import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
-import com.lukasanda.aismobile.databinding.ActivityLoginBinding
+import androidx.recyclerview.widget.DividerItemDecoration
+import com.amulyakhare.textdrawable.TextDrawable
+import com.amulyakhare.textdrawable.util.ColorGenerator
+import com.google.android.material.chip.Chip
+import com.lukasanda.aismobile.databinding.ComposeEmailFragmentBinding
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import sk.lukasanda.base.ui.activity.BaseViews
 import sk.lukasanda.base.ui.fragment.BaseFragment
+import sk.lukasanda.base.ui.recyclerview.bindLinear
+import sk.lukasanda.dataprovider.data.Suggestion
 
 class ComposeEmailFragment :
-    BaseFragment<ComposeEmailFragment.Views, ActivityLoginBinding, ComposeEmailViewModel, ComposeEmailHandler>() {
+    BaseFragment<ComposeEmailFragment.Views, ComposeEmailFragmentBinding, ComposeEmailViewModel, ComposeEmailHandler>() {
+
+    private val selected = mutableListOf<Suggestion>()
+
 
     private val contactAdapter: ContactAdapter = ContactAdapter {
-        //        emptyAdapter()
+        selected.add(it)
+        binding.recipients.setText("")
+        binding.chipGroup.addView(createChip(it))
+        clearLoading()
     }
 
-    private fun emptyAdapter() = contactAdapter.swapData(emptyList())
+    private fun clearLoading() {
+        viewModel.cancelJobs()
+        contactAdapter.swapData(emptyList())
+    }
+
 
     inner class Views : BaseViews {
         override fun modifyViews() {
-//            binding.recipients.apply {
-//                doOnTextChanged { text, start, count, after ->
-//                    if (text?.length ?: 0 > 3) {
-//                        viewModel.getSuggestions(text.toString())
-//                    }
-//                }
-//            }
-//
-//            binding.contactsRecycler.bindLinear(contactAdapter)
+            binding.recipients.apply {
+                doOnTextChanged { text, start, count, after ->
+                    if (text?.length ?: 0 > 2) {
+                        viewModel.getSuggestions(text.toString())
+                    } else {
+                        viewModel.cancelJobs()
+                        clearLoading()
+                    }
+                }
+            }
+
+            binding.contactsRecycler.apply {
+                bindLinear(contactAdapter)
+                addItemDecoration(
+                    DividerItemDecoration(
+                        this.context,
+                        DividerItemDecoration.VERTICAL
+                    )
+                )
+            }
 
             viewModel.suggestions().observe(viewLifecycleOwner, Observer {
                 contactAdapter.swapData(it)
             })
+
+            binding.send.setOnClickListener {
+                viewModel.sendMail(
+                    getEmails(),
+                    binding.subject.text.toString(),
+                    binding.message.text.toString()
+                )
+                handler.closeFragment()
+            }
         }
 
     }
 
+    private fun getEmails(): String {
+        val builder = StringBuilder()
+        selected.forEach { builder.append("${it.id}@is.stuba.sk").append(", ") }
+        return builder.toString().substringBeforeLast(",")
+    }
+
+    private fun createChip(suggestion: Suggestion): Chip {
+        val drawable =
+            TextDrawable.builder().beginConfig().textColor(Color.WHITE).fontSize(40).bold()
+                .toUpperCase()
+                .endConfig()
+                .buildRound(
+                    suggestion.name.first().toString(),
+                    ColorGenerator.MATERIAL.getColor(suggestion.name)
+                )
+
+        val chip = Chip(requireContext()).apply {
+            chipBackgroundColor = ColorStateList.valueOf(Color.WHITE)
+            chipStrokeColor = ColorStateList.valueOf(Color.GRAY)
+            chipStrokeWidth = 1f
+            text = suggestion.name
+            setTextColor(Color.BLACK)
+            setEnsureMinTouchTargetSize(false)
+            chipIcon = drawable
+        }
+        chip.setPaddingRelative(chip.paddingStart, 0, chip.paddingEnd, 0)
+        return chip
+    }
+
     override val viewModel by viewModel<ComposeEmailViewModel> { parametersOf(Bundle()) }
 
-    override fun setBinding(): ActivityLoginBinding =
-        ActivityLoginBinding.inflate(layoutInflater)
+    override fun setBinding(): ComposeEmailFragmentBinding =
+        ComposeEmailFragmentBinding.inflate(layoutInflater)
 
     override fun createViews() = Views()
 
@@ -61,5 +129,5 @@ class ComposeEmailFragment :
 }
 
 interface ComposeEmailHandler {
-
+    fun closeFragment()
 }

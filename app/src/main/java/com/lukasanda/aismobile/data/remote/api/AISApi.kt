@@ -92,4 +92,33 @@ interface AISApi {
     @POST("/auth/system/uissuggest.pl")
     suspend fun getSuggestions(@Body body: RequestBody): Response<ResponseBody>
 
+    @POST("/auth/posta/nova_zprava.pl")
+    suspend fun newMessagePage(): Response<ResponseBody>
+
+    @FormUrlEncoded
+    @POST("/auth/posta/nova_zprava.pl")
+    suspend fun sendMessage(
+        @Field("lang", encoded = true) lang: String = "sk",
+        @Field("zprava", encoded = true) zprava: String = "1",
+        @Field("To", encoded = true) to: String,
+        @Field("Cc", encoded = true) copy: String = "",
+        @Field("Bcc", encoded = true) hiddenCopy: String = "",
+        @Field("Subject", encoded = true) subject: String,
+        @Field("Data", encoded = true) message: String,
+        @Field("priloha", encoded = true) priloha1: String = "",
+        @Field("priloha", encoded = true) priloha2: String = "",
+        @Field("priloha", encoded = true) priloha3: String = "",
+        @Field("priloha", encoded = true) priloha4: String = "",
+        @Field("priloha", encoded = true) priloha5: String = "",
+        @Field("priloha", encoded = true) priloha6: String = "",
+        @Field("priloha", encoded = true) priloha7: String = "",
+//        @Field("zachovat_zpravu", encoded = true) keepMessage: String = "1",
+//        @Field("zachovat_adresy", encoded = true) keepRecipients: String = "1",
+        @Field("ulozit_odesl_zpravu", encoded = true) saveSentMessage: String = "1",
+        @Field("ulozit_do_sl", encoded = true) saveMessageTo: String,
+        @Field("send", encoded = true) sendMessage: String = "ODOSLAŤ SPRÁVU",
+        @Field("akce", encoded = true) action: String = "schranka",
+        @Field("serializace", encoded = true) serialisation: String
+    ): Response<ResponseBody>
+
 }

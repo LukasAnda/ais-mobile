@@ -20,17 +20,17 @@
     <fragment
         android:id="@+id/scheduleFragment"
         android:name="com.lukasanda.aismobile.ui.main.timetable.TimetableFragment"
-        android:label="ScheduleFragment"
+        android:label="Rozvrh"
         tools:layout="@layout/fragment_schedule" />
     <fragment
         android:id="@+id/subjectsFragment"
         android:name="com.lukasanda.aismobile.ui.main.subjects.SubjectsFragment"
-        android:label="SubjectsFragment"
+        android:label="Hodnotenie"
         tools:layout="@layout/fragment_subjects" />
     <fragment
         android:id="@+id/emailFragment"
         android:name="com.lukasanda.aismobile.ui.main.email.EmailFragment"
-        android:label="EmailFragment"
+        android:label="Email"
         tools:layout="@layout/email__fragment">
         <action
             android:id="@+id/action_emailFragment_to_emailDetailFragment"
@@ -42,7 +42,7 @@
     <fragment
         android:id="@+id/emailDetailFragment"
         android:name="com.lukasanda.aismobile.ui.main.emailDetail.EmailDetailFragment"
-        android:label="EmailDetailFragment"
+        android:label="Email-detail"
         tools:layout="@layout/email_detail__fragment">
         <argument
             android:name="email"
@@ -51,5 +51,5 @@
     <fragment
         android:id="@+id/composeEmailFragment"
         android:name="com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailFragment"
-        android:label="ComposeEmailFragment" />
+        android:label="Vytvor email" />
 </navigation>

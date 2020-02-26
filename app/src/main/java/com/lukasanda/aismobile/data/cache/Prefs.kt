@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Lukáš Anda. All rights reserved.
+ * Copyright 2020 Lukáš Anda. All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@ class Prefs(context: Context) {
     private val USERNAME = "username"
     private val PASSWORD = "password"
     private val AISID = "aisid"
+    private val SENT_DIRECTORY_ID = "sent_directory_id"
 
     val prefs: SharedPreferences = context.getSharedPreferences(PREFS_FILENAME, 0)
 
@@ -56,4 +57,8 @@ class Prefs(context: Context) {
     var id: Int
         get() = prefs.getInt(AISID, 0)
         set(value) = prefs.edit().putInt(AISID, value).apply()
+
+    var sentDirectoryId: String
+        get() = prefs.getString(SENT_DIRECTORY_ID, "") ?: ""
+        set(value) = prefs.edit().putString(SENT_DIRECTORY_ID, value).apply()
 }

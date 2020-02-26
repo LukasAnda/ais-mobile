@@ -29,18 +29,25 @@ class ComposeEmailViewModel(
     private val downloadJobs = mutableListOf<Job>()
 
     fun getSuggestions(query: String) {
-        downloadJobs.forEach {
-            it.cancel()
-        }
-        downloadJobs.clear()
+        cancelJobs()
         val job = submitSuggestionRequest(query)
         downloadJobs.add(job)
     }
 
+    fun cancelJobs() {
+        downloadJobs.forEach {
+            it.cancel()
+        }
+        downloadJobs.clear()
+    }
+
     fun suggestions() = emailRepository.suggestions()
 
+    fun sendMail(to: String, subject: String, message: String) =
+        viewModelScope.launch { emailRepository.sendMail(to, subject, message) }
+
     private fun submitSuggestionRequest(query: String) = viewModelScope.launch {
-        delay(1000)
+        delay(500)
         emailRepository.getSuggestions(query)
     }
 }

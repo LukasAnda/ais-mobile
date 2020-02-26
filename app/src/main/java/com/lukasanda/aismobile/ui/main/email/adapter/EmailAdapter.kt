@@ -16,9 +16,9 @@ package com.lukasanda.aismobile.ui.main.email.adapter
 import android.graphics.Color
 import android.view.ViewGroup
 import com.amulyakhare.textdrawable.TextDrawable
+import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.databinding.EmailItemBinding
-import com.lukasanda.aismobile.util.toARGB
 import sk.lukasanda.base.ui.recyclerview.BaseAdapter
 import sk.lukasanda.base.ui.recyclerview.BindingViewHolder
 import sk.lukasanda.base.ui.recyclerview.create
@@ -36,8 +36,9 @@ class EmailItemHolder(binding: EmailItemBinding) :
         binding.subject.text = item.subject
         val initials = item.sender.first()
         val drawable =
-            TextDrawable.builder().beginConfig().width(40).height(40).textColor(Color.WHITE)
-                .endConfig().buildRound(initials.toString(), item.sender.hashCode().toARGB())
+            TextDrawable.builder().beginConfig().textColor(Color.WHITE).bold().toUpperCase()
+                .endConfig()
+                .buildRound(initials.toString(), ColorGenerator.MATERIAL.getColor(item.sender))
 
         binding.icon.setImageDrawable(drawable)
 

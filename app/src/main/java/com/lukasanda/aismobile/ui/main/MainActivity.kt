@@ -67,8 +67,6 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
                 startWorker(applicationContext)
             }
 
-            binding.windowTitle.text = "Rozvrh"
-
             viewModel.profile().observe(this@MainActivity, Observer {
                 if (it == null) return@Observer
 
@@ -86,6 +84,10 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
                 binding.drawer.wifiName.text = "Wifi username: ${it.email}"
                 binding.drawer.wifiPassword.text = "Wifi password: ${it.password}"
             })
+
+            navController?.addOnDestinationChangedListener { controller, destination, arguments ->
+                binding.windowTitle.text = destination.label
+            }
         }
 
         override fun setNavigationGraph() = R.id.homeNavigationContainer
@@ -117,5 +119,9 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
 
     override fun composeEmail() {
         navController?.navigateSafe(EmailFragmentDirections.actionEmailFragmentToComposeEmailFragment())
+    }
+
+    override fun closeFragment() {
+        navController?.popBackStack()
     }
 }

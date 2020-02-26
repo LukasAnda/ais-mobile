@@ -63,16 +63,9 @@ class SyncCoroutineWorker(
             val wifiResponse = service.wifiInfo().authenticatedOrThrow()
             saveProfile(educationResponse, wifiResponse)
 
-            val bodyString =
-                "_suggestKey=Luk&upresneni_default=aktivni_a_preruseni,absolventi,zamestnanci,externiste&_suggestMaxItems=25&vzorek=&_suggestHandler=lide&lang=undefined"
-
-
-//            val suggestionsResponse = service.getSuggestions(RequestBody.create(MediaType.parse("text/plain"), bodyString)).authenticatedOrThrow()
-//            doStuff(suggestionsResponse)
-
 //            courseRepository.update()
 
-            //emailRepository.update()
+//            emailRepository.update()
 
             Result.success()
         } catch (e: Exception) {

@@ -18,7 +18,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clipToPadding="false"
-    android:descendantFocusability="beforeDescendants"
+    android:descendantFocusability="afterDescendants"
     android:orientation="vertical">
 
     <androidx.constraintlayout.widget.ConstraintLayout

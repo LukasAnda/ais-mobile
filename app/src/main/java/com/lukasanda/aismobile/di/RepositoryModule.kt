@@ -21,5 +21,5 @@ import org.koin.dsl.module
 val repositoryModule = module {
     single(createdAtStart = false) { TimetableRepository(get(), get(), get(), get()) }
     single(createdAtStart = false) { CourseRepository(get(), get(), get()) }
-    single(createdAtStart = false) { EmailRepository(get(), get()) }
+    single(createdAtStart = false) { EmailRepository(get(), get(), get()) }
 }

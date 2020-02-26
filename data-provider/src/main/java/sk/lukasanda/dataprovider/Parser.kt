@@ -271,20 +271,43 @@ object Parser {
         }
     }
 
-    fun getEmailPages(webResponse: String): Int {
-        if (webResponse.isEmpty()) return -1
+    fun getNewMessageToken(webResponse: String): String {
+        if (webResponse.isEmpty()) return ""
+        val cleaner = HtmlCleaner()
+        return try {
+            val items = cleaner.clean(webResponse)
+
+            val tokenElement = items.findElementByAttValue("name", "serializace", true, true)
+            val token = tokenElement.getAttributeByName("value")
+            token
+        } catch (e: Exception) {
+            ""
+        }
+    }
+
+    fun getEmailInfo(webResponse: String): Pair<Int, String> {
+        if (webResponse.isEmpty()) return Pair(-1, "")
 
         val cleaner = HtmlCleaner()
         return try {
             val items = cleaner.clean(webResponse)
 
-            val image = items.findElementByAttValue("sysid", "tree-8", true, true) ?: return 1
+            val sentDirectoryImage =
+                items.findElementByAttValue("sysid", "post-sent-small", true, true)
+            val sentDirectoryLink =
+                sentDirectoryImage.parent.findElementByName("a", true).getAttributeByName("href")
+                    .substringAfter("fid=")
+
+            val image = items.findElementByAttValue("sysid", "tree-8", true, true) ?: return Pair(
+                1,
+                sentDirectoryLink
+            )
             val row = image.parent.parent
 
 
-            row.childTagList.size - 4
+            Pair(row.childTagList.size - 4, sentDirectoryLink)
         } catch (e: Exception) {
-            -1
+            Pair(-1, "")
         }
     }
 

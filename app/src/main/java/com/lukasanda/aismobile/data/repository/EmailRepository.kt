@@ -13,8 +13,10 @@
 
 package com.lukasanda.aismobile.data.repository
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.db.dao.EmailDao
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.data.remote.AuthException
@@ -27,7 +29,11 @@ import okhttp3.RequestBody
 import sk.lukasanda.dataprovider.Parser
 import sk.lukasanda.dataprovider.data.Suggestion
 
-class EmailRepository(private val emailDao: EmailDao, private val service: AISApi) {
+class EmailRepository(
+    private val emailDao: EmailDao,
+    private val prefs: Prefs,
+    private val service: AISApi
+) {
 
     private val _emailDetail = MutableLiveData<String?>()
     fun emailDetail(): LiveData<String?> = _emailDetail
@@ -39,7 +45,10 @@ class EmailRepository(private val emailDao: EmailDao, private val service: AISAp
     @Throws(AuthException::class, HTTPException::class)
     suspend fun update() {
         val emailsCountResponse = service.emails().authenticatedOrThrow()
-        val emailsCount = Parser.getEmailPages(emailsCountResponse)
+        val emailsInfo = Parser.getEmailInfo(emailsCountResponse)
+
+        val emailsCount = emailsInfo.first
+        prefs.sentDirectoryId = emailsInfo.second
 
         for (i in 0 until emailsCount) {
             val emailPageResponse = service.emailPage(i.toString()).authenticatedOrThrow()
@@ -77,6 +86,29 @@ class EmailRepository(private val emailDao: EmailDao, private val service: AISAp
         ).authenticatedOrThrow()
 
         _suggestions.postValue(Parser.getSuggestions(suggestionResponse))
+    }
+
+    suspend fun sendMail(to: String, subject: String, message: String) {
+        val newMailResponse = service.newMessagePage().authenticatedOrThrow()
+        val token = Parser.getNewMessageToken(newMailResponse)
+        if (token.isEmpty()) {
+            Log.d("TAG", "Empty token, something went wrong")
+            return
+        } else {
+            Log.d("TAG", "Sending message")
+        }
+
+        val response = service.sendMessage(
+            to = to,
+            subject = subject,
+            message = message,
+            saveMessageTo = prefs.sentDirectoryId,
+            serialisation = token
+        )
+    }
+
+    fun workWithReponse(webResponse: String) {
+        webResponse.toString()
     }
 
 
