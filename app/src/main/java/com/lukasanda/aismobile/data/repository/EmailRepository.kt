@@ -1,0 +1,115 @@
+/*
+ * Copyright 2020 Lukáš Anda. All rights reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.lukasanda.aismobile.data.repository
+
+import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import com.lukasanda.aismobile.data.cache.Prefs
+import com.lukasanda.aismobile.data.db.dao.EmailDao
+import com.lukasanda.aismobile.data.db.entity.Email
+import com.lukasanda.aismobile.data.remote.AuthException
+import com.lukasanda.aismobile.data.remote.HTTPException
+import com.lukasanda.aismobile.data.remote.api.AISApi
+import com.lukasanda.aismobile.util.authenticatedOrThrow
+import com.lukasanda.aismobile.util.getSuggestionRequestString
+import okhttp3.MediaType
+import okhttp3.RequestBody
+import sk.lukasanda.dataprovider.Parser
+import sk.lukasanda.dataprovider.data.Suggestion
+
+class EmailRepository(
+    private val emailDao: EmailDao,
+    private val prefs: Prefs,
+    private val service: AISApi
+) {
+
+    private val _emailDetail = MutableLiveData<String?>()
+    fun emailDetail(): LiveData<String?> = _emailDetail
+    fun clearDetail() = _emailDetail.postValue(null)
+
+    private val _suggestions = MutableLiveData<List<Suggestion>>()
+    fun suggestions(): LiveData<List<Suggestion>> = _suggestions
+
+    @Throws(AuthException::class, HTTPException::class)
+    suspend fun update() {
+        val emailsCountResponse = service.emails().authenticatedOrThrow()
+        val emailsInfo = Parser.getEmailInfo(emailsCountResponse)
+
+        val emailsCount = emailsInfo.first
+        prefs.sentDirectoryId = emailsInfo.second
+
+        for (i in 0 until emailsCount) {
+            val emailPageResponse = service.emailPage(i.toString()).authenticatedOrThrow()
+            val emailsList = Parser.getEmails(emailPageResponse) ?: emptyList()
+            println(emailsList.joinToString("\n"))
+            emailDao.insertEmails(emailsList.map {
+                Email(
+                    it.eid.substringAfter("="),
+                    it.fid.substringAfter("="),
+                    it.sender,
+                    it.subject,
+                    it.date,
+                    it.opened
+                )
+            })
+        }
+    }
+
+    suspend fun getEmailDetail(email: Email) {
+        val response =
+            service.emailDetail("${email.eid};fid=${email.fid};on=0")
+                .authenticatedOrThrow()
+        val message = Parser.getEmailDetail(response)
+        _emailDetail.postValue(message)
+    }
+
+    fun getEmails() = emailDao.getEmails()
+
+    suspend fun getSuggestions(query: String) {
+        val suggestionResponse = service.getSuggestions(
+            RequestBody.create(
+                MediaType.parse("text/plain"),
+                getSuggestionRequestString(query)
+            )
+        ).authenticatedOrThrow()
+
+        _suggestions.postValue(Parser.getSuggestions(suggestionResponse))
+    }
+
+    suspend fun sendMail(to: String, subject: String, message: String) {
+        val newMailResponse = service.newMessagePage().authenticatedOrThrow()
+        val token = Parser.getNewMessageToken(newMailResponse)
+        if (token.isEmpty()) {
+            Log.d("TAG", "Empty token, something went wrong")
+            return
+        } else {
+            Log.d("TAG", "Sending message")
+        }
+
+        val response = service.sendMessage(
+            to = to,
+            subject = subject,
+            message = message,
+            saveMessageTo = prefs.sentDirectoryId,
+            serialisation = token
+        )
+    }
+
+    fun workWithReponse(webResponse: String) {
+        webResponse.toString()
+    }
+
+
+}
