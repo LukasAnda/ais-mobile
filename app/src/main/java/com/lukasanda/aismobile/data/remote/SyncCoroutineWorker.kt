@@ -16,6 +16,7 @@ package com.lukasanda.aismobile.data.remote
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.google.gson.Gson
 import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.db.dao.ProfileDao
 import com.lukasanda.aismobile.data.db.entity.Profile
@@ -32,6 +33,7 @@ import org.koin.core.KoinComponent
 import org.koin.core.inject
 import retrofit2.Response
 import sk.lukasanda.dataprovider.Parser
+import sk.lukasanda.dataprovider.data.SuggestionResult
 
 class SyncCoroutineWorker(
     context: Context,
@@ -61,6 +63,13 @@ class SyncCoroutineWorker(
             val wifiResponse = service.wifiInfo().authenticatedOrThrow()
             saveProfile(educationResponse, wifiResponse)
 
+            val bodyString =
+                "_suggestKey=Luk&upresneni_default=aktivni_a_preruseni,absolventi,zamestnanci,externiste&_suggestMaxItems=25&vzorek=&_suggestHandler=lide&lang=undefined"
+
+
+//            val suggestionsResponse = service.getSuggestions(RequestBody.create(MediaType.parse("text/plain"), bodyString)).authenticatedOrThrow()
+//            doStuff(suggestionsResponse)
+
 //            courseRepository.update()
 
             //emailRepository.update()
@@ -78,6 +87,12 @@ class SyncCoroutineWorker(
 
             Result.retry()
         }
+    }
+
+    fun doStuff(response: String) {
+        val suggestion = Gson().fromJson<SuggestionResult>(response, SuggestionResult::class.java)
+            .toSuggestions()
+        println(suggestion.joinToString("\n"))
     }
 
     private fun saveCookie(

@@ -23,6 +23,8 @@ import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.core.State
 import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.databinding.ActivityLoginBinding
+import com.lukasanda.aismobile.util.hide
+import com.lukasanda.aismobile.util.show
 import com.lukasanda.aismobile.util.startWorker
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel

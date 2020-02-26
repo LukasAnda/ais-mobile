@@ -14,8 +14,12 @@
 package com.lukasanda.aismobile.ui.main.timetable.timetable
 
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
+import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.db.entity.TimetableItem
 import com.lukasanda.aismobile.databinding.ScheduleItemBinding
+import com.lukasanda.aismobile.util.hide
+import com.lukasanda.aismobile.util.show
 import sk.lukasanda.base.ui.recyclerview.BaseAdapter
 import sk.lukasanda.base.ui.recyclerview.BindingViewHolder
 import sk.lukasanda.base.ui.recyclerview.create

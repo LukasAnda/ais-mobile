@@ -21,13 +21,20 @@ import com.lukasanda.aismobile.data.remote.AuthException
 import com.lukasanda.aismobile.data.remote.HTTPException
 import com.lukasanda.aismobile.data.remote.api.AISApi
 import com.lukasanda.aismobile.util.authenticatedOrThrow
+import com.lukasanda.aismobile.util.getSuggestionRequestString
+import okhttp3.MediaType
+import okhttp3.RequestBody
 import sk.lukasanda.dataprovider.Parser
+import sk.lukasanda.dataprovider.data.Suggestion
 
 class EmailRepository(private val emailDao: EmailDao, private val service: AISApi) {
 
     private val _emailDetail = MutableLiveData<String?>()
     fun emailDetail(): LiveData<String?> = _emailDetail
     fun clearDetail() = _emailDetail.postValue(null)
+
+    private val _suggestions = MutableLiveData<List<Suggestion>>()
+    fun suggestions(): LiveData<List<Suggestion>> = _suggestions
 
     @Throws(AuthException::class, HTTPException::class)
     suspend fun update() {
@@ -60,6 +67,17 @@ class EmailRepository(private val emailDao: EmailDao, private val service: AISAp
     }
 
     fun getEmails() = emailDao.getEmails()
+
+    suspend fun getSuggestions(query: String) {
+        val suggestionResponse = service.getSuggestions(
+            RequestBody.create(
+                MediaType.parse("text/plain"),
+                getSuggestionRequestString(query)
+            )
+        ).authenticatedOrThrow()
+
+        _suggestions.postValue(Parser.getSuggestions(suggestionResponse))
+    }
 
 
 }

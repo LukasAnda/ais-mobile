@@ -402,6 +402,13 @@ object Parser {
 
     }
 
+    fun getSuggestions(webResponse: String): List<Suggestion>? {
+        if (webResponse.isEmpty()) return emptyList()
+
+        return Gson().fromJson<SuggestionResult>(webResponse, SuggestionResult::class.java)
+            .toSuggestions()
+    }
+
     private fun <T> Array<Any>.asTagNode(function: (TagNode) -> T): T? {
         if (isNotEmpty()) {
             if (first() is TagNode) {

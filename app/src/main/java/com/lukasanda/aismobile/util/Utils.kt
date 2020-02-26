@@ -39,7 +39,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.DEFAULT_ALL
 import androidx.core.app.NotificationCompat.PRIORITY_MAX
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.LiveData
 import androidx.viewpager2.widget.ViewPager2
 import androidx.work.*
 import com.lukasanda.aismobile.R
@@ -167,10 +166,5 @@ fun Int.toARGB(): Int {
     return Color.parseColor(stringColor)
 }
 
-fun <T> LiveData<T>.toSingleEvent(): LiveData<T> {
-    val result = LiveEvent<T>()
-    result.addSource(this) {
-        result.value = it
-    }
-    return result
-}
+fun getSuggestionRequestString(query: String) =
+    "_suggestKey=${query}&upresneni_default=aktivni_a_preruseni,absolventi,zamestnanci,externiste&_suggestMaxItems=25&vzorek=&_suggestHandler=lide&lang=undefined"

@@ -18,6 +18,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lukasanda.aismobile.data.db.entity.TimetableItem
 import com.lukasanda.aismobile.databinding.WeekItemBinding
+import com.lukasanda.aismobile.util.hide
+import com.lukasanda.aismobile.util.show
 import sk.lukasanda.base.ui.recyclerview.BaseAdapter
 import sk.lukasanda.base.ui.recyclerview.BaseBindingViewHolder
 import sk.lukasanda.base.ui.recyclerview.create

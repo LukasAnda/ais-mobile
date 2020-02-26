@@ -35,6 +35,9 @@
         <action
             android:id="@+id/action_emailFragment_to_emailDetailFragment"
             app:destination="@id/emailDetailFragment" />
+        <action
+            android:id="@+id/action_emailFragment_to_composeEmailFragment"
+            app:destination="@id/composeEmailFragment" />
     </fragment>
     <fragment
         android:id="@+id/emailDetailFragment"
@@ -45,4 +48,8 @@
             android:name="email"
             app:argType="com.lukasanda.aismobile.data.db.entity.Email" />
     </fragment>
+    <fragment
+        android:id="@+id/composeEmailFragment"
+        android:name="com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailFragment"
+        android:label="ComposeEmailFragment" />
 </navigation>

@@ -22,6 +22,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import sk.lukasanda.base.ui.activity.BaseViews
 import sk.lukasanda.base.ui.fragment.BaseFragment
+import sk.lukasanda.base.ui.recyclerview.bindLinear
 
 class EmailFragment :
     BaseFragment<EmailFragment.Views, EmailFragmentBinding, EmailViewModel, EmailFragmentHandler>() {
@@ -46,6 +47,9 @@ class EmailFragment :
                 adapter.swapData(it)
                 handler.riseToolbar()
             })
+            binding.compose.setOnClickListener {
+                handler.composeEmail()
+            }
         }
 
     }
@@ -54,4 +58,5 @@ class EmailFragment :
 interface EmailFragmentHandler {
     fun riseToolbar()
     fun showEmailDetail(email: Email)
+    fun composeEmail()
 }

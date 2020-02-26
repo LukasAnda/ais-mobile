@@ -18,6 +18,7 @@ import android.os.Bundle
 import android.view.ViewOutlineProvider
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.lifecycle.Observer
+import androidx.navigation.ui.setupWithNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
@@ -26,6 +27,7 @@ import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.databinding.ActivityMainBinding
 import com.lukasanda.aismobile.ui.login.LoginActivity
+import com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailHandler
 import com.lukasanda.aismobile.ui.main.email.EmailFragmentDirections
 import com.lukasanda.aismobile.ui.main.email.EmailFragmentHandler
 import com.lukasanda.aismobile.ui.main.emailDetail.EmailDetailHandler
@@ -33,6 +35,7 @@ import com.lukasanda.aismobile.ui.main.subjects.SubjectsFragmentHandler
 import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentHandler
 import com.lukasanda.aismobile.util.startWorker
 import kotlinx.android.synthetic.main.item_header_drawer.*
+import kotlinx.android.synthetic.main.item_header_drawer.view.*
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -42,7 +45,8 @@ import sk.lukasanda.base.ui.activity.BaseUIActivity
 
 
 class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityMainBinding>(),
-    TimetableFragmentHandler, SubjectsFragmentHandler, EmailFragmentHandler, EmailDetailHandler {
+    TimetableFragmentHandler, SubjectsFragmentHandler, EmailFragmentHandler, EmailDetailHandler,
+    ComposeEmailHandler {
 
     private lateinit var toggle: ActionBarDrawerToggle
 
@@ -109,5 +113,9 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
                 email
             )
         )
+    }
+
+    override fun composeEmail() {
+        navController?.navigateSafe(EmailFragmentDirections.actionEmailFragmentToComposeEmailFragment())
     }
 }

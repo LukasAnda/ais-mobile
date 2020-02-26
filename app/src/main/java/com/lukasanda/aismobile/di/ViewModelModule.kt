@@ -16,6 +16,7 @@ package com.lukasanda.aismobile.di
 import androidx.lifecycle.SavedStateHandle
 import com.lukasanda.aismobile.ui.login.LoginViewModel
 import com.lukasanda.aismobile.ui.main.MainViewModel
+import com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailViewModel
 import com.lukasanda.aismobile.ui.main.email.EmailViewModel
 import com.lukasanda.aismobile.ui.main.emailDetail.EmailDetailViewModel
 import com.lukasanda.aismobile.ui.main.subjects.SubjectsViewModel
@@ -30,4 +31,5 @@ val viewModelModule = module {
     viewModel { (handle: SavedStateHandle) -> TimetableViewModel(get(), get(), handle) }
     viewModel { (handle: SavedStateHandle) -> EmailViewModel(get(), handle) }
     viewModel { (handle: SavedStateHandle) -> EmailDetailViewModel(get(), handle) }
+    viewModel { (handle: SavedStateHandle) -> ComposeEmailViewModel(get(), handle) }
 }

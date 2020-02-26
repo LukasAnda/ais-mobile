@@ -21,13 +21,13 @@ buildscript {
             multidex_version                   : '2.1.0',
             //application components
             activity__version                  : '1.1.0',
-            fragment__version                  : '1.2.1',
+            fragment__version                  : '1.2.2',
             //life cycle
             lifecycle__version                 : '2.2.0',
             lifecycle_saved_state__version     : '2.2.0',
             //ui
             app_compat__version                : '1.2.0-alpha01',
-            material_design_components__version: '1.2.0-alpha04',
+            material_design_components__version: '1.2.0-alpha05',
             constraint_layout__version         : '2.0.0-beta4',
             view_pager__version                : '1.0.0',
             recycler_view__version             : '1.2.0-alpha01',
