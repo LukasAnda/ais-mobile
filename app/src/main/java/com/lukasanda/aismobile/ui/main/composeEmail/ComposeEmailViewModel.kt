@@ -16,6 +16,7 @@ package com.lukasanda.aismobile.ui.main.composeEmail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.lukasanda.aismobile.data.repository.EmailRepository
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -27,6 +28,12 @@ class ComposeEmailViewModel(
 ) : BaseViewModel(handle) {
 
     private val downloadJobs = mutableListOf<Job>()
+
+    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, t ->
+        run {
+            t.printStackTrace()
+        }
+    }
 
     fun getSuggestions(query: String) {
         cancelJobs()
@@ -44,10 +51,17 @@ class ComposeEmailViewModel(
     fun suggestions() = emailRepository.suggestions()
 
     fun sendMail(to: String, subject: String, message: String) =
-        viewModelScope.launch { emailRepository.sendMail(to, subject, message) }
+        viewModelScope.launch(coroutineExceptionHandler) {
+            emailRepository.sendMail(
+                to,
+                subject,
+                message
+            )
+        }
 
-    private fun submitSuggestionRequest(query: String) = viewModelScope.launch {
-        delay(500)
-        emailRepository.getSuggestions(query)
-    }
+    private fun submitSuggestionRequest(query: String) =
+        viewModelScope.launch(coroutineExceptionHandler) {
+            delay(500)
+            emailRepository.getSuggestions(query)
+        }
 }

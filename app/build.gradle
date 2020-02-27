@@ -111,6 +111,7 @@ dependencies {
     //ui
     implementation "androidx.annotation:annotation:1.1.0"
     implementation "androidx.appcompat:appcompat:$libraries.app_compat__version"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:$libraries.swipe_refresh__version"
     implementation "com.google.android.material:material:$libraries.material_design_components__version"
     implementation "androidx.constraintlayout:constraintlayout:$libraries.constraint_layout__version"
     implementation "androidx.viewpager2:viewpager2:$libraries.view_pager__version"

@@ -49,6 +49,7 @@ import com.lukasanda.aismobile.ui.main.MainActivity
 import okhttp3.ResponseBody
 import retrofit2.Response
 import java.util.concurrent.TimeUnit
+import java.util.regex.Pattern
 
 
 const val NOTIFICATION_ID = "ais_notification_id"
@@ -166,5 +167,15 @@ fun Int.toARGB(): Int {
     return Color.parseColor(stringColor)
 }
 
+
+fun String.getNameFromSender() =
+    Pattern.compile("(\\w{2,}+\\.( ){1,})|(, \\w+)").matcher(this).replaceAll("").substringBefore("@").replace(
+        ".",
+        " "
+    ).trim()
+
+fun String.getInitialsFromName() = this.split(" ").map { it.first().toUpperCase() }.joinToString("")
+
 fun getSuggestionRequestString(query: String) =
-    "_suggestKey=${query}&upresneni_default=aktivni_a_preruseni,absolventi,zamestnanci,externiste&_suggestMaxItems=25&vzorek=&_suggestHandler=lide&lang=undefined"
+//    "_suggestKey=${query}&upresneni_default=aktivni_a_preruseni,absolventi,zamestnanci,externiste&_suggestMaxItems=25&vzorek=&_suggestHandler=lide&lang=undefined"
+    "_suggestKey=${query}&upresneni_default=aktivni_a_preruseni,zamestnanci&_suggestMaxItems=25&vzorek=&_suggestHandler=lide&lang=undefined"

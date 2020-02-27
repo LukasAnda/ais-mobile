@@ -16,6 +16,8 @@ package com.lukasanda.aismobile.ui.main.composeEmail
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import android.view.KeyEvent
+import androidx.core.view.isEmpty
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -23,6 +25,8 @@ import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.google.android.material.chip.Chip
 import com.lukasanda.aismobile.databinding.ComposeEmailFragmentBinding
+import com.lukasanda.aismobile.util.hide
+import com.lukasanda.aismobile.util.show
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import sk.lukasanda.base.ui.activity.BaseViews
@@ -40,12 +44,29 @@ class ComposeEmailFragment :
         selected.add(it)
         binding.recipients.setText("")
         binding.chipGroup.addView(createChip(it))
+        binding.chipGroup.show()
         clearLoading()
     }
 
     private fun clearLoading() {
         viewModel.cancelJobs()
         contactAdapter.swapData(emptyList())
+        binding.contactsRecycler.hide()
+    }
+
+    private fun removeLastContact() {
+        binding.contactsRecycler.hide()
+        val viewCount = binding.chipGroup.childCount
+        if (viewCount > 0) {
+            selected.dropLast(1)
+            binding.chipGroup.removeViewAt(viewCount - 1)
+
+            if (binding.chipGroup.isEmpty()) {
+                binding.chipGroup.hide()
+            }
+        } else {
+            binding.chipGroup.hide()
+        }
     }
 
 
@@ -60,6 +81,12 @@ class ComposeEmailFragment :
                         clearLoading()
                     }
                 }
+                setOnKeyListener { v, keyCode, event ->
+                    if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_DEL && binding.recipients.text?.isEmpty() == true) {
+                        removeLastContact()
+                    }
+                    false
+                }
             }
 
             binding.contactsRecycler.apply {
@@ -73,6 +100,11 @@ class ComposeEmailFragment :
             }
 
             viewModel.suggestions().observe(viewLifecycleOwner, Observer {
+                if (it.isEmpty()) {
+                    binding.contactsRecycler.hide()
+                } else {
+                    binding.contactsRecycler.show()
+                }
                 contactAdapter.swapData(it)
             })
 

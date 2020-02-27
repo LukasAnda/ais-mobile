@@ -19,6 +19,8 @@ import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.databinding.EmailItemBinding
+import com.lukasanda.aismobile.util.getInitialsFromName
+import com.lukasanda.aismobile.util.getNameFromSender
 import sk.lukasanda.base.ui.recyclerview.BaseAdapter
 import sk.lukasanda.base.ui.recyclerview.BindingViewHolder
 import sk.lukasanda.base.ui.recyclerview.create
@@ -34,11 +36,12 @@ class EmailItemHolder(binding: EmailItemBinding) :
     override fun bind(item: Email, onClick: ((Email) -> Unit)?) {
         binding.name.text = item.sender
         binding.subject.text = item.subject
-        val initials = item.sender.first()
+        val name = item.sender.getNameFromSender()
+        val initials = name.getInitialsFromName()
         val drawable =
             TextDrawable.builder().beginConfig().textColor(Color.WHITE).bold().toUpperCase()
                 .endConfig()
-                .buildRound(initials.toString(), ColorGenerator.MATERIAL.getColor(item.sender))
+                .buildRound(initials, ColorGenerator.MATERIAL.getColor(item.sender))
 
         binding.icon.setImageDrawable(drawable)
 
