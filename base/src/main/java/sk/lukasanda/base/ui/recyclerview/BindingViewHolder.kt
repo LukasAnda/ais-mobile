@@ -25,11 +25,11 @@ abstract class BindingViewHolder<I, T : ViewBinding>(binding: T) :
 
 abstract class BaseBindingViewHolder<ITEM, LISTENER_ITEM, BINDING : ViewBinding>(val binding: BINDING) :
     RecyclerView.ViewHolder(binding.root) {
-    abstract fun bind(item: ITEM, onClick: ((LISTENER_ITEM) -> Unit)? = null)
+    abstract fun bind(item: ITEM, onClick: (LISTENER_ITEM) -> Unit)
 }
 
 abstract class BaseAdapter<ITEM : Any, LISTENER_ITEM : Any, VIEWHOLDER : BaseBindingViewHolder<ITEM, LISTENER_ITEM, *>>(
-    val onClick: ((LISTENER_ITEM) -> Unit)? = null
+    val onClick: (LISTENER_ITEM) -> Unit
 ) : RecyclerView.Adapter<VIEWHOLDER>() {
     protected val items = mutableListOf<ITEM>()
 

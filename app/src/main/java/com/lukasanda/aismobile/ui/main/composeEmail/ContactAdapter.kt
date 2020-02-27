@@ -31,7 +31,7 @@ class ContactAdapter(private val listener: (Suggestion) -> Unit) :
 
 class ContactItemHolder(binding: ContactItemBinding) :
     BindingViewHolder<Suggestion, ContactItemBinding>(binding) {
-    override fun bind(item: Suggestion, onClick: ((Suggestion) -> Unit)?) {
+    override fun bind(item: Suggestion, onClick: (Suggestion) -> Unit) {
         binding.name.text = item.name
         val drawable =
             TextDrawable.builder().beginConfig().textColor(Color.WHITE).bold().toUpperCase()
@@ -42,7 +42,7 @@ class ContactItemHolder(binding: ContactItemBinding) :
         binding.icon.setImageDrawable(drawable)
 
         binding.root.setOnClickListener {
-            onClick?.invoke(item)
+            onClick.invoke(item)
         }
     }
 

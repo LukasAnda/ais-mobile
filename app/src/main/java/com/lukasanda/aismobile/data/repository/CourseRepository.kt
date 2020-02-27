@@ -26,7 +26,6 @@ import com.lukasanda.aismobile.data.repository.CourseRepository.UpdateType.NEWES
 import com.lukasanda.aismobile.util.authenticatedOrThrow
 import com.snakydesign.livedataextensions.map
 import kotlinx.coroutines.delay
-import sk.lukasanda.base.ui.recyclerview.replaceWith
 import sk.lukasanda.dataprovider.Parser
 import sk.lukasanda.dataprovider.data.Semester
 
@@ -37,9 +36,9 @@ class CourseRepository(
 ) {
 
     init {
-        courseDao.getSemesters().observeForever {
-            semesters.replaceWith(it)
-        }
+//        courseDao.getSemesters().observeForever {
+//            semesters.replaceWith(it)
+//        }
     }
 
 
@@ -94,7 +93,11 @@ class CourseRepository(
 
             courses.forEach { course ->
 
-                dbSheets.addAll(parseSheets(course, semester))
+                val newSheets = parseSheets(course, semester)
+//                println("New sheeeeeeeeeets---------------------------")
+//                println(newSheets)
+
+                dbSheets.addAll(newSheets)
 
                 delay(1000)
             }
@@ -102,9 +105,14 @@ class CourseRepository(
 
         when (updateType) {
             FETCH -> {
-                semesters?.forEach {
+//                semesters?.forEach {
+//                    updateSemester(it)
+//                }
+
+                semesters?.get(3)?.let {
                     updateSemester(it)
                 }
+                println(dbSheets)
                 courseDao.update(dbCourses, dbSheets)
             }
             NEWEST -> {
@@ -142,6 +150,8 @@ class CourseRepository(
         val sheets =
             Parser.getSheets(sheetResponse) ?: mutableListOf()
 
+//        println(sheets.joinToString("\n"))
+
         return sheets.map { sheetToDb(it, course) }
     }
 
@@ -168,10 +178,11 @@ class CourseRepository(
         course: Course
     ) = Sheet(
         course.id + sheet.name,
-        course.id,
-        sheet.name,
-        sheet.headers,
-        sheet.values
+        courseId = course.id,
+        name = sheet.name,
+        comment = sheet.comment,
+        headers = sheet.headers,
+        values = sheet.values
     )
 
     enum class UpdateType {

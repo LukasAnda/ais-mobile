@@ -32,7 +32,9 @@ class TimetableFragment :
     override val viewModel: TimetableViewModel by viewModel { parametersOf(Bundle()) }
 
     private val weekAdapter by lazy {
-        WeekAdapter()
+        WeekAdapter {
+            handler.showDetailFromTimetable(it.courseId)
+        }
     }
 
     private val pageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
@@ -89,4 +91,5 @@ class TimetableFragment :
 
 interface TimetableFragmentHandler {
     fun lowerToolbar()
+    fun showDetailFromTimetable(courseId: String)
 }

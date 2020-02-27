@@ -33,7 +33,10 @@ import com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailHandler
 import com.lukasanda.aismobile.ui.main.email.EmailFragmentDirections
 import com.lukasanda.aismobile.ui.main.email.EmailFragmentHandler
 import com.lukasanda.aismobile.ui.main.emailDetail.EmailDetailHandler
+import com.lukasanda.aismobile.ui.main.subjectDetail.SubjectDetailHandler
+import com.lukasanda.aismobile.ui.main.subjects.SubjectsFragmentDirections
 import com.lukasanda.aismobile.ui.main.subjects.SubjectsFragmentHandler
+import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentDirections
 import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentHandler
 import com.lukasanda.aismobile.util.createLiveData
 import com.lukasanda.aismobile.util.startWorker
@@ -49,7 +52,7 @@ import sk.lukasanda.base.ui.activity.BaseUIActivity
 
 class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityMainBinding>(),
     TimetableFragmentHandler, SubjectsFragmentHandler, EmailFragmentHandler, EmailDetailHandler,
-    ComposeEmailHandler {
+    ComposeEmailHandler, SubjectDetailHandler {
 
     private lateinit var toggle: ActionBarDrawerToggle
 
@@ -124,6 +127,22 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
 
     override fun lowerToolbar() {
         binding.appbar.outlineProvider = null
+    }
+
+    override fun showDetailFromSubjects(courseId: String) {
+        navController?.navigateSafe(
+            SubjectsFragmentDirections.actionSubjectsFragmentToSubjectDetailFragment(
+                courseId
+            )
+        )
+    }
+
+    override fun showDetailFromTimetable(courseId: String) {
+        navController?.navigateSafe(
+            TimetableFragmentDirections.actionScheduleFragmentToSubjectDetailFragment(
+                courseId
+            )
+        )
     }
 
     override fun riseToolbar() {

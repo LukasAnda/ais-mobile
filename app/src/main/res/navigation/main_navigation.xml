@@ -21,12 +21,20 @@
         android:id="@+id/scheduleFragment"
         android:name="com.lukasanda.aismobile.ui.main.timetable.TimetableFragment"
         android:label="Rozvrh"
-        tools:layout="@layout/fragment_schedule" />
+        tools:layout="@layout/fragment_schedule">
+        <action
+            android:id="@+id/action_scheduleFragment_to_subjectDetailFragment"
+            app:destination="@id/subjectDetailFragment" />
+    </fragment>
     <fragment
         android:id="@+id/subjectsFragment"
         android:name="com.lukasanda.aismobile.ui.main.subjects.SubjectsFragment"
         android:label="Hodnotenie"
-        tools:layout="@layout/fragment_subjects" />
+        tools:layout="@layout/fragment_subjects">
+        <action
+            android:id="@+id/action_subjectsFragment_to_subjectDetailFragment"
+            app:destination="@id/subjectDetailFragment" />
+    </fragment>
     <fragment
         android:id="@+id/emailFragment"
         android:name="com.lukasanda.aismobile.ui.main.email.EmailFragment"
@@ -52,4 +60,12 @@
         android:id="@+id/composeEmailFragment"
         android:name="com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailFragment"
         android:label="Vytvor email" />
+    <fragment
+        android:id="@+id/subjectDetailFragment"
+        android:name="com.lukasanda.aismobile.ui.main.subjectDetail.SubjectDetailFragment"
+        android:label="SubjectDetailFragment">
+        <argument
+            android:name="courseId"
+            app:argType="string" />
+    </fragment>
 </navigation>

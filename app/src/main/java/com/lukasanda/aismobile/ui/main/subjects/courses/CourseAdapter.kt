@@ -13,16 +13,16 @@
 
 package com.lukasanda.aismobile.ui.main.subjects.courses
 
+import android.util.Log
 import android.view.ViewGroup
 import com.lukasanda.aismobile.data.db.entity.FullCourse
 import com.lukasanda.aismobile.databinding.CourseItemBinding
-import com.lukasanda.aismobile.databinding.ScheduleItemBinding
 import sk.lukasanda.base.ui.recyclerview.BaseAdapter
 import sk.lukasanda.base.ui.recyclerview.BindingViewHolder
 import sk.lukasanda.base.ui.recyclerview.create
 
-class CourseAdapter :
-    BaseAdapter<FullCourse, FullCourse, CourseViewHolder>() {
+class CourseAdapter(private val listener: (FullCourse) -> Unit) :
+    BaseAdapter<FullCourse, FullCourse, CourseViewHolder>(listener) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         parent.create(::CourseViewHolder, CourseItemBinding::inflate)
 }
@@ -30,9 +30,13 @@ class CourseAdapter :
 class CourseViewHolder(binding: CourseItemBinding) :
     BindingViewHolder<FullCourse, CourseItemBinding>(binding) {
 
-    override fun bind(item: FullCourse, onClick: ((FullCourse) -> Unit)?) {
+    override fun bind(item: FullCourse, onClick: (FullCourse) -> Unit) {
         with(binding) {
             name.text = item.course?.courseName
+            root.setOnClickListener {
+                Log.d("TAG", "On Click invoked")
+                onClick.invoke(item)
+            }
         }
     }
 }

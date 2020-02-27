@@ -34,7 +34,7 @@ class EmailAdapter(listener: (Email) -> Unit) :
 
 class EmailItemHolder(binding: EmailItemBinding) :
     BindingViewHolder<Email, EmailItemBinding>(binding) {
-    override fun bind(item: Email, onClick: ((Email) -> Unit)?) {
+    override fun bind(item: Email, onClick: (Email) -> Unit) {
         binding.name.text = item.sender
         binding.subject.text = item.subject
         val name = item.sender.getNameFromSender()

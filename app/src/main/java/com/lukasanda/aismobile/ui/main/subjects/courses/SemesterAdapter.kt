@@ -24,7 +24,8 @@ import sk.lukasanda.base.ui.recyclerview.BaseAdapter
 import sk.lukasanda.base.ui.recyclerview.BaseBindingViewHolder
 import sk.lukasanda.base.ui.recyclerview.create
 
-class SemesterAdapter : BaseAdapter<List<FullCourse>, FullCourse, SemesterItemHolder>() {
+class SemesterAdapter(private val listener: (FullCourse) -> Unit) :
+    BaseAdapter<List<FullCourse>, FullCourse, SemesterItemHolder>(listener) {
     private val pool = RecyclerView.RecycledViewPool()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         parent.create(::SemesterItemHolder, SemesterItemBinding::inflate).apply {
@@ -35,15 +36,15 @@ class SemesterAdapter : BaseAdapter<List<FullCourse>, FullCourse, SemesterItemHo
 
     override fun onBindViewHolder(holder: SemesterItemHolder, position: Int) {
         if (items.isNotEmpty()) {
-            holder.bind(items[position % items.size])
+            holder.bind(items[position % items.size], listener)
         }
     }
 }
 
 class SemesterItemHolder(binding: SemesterItemBinding) :
     BaseBindingViewHolder<List<FullCourse>, FullCourse, SemesterItemBinding>(binding) {
-    override fun bind(item: List<FullCourse>, onClick: ((FullCourse) -> Unit)?) {
-        val adapter = CourseAdapter()
+    override fun bind(item: List<FullCourse>, onClick: (FullCourse) -> Unit) {
+        val adapter = CourseAdapter(onClick)
         binding.recycler.apply {
             layoutManager = LinearLayoutManager(context)
             this.adapter = adapter

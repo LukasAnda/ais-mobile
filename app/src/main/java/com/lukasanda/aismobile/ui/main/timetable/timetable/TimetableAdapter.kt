@@ -24,8 +24,8 @@ import sk.lukasanda.base.ui.recyclerview.BaseAdapter
 import sk.lukasanda.base.ui.recyclerview.BindingViewHolder
 import sk.lukasanda.base.ui.recyclerview.create
 
-class TimetableAdapter :
-    BaseAdapter<TimetableItem, TimetableItem, TimetableCourseViewHolder>() {
+class TimetableAdapter(private val listener: (TimetableItem) -> Unit) :
+    BaseAdapter<TimetableItem, TimetableItem, TimetableCourseViewHolder>(listener) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         parent.create(::TimetableCourseViewHolder, ScheduleItemBinding::inflate)
 }
@@ -33,7 +33,7 @@ class TimetableAdapter :
 class TimetableCourseViewHolder(binding: ScheduleItemBinding) :
     BindingViewHolder<TimetableItem, ScheduleItemBinding>(binding) {
 
-    override fun bind(item: TimetableItem, onClick: ((TimetableItem) -> Unit)?) {
+    override fun bind(item: TimetableItem, onClick: (TimetableItem) -> Unit) {
         with(binding) {
             name.text = item.name
             time.text = "${item.startTime} - ${item.endTime}"
@@ -60,6 +60,10 @@ class TimetableCourseViewHolder(binding: ScheduleItemBinding) :
                 nextLesson.show()
             } else {
                 nextLesson.hide()
+            }
+
+            binding.root.setOnClickListener {
+                onClick?.invoke(item)
             }
         }
     }

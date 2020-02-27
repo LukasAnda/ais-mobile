@@ -14,6 +14,7 @@
 package com.lukasanda.aismobile.ui.main.subjects
 
 import android.os.Bundle
+import android.util.Log
 import androidx.lifecycle.Observer
 import androidx.viewpager2.widget.ViewPager2
 import com.lukasanda.aismobile.databinding.FragmentSubjectsBinding
@@ -36,7 +37,10 @@ class SubjectsFragment :
     override lateinit var handler: SubjectsFragmentHandler
 
     private val semesterAdapter by lazy {
-        SemesterAdapter()
+        SemesterAdapter {
+            Log.d("TAG", "On click is here")
+            handler.showDetailFromSubjects(it.course?.id ?: "")
+        }
     }
 
     private val pageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
@@ -88,4 +92,5 @@ class SubjectsFragment :
 
 interface SubjectsFragmentHandler {
     fun lowerToolbar()
+    fun showDetailFromSubjects(courseId: String)
 }
