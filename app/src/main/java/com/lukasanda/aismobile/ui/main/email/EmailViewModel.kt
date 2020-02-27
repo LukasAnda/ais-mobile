@@ -33,6 +33,6 @@ class EmailViewModel(
 
     fun emails() = emailRepository.getEmails()
     fun update() = viewModelScope.launch(coroutineExceptionHandler) {
-        emailRepository.update()
+        emailRepository.update(updateType = EmailRepository.UpdateType.Purge)
     }
 }

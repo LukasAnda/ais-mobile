@@ -20,13 +20,15 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 
 class Prefs(context: Context) {
-    private val PREFS_FILENAME = "${BuildConfig.APPLICATION_ID}.prefs"
-    private val SESSION_EXPIRATION = "session_expiration_date"
-    private val COOKIES = "cookies"
-    private val USERNAME = "username"
-    private val PASSWORD = "password"
-    private val AISID = "aisid"
-    private val SENT_DIRECTORY_ID = "sent_directory_id"
+    val PREFS_FILENAME = "${BuildConfig.APPLICATION_ID}.prefs"
+    val SESSION_EXPIRATION = "session_expiration_date"
+    val COOKIES = "cookies"
+    val USERNAME = "username"
+    val PASSWORD = "password"
+    val AISID = "aisid"
+    val SENT_DIRECTORY_ID = "sent_directory_id"
+    val NEW_EMAIL_COUNT = "new_email_count"
+    val EMAIL_CACHE_EXPIRATION = "email_cache_expiration"
 
     val prefs: SharedPreferences = context.getSharedPreferences(PREFS_FILENAME, 0)
 
@@ -46,6 +48,18 @@ class Prefs(context: Context) {
             value.toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
         ).apply()
 
+    var emailExpiration: DateTime
+        get() = DateTime.parse(
+            prefs.getString(
+                EMAIL_CACHE_EXPIRATION,
+                DateTime.now().minusDays(1).toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
+            ), DateTimeFormat.forPattern("dd.MM.yyyy hh:mm")
+        )
+        set(value) = prefs.edit().putString(
+            EMAIL_CACHE_EXPIRATION,
+            value.toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
+        ).apply()
+
     var username: String
         get() = prefs.getString(USERNAME, "") ?: ""
         set(value) = prefs.edit().putString(USERNAME, value).apply()
@@ -61,4 +75,8 @@ class Prefs(context: Context) {
     var sentDirectoryId: String
         get() = prefs.getString(SENT_DIRECTORY_ID, "") ?: ""
         set(value) = prefs.edit().putString(SENT_DIRECTORY_ID, value).apply()
+
+    var newEmailCount: Int
+        get() = prefs.getInt(NEW_EMAIL_COUNT, 0)
+        set(value) = prefs.edit().putInt(NEW_EMAIL_COUNT, value).apply()
 }

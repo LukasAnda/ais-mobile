@@ -18,8 +18,10 @@ import android.os.Bundle
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
 import com.amulyakhare.textdrawable.TextDrawable
+import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.lukasanda.aismobile.databinding.EmailDetailFragmentBinding
-import com.lukasanda.aismobile.util.toARGB
+import com.lukasanda.aismobile.util.getInitialsFromName
+import com.lukasanda.aismobile.util.getNameFromSender
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import sk.lukasanda.base.ui.activity.BaseViews
@@ -34,12 +36,13 @@ class EmailDetailFragment :
 
             binding.sender.text = args.email.sender
             binding.subject.text = args.email.subject
+            binding.date.text = args.email.date
 
-            val initials = args.email.sender.first()
+            val initials = args.email.sender.getNameFromSender().getInitialsFromName()
             val drawable =
-                TextDrawable.builder().beginConfig().width(40).height(40).textColor(Color.WHITE)
+                TextDrawable.builder().beginConfig().textColor(Color.WHITE)
                     .endConfig()
-                    .buildRound(initials.toString(), args.email.sender.hashCode().toARGB())
+                    .buildRound(initials, ColorGenerator.MATERIAL.getColor(args.email.sender))
 
             binding.icon.setImageDrawable(drawable)
 

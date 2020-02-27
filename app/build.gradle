@@ -121,6 +121,9 @@ dependencies {
     //view binding
     implementation "androidx.databinding:viewbinding:$libraries.view_binding__version"
 
+    //prefs
+    implementation 'com.github.ibrahimsn98:live-preferences:1.6'
+
     //navigation
     implementation "androidx.navigation:navigation-fragment-ktx:$libraries.navigation__version"
     implementation "androidx.navigation:navigation-runtime-ktx:$libraries.navigation__version"

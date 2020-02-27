@@ -17,6 +17,10 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.view.KeyEvent
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.widget.Toast
 import androidx.core.view.isEmpty
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
@@ -24,7 +28,10 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.google.android.material.chip.Chip
+import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.databinding.ComposeEmailFragmentBinding
+import com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailViewModel.EmailSendState.Fail
+import com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailViewModel.EmailSendState.Success
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -69,9 +76,9 @@ class ComposeEmailFragment :
         }
     }
 
-
     inner class Views : BaseViews {
         override fun modifyViews() {
+            setHasOptionsMenu(true)
             binding.recipients.apply {
                 doOnTextChanged { text, start, count, after ->
                     if (text?.length ?: 0 > 2) {
@@ -108,16 +115,39 @@ class ComposeEmailFragment :
                 contactAdapter.swapData(it)
             })
 
-            binding.send.setOnClickListener {
+            viewModel.sentMailState().observe(viewLifecycleOwner, Observer { emailSendState ->
+                when (emailSendState) {
+                    Success -> handler.closeFragment()
+                    Fail -> {
+                        Toast.makeText(
+                            requireContext(),
+                            "Something went wrong, try again later",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    else -> {
+                    }
+                }
+            })
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.compose_email__menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.send -> {
                 viewModel.sendMail(
                     getEmails(),
                     binding.subject.text.toString(),
                     binding.message.text.toString()
                 )
-                handler.closeFragment()
             }
         }
-
+        return super.onOptionsItemSelected(item)
     }
 
     private fun getEmails(): String {

@@ -14,6 +14,7 @@
 package com.lukasanda.aismobile.ui.main
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.ViewOutlineProvider
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -36,6 +37,7 @@ import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentHandler
 import com.lukasanda.aismobile.util.startWorker
 import kotlinx.android.synthetic.main.item_header_drawer.*
 import kotlinx.android.synthetic.main.item_header_drawer.view.*
+import me.ibrahimsn.library.LiveSharedPreferences
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -52,6 +54,7 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
 
     override val viewModel by viewModel<MainViewModel> { parametersOf(Bundle()) }
     private val prefs by inject<Prefs>()
+    private val livePrefs = LiveSharedPreferences(prefs.prefs)
 
     inner class Views : BaseActivityViews {
 
@@ -88,6 +91,16 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
             navController?.addOnDestinationChangedListener { controller, destination, arguments ->
                 binding.windowTitle.text = destination.label
             }
+
+            livePrefs.getInt(prefs.NEW_EMAIL_COUNT, 0).observe(this@MainActivity, Observer {
+                if (it > 0) {
+                    binding.bottomMenu.getOrCreateBadge(R.id.emailFragment).apply {
+                        badgeTextColor = Color.WHITE
+                        this.number = it
+                        backgroundColor = Color.RED
+                    }
+                }
+            })
         }
 
         override fun setNavigationGraph() = R.id.homeNavigationContainer

@@ -17,6 +17,7 @@ import android.graphics.Color
 import android.view.ViewGroup
 import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
+import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.databinding.EmailItemBinding
 import com.lukasanda.aismobile.util.getInitialsFromName
@@ -44,6 +45,14 @@ class EmailItemHolder(binding: EmailItemBinding) :
                 .buildRound(initials, ColorGenerator.MATERIAL.getColor(item.sender))
 
         binding.icon.setImageDrawable(drawable)
+
+        if (item.opened) {
+            binding.name.setTextAppearance(binding.name.context, R.style.regular__text_view)
+            binding.subject.setTextAppearance(binding.name.context, R.style.regular__text_view)
+        } else {
+            binding.name.setTextAppearance(binding.name.context, R.style.bold__text_view)
+            binding.subject.setTextAppearance(binding.name.context, R.style.bold__text_view)
+        }
 
         binding.root.setOnClickListener {
             onClick?.invoke(item)

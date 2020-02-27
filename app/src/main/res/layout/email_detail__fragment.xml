@@ -47,12 +47,37 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:textColor="@color/color_on_surface"
-        android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="@id/icon"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toTopOf="@id/date"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/icon"
         app:layout_constraintTop_toTopOf="@id/icon"
         tools:text="Akademicky informacny system" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/date"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:textColor="@color/color_on_surface"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@id/icon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/icon"
+        app:layout_constraintTop_toBottomOf="@id/sender"
+        tools:text="Akademicky informacny system" />
+
+    <View
+        android:id="@+id/delimiter1"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+        android:background="#B6B6B6"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/icon" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/content"
@@ -62,7 +87,7 @@
         android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/icon" />
+        app:layout_constraintTop_toBottomOf="@id/delimiter1" />
 
     <androidx.core.widget.ContentLoadingProgressBar
         android:id="@+id/progress"
