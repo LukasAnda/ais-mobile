@@ -25,7 +25,7 @@ interface EmailDao {
     @Query("DELETE FROM email")
     suspend fun deleteAll()
 
-    @Query("SELECT * FROM email")
+    @Query("SELECT * FROM email ")
     fun getEmails(): LiveData<List<Email>>
 
     @Update(onConflict = OnConflictStrategy.REPLACE)

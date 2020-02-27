@@ -13,13 +13,17 @@
 
 package com.lukasanda.aismobile.ui.main.composeEmail
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.lukasanda.aismobile.data.repository.EmailRepository
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import sk.lukasanda.base.ui.viewmodel.BaseViewModel
+import sk.lukasanda.dataprovider.data.Suggestion
 
 class ComposeEmailViewModel(
     private val emailRepository: EmailRepository,
@@ -27,6 +31,17 @@ class ComposeEmailViewModel(
 ) : BaseViewModel(handle) {
 
     private val downloadJobs = mutableListOf<Job>()
+
+    private val _sendMailLiveData = MutableLiveData<EmailSendState>(EmailSendState.Unknown)
+    fun sentMailState(): LiveData<EmailSendState> = _sendMailLiveData
+
+    private val _suggestionsLiveData = MutableLiveData<List<Suggestion>>()
+
+    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, t ->
+        run {
+            t.printStackTrace()
+        }
+    }
 
     fun getSuggestions(query: String) {
         cancelJobs()
@@ -41,13 +56,29 @@ class ComposeEmailViewModel(
         downloadJobs.clear()
     }
 
-    fun suggestions() = emailRepository.suggestions()
+    fun suggestions(): LiveData<List<Suggestion>> = _suggestionsLiveData
 
     fun sendMail(to: String, subject: String, message: String) =
-        viewModelScope.launch { emailRepository.sendMail(to, subject, message) }
+        viewModelScope.launch(coroutineExceptionHandler) {
+            val success = emailRepository.sendMail(
+                to,
+                subject,
+                message
+            )
+            if (success) {
+                _sendMailLiveData.postValue(EmailSendState.Success)
+            } else {
+                _sendMailLiveData.postValue(EmailSendState.Fail)
+            }
+        }
 
-    private fun submitSuggestionRequest(query: String) = viewModelScope.launch {
-        delay(500)
-        emailRepository.getSuggestions(query)
+    private fun submitSuggestionRequest(query: String) =
+        viewModelScope.launch(coroutineExceptionHandler) {
+            delay(500)
+            _suggestionsLiveData.postValue(emailRepository.getSuggestions(query))
+        }
+
+    enum class EmailSendState {
+        Unknown, Success, Fail
     }
 }

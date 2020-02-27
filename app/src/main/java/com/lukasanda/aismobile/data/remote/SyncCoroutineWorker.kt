@@ -65,7 +65,7 @@ class SyncCoroutineWorker(
 
 //            courseRepository.update()
 
-//            emailRepository.update()
+            emailRepository.update()
 
             Result.success()
         } catch (e: Exception) {

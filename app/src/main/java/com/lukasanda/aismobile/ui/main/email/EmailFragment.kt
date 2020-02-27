@@ -18,6 +18,8 @@ import androidx.lifecycle.Observer
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.databinding.EmailFragmentBinding
 import com.lukasanda.aismobile.ui.main.email.adapter.EmailAdapter
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import sk.lukasanda.base.ui.activity.BaseViews
@@ -43,8 +45,19 @@ class EmailFragment :
         override fun modifyViews() {
             binding.recycler.bindLinear(adapter)
 
+            binding.pullToRefresh.setOnRefreshListener {
+                binding.pullToRefresh.isRefreshing = true
+                viewModel.update()
+            }
+
             viewModel.emails().observe(viewLifecycleOwner, Observer {
-                adapter.swapData(it)
+                binding.pullToRefresh.isRefreshing = false
+                adapter.swapData(it.sortedByDescending {
+                    DateTime.parse(
+                        it.date,
+                        DateTimeFormat.forPattern("dd. MM. yyyy HH:mm")
+                    )
+                })
                 handler.riseToolbar()
             })
             binding.compose.setOnClickListener {

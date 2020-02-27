@@ -44,4 +44,5 @@
     <string name="notification_title">AIS Aktualizácia</string>
     <string name="notification_subtitle">Prebieha aktualizácia</string>
     <string name="no_subjects">Žiadne predmety pre zvolený semester</string>
+    <string name="action__send">Send</string>
 </resources>

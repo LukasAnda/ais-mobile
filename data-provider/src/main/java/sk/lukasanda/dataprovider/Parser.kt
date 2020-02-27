@@ -285,8 +285,8 @@ object Parser {
         }
     }
 
-    fun getEmailInfo(webResponse: String): Pair<Int, String> {
-        if (webResponse.isEmpty()) return Pair(-1, "")
+    fun getEmailInfo(webResponse: String): EmailInfo {
+        if (webResponse.isEmpty()) return EmailInfo(-1, "", 0)
 
         val cleaner = HtmlCleaner()
         return try {
@@ -298,16 +298,21 @@ object Parser {
                 sentDirectoryImage.parent.findElementByName("a", true).getAttributeByName("href")
                     .substringAfter("fid=")
 
-            val image = items.findElementByAttValue("sysid", "tree-8", true, true) ?: return Pair(
-                1,
-                sentDirectoryLink
-            )
+            val emailCountElement = items.findElementByAttValue("href", "/auth/posta/", true, true)
+            val emailCount = emailCountElement.content().toInt()
+
+            val image =
+                items.findElementByAttValue("sysid", "tree-8", true, true) ?: return EmailInfo(
+                    1,
+                    sentDirectoryLink,
+                    emailCount
+                )
             val row = image.parent.parent
 
 
-            Pair(row.childTagList.size - 4, sentDirectoryLink)
+            EmailInfo(row.childTagList.size - 4, sentDirectoryLink, emailCount)
         } catch (e: Exception) {
-            Pair(-1, "")
+            EmailInfo(-1, "", 0)
         }
     }
 
@@ -374,7 +379,12 @@ object Parser {
             val form = items.findElementByAttValue("name", "wqqwqqwwqyw0", true, true)
             val table = form.findElementByName("tbody", true).findElementByName("tbody", true)
             val message = table.childTagList.last().findElementByName("small", true)
-                .allChildren.map { if (it is ContentNode) it.content else "\n" }.joinToString("")
+                .allChildren.map {
+                if (it is ContentNode) it.content else if (it is TagNode && it.hasAttribute(
+                        "href"
+                    )
+                ) it.content() else "\n"
+            }.joinToString("")
                 .replace("&nbsp;", " ")
             message
         } catch (e: Exception) {

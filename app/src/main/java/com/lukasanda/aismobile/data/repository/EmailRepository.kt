@@ -26,6 +26,7 @@ import com.lukasanda.aismobile.util.authenticatedOrThrow
 import com.lukasanda.aismobile.util.getSuggestionRequestString
 import okhttp3.MediaType
 import okhttp3.RequestBody
+import org.joda.time.DateTime
 import sk.lukasanda.dataprovider.Parser
 import sk.lukasanda.dataprovider.data.Suggestion
 
@@ -39,21 +40,26 @@ class EmailRepository(
     fun emailDetail(): LiveData<String?> = _emailDetail
     fun clearDetail() = _emailDetail.postValue(null)
 
-    private val _suggestions = MutableLiveData<List<Suggestion>>()
-    fun suggestions(): LiveData<List<Suggestion>> = _suggestions
 
     @Throws(AuthException::class, HTTPException::class)
-    suspend fun update() {
+    suspend fun update(updateType: UpdateType = UpdateType.Lazy) {
         val emailsCountResponse = service.emails().authenticatedOrThrow()
         val emailsInfo = Parser.getEmailInfo(emailsCountResponse)
 
-        val emailsCount = emailsInfo.first
-        prefs.sentDirectoryId = emailsInfo.second
+        val emailsCount = emailsInfo.emailPages
+        prefs.sentDirectoryId = emailsInfo.saveDirectoryId
+        prefs.newEmailCount = emailsInfo.newEmailCount
+
+        println(emailsInfo)
+
+        if (updateType == UpdateType.Lazy) {
+            if (prefs.emailExpiration.isAfterNow)
+                return
+        }
 
         for (i in 0 until emailsCount) {
             val emailPageResponse = service.emailPage(i.toString()).authenticatedOrThrow()
             val emailsList = Parser.getEmails(emailPageResponse) ?: emptyList()
-            println(emailsList.joinToString("\n"))
             emailDao.insertEmails(emailsList.map {
                 Email(
                     it.eid.substringAfter("="),
@@ -65,19 +71,23 @@ class EmailRepository(
                 )
             })
         }
+        prefs.emailExpiration = DateTime.now().plusMinutes(10)
     }
 
     suspend fun getEmailDetail(email: Email) {
         val response =
-            service.emailDetail("${email.eid};fid=${email.fid};on=0")
-                .authenticatedOrThrow()
+            service.emailDetail("${email.eid};fid=${email.fid};on=0").authenticatedOrThrow()
         val message = Parser.getEmailDetail(response)
         _emailDetail.postValue(message)
+        if (!email.opened) {
+            prefs.newEmailCount--
+        }
+        emailDao.update(email.copy(opened = true))
     }
 
     fun getEmails() = emailDao.getEmails()
 
-    suspend fun getSuggestions(query: String) {
+    suspend fun getSuggestions(query: String): List<Suggestion> {
         val suggestionResponse = service.getSuggestions(
             RequestBody.create(
                 MediaType.parse("text/plain"),
@@ -85,15 +95,15 @@ class EmailRepository(
             )
         ).authenticatedOrThrow()
 
-        _suggestions.postValue(Parser.getSuggestions(suggestionResponse))
+        return Parser.getSuggestions(suggestionResponse) ?: emptyList()
     }
 
-    suspend fun sendMail(to: String, subject: String, message: String) {
+    suspend fun sendMail(to: String, subject: String, message: String): Boolean {
         val newMailResponse = service.newMessagePage().authenticatedOrThrow()
         val token = Parser.getNewMessageToken(newMailResponse)
         if (token.isEmpty()) {
             Log.d("TAG", "Empty token, something went wrong")
-            return
+            return false
         } else {
             Log.d("TAG", "Sending message")
         }
@@ -105,10 +115,12 @@ class EmailRepository(
             saveMessageTo = prefs.sentDirectoryId,
             serialisation = token
         )
+
+        return response.code() == 302
     }
 
-    fun workWithReponse(webResponse: String) {
-        webResponse.toString()
+    enum class UpdateType {
+        Lazy, Purge
     }
 
 

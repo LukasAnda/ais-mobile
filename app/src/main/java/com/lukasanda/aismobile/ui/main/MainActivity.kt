@@ -14,11 +14,13 @@
 package com.lukasanda.aismobile.ui.main
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.ViewOutlineProvider
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.lifecycle.Observer
-import androidx.navigation.ui.setupWithNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.NavigationUI
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
@@ -33,6 +35,7 @@ import com.lukasanda.aismobile.ui.main.email.EmailFragmentHandler
 import com.lukasanda.aismobile.ui.main.emailDetail.EmailDetailHandler
 import com.lukasanda.aismobile.ui.main.subjects.SubjectsFragmentHandler
 import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentHandler
+import com.lukasanda.aismobile.util.createLiveData
 import com.lukasanda.aismobile.util.startWorker
 import kotlinx.android.synthetic.main.item_header_drawer.*
 import kotlinx.android.synthetic.main.item_header_drawer.view.*
@@ -57,9 +60,9 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
 
         override fun modifyViews() {
             this@MainActivity.navController?.let {
-                binding.bottomMenu.setupWithNavController(it)
+                NavigationUI.setupWithNavController(binding.bottomMenu, it)
             }
-//            setSupportActionBar(binding.toolbar)
+
 
             if (prefs.sessionCookie.isEmpty()) {
                 startActivity(Intent(this@MainActivity, LoginActivity::class.java))
@@ -88,6 +91,18 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
             navController?.addOnDestinationChangedListener { controller, destination, arguments ->
                 binding.windowTitle.text = destination.label
             }
+
+            createLiveData<Int>(prefs.prefs, prefs.NEW_EMAIL_COUNT).observe(
+                this@MainActivity,
+                Observer {
+                    if (it > 0) {
+                        binding.bottomMenu.getOrCreateBadge(R.id.emailFragment).apply {
+                            badgeTextColor = Color.WHITE
+                            this.number = it
+                            backgroundColor = Color.RED
+                        }
+                    }
+                })
         }
 
         override fun setNavigationGraph() = R.id.homeNavigationContainer
@@ -100,6 +115,12 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
     override fun createViews(): Views = Views()
 
     override fun setBinding(): ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
+
+    override fun setAppBarConfig() = AppBarConfiguration.Builder(
+        R.id.scheduleFragment,
+        R.id.subjectsFragment,
+        R.id.emailFragment
+    ).setDrawerLayout(binding.drawer).build()
 
     override fun lowerToolbar() {
         binding.appbar.outlineProvider = null

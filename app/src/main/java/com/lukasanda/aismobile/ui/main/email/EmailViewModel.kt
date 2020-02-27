@@ -14,7 +14,10 @@
 package com.lukasanda.aismobile.ui.main.email
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import com.lukasanda.aismobile.data.repository.EmailRepository
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.launch
 import sk.lukasanda.base.ui.viewmodel.BaseViewModel
 
 class EmailViewModel(
@@ -22,5 +25,14 @@ class EmailViewModel(
     private val handle: SavedStateHandle
 ) :
     BaseViewModel(handle) {
+    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, t ->
+        run {
+            t.printStackTrace()
+        }
+    }
+
     fun emails() = emailRepository.getEmails()
+    fun update() = viewModelScope.launch(coroutineExceptionHandler) {
+        emailRepository.update(updateType = EmailRepository.UpdateType.Purge)
+    }
 }

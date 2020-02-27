@@ -42,7 +42,7 @@
     <fragment
         android:id="@+id/emailDetailFragment"
         android:name="com.lukasanda.aismobile.ui.main.emailDetail.EmailDetailFragment"
-        android:label="Email-detail"
+        android:label="&#160;"
         tools:layout="@layout/email_detail__fragment">
         <argument
             android:name="email"
