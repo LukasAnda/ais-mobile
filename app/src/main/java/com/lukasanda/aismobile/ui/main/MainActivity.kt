@@ -35,10 +35,10 @@ import com.lukasanda.aismobile.ui.main.email.EmailFragmentHandler
 import com.lukasanda.aismobile.ui.main.emailDetail.EmailDetailHandler
 import com.lukasanda.aismobile.ui.main.subjects.SubjectsFragmentHandler
 import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentHandler
+import com.lukasanda.aismobile.util.createLiveData
 import com.lukasanda.aismobile.util.startWorker
 import kotlinx.android.synthetic.main.item_header_drawer.*
 import kotlinx.android.synthetic.main.item_header_drawer.view.*
-import me.ibrahimsn.library.LiveSharedPreferences
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -55,16 +55,13 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
 
     override val viewModel by viewModel<MainViewModel> { parametersOf(Bundle()) }
     private val prefs by inject<Prefs>()
-    private val livePrefs = LiveSharedPreferences(prefs.prefs)
 
     inner class Views : BaseActivityViews {
 
         override fun modifyViews() {
             this@MainActivity.navController?.let {
-                //                binding.bottomMenu.setupWithNavController(it)
                 NavigationUI.setupWithNavController(binding.bottomMenu, it)
             }
-//            setSupportActionBar(binding.toolbar)
 
 
             if (prefs.sessionCookie.isEmpty()) {
@@ -95,15 +92,17 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
                 binding.windowTitle.text = destination.label
             }
 
-            livePrefs.getInt(prefs.NEW_EMAIL_COUNT, 0).observe(this@MainActivity, Observer {
-                if (it > 0) {
-                    binding.bottomMenu.getOrCreateBadge(R.id.emailFragment).apply {
-                        badgeTextColor = Color.WHITE
-                        this.number = it
-                        backgroundColor = Color.RED
+            createLiveData<Int>(prefs.prefs, prefs.NEW_EMAIL_COUNT).observe(
+                this@MainActivity,
+                Observer {
+                    if (it > 0) {
+                        binding.bottomMenu.getOrCreateBadge(R.id.emailFragment).apply {
+                            badgeTextColor = Color.WHITE
+                            this.number = it
+                            backgroundColor = Color.RED
+                        }
                     }
-                }
-            })
+                })
         }
 
         override fun setNavigationGraph() = R.id.homeNavigationContainer

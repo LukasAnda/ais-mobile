@@ -50,6 +50,8 @@ class EmailRepository(
         prefs.sentDirectoryId = emailsInfo.saveDirectoryId
         prefs.newEmailCount = emailsInfo.newEmailCount
 
+        println(emailsInfo)
+
         if (updateType == UpdateType.Lazy) {
             if (prefs.emailExpiration.isAfterNow)
                 return
@@ -69,7 +71,7 @@ class EmailRepository(
                 )
             })
         }
-        prefs.emailExpiration = DateTime.now().plusMinutes(15)
+        prefs.emailExpiration = DateTime.now().plusMinutes(10)
     }
 
     suspend fun getEmailDetail(email: Email) {
