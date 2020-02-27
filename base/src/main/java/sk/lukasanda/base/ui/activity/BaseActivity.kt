@@ -24,6 +24,9 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.NavigationUI
+import androidx.navigation.ui.navigateUp
 import androidx.viewbinding.ViewBinding
 import sk.lukasanda.base.ui.trait.LifecycleTrait
 import sk.lukasanda.base.ui.viewmodel.BaseViewModel
@@ -36,14 +39,12 @@ abstract class BaseUIActivity<VIEWMODEL : BaseViewModel, BASE_VIEWS : BaseActivi
 
     private var actionBarDrawerToggle: ActionBarDrawerToggle? = null
     private var toolbar: Toolbar? = null
-    @Suppress("MemberVisibilityCanBePrivate")
     protected lateinit var binding: BINDING
-    @Suppress("MemberVisibilityCanBePrivate")
     protected var drawerLayout: DrawerLayout? = null
-    @Suppress("MemberVisibilityCanBePrivate")
     protected lateinit var activityLayoutCL: CoordinatorLayout
-    @Suppress("MemberVisibilityCanBePrivate")
     protected var navController: NavController? = null
+
+    private var appBarConfig: AppBarConfiguration? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,15 +56,40 @@ abstract class BaseUIActivity<VIEWMODEL : BaseViewModel, BASE_VIEWS : BaseActivi
 
         this.initializeParameters()
         this.initializeViews()
-        this.initializeToolbar()
-        this.initializeNavigationDrawer(this.binding.root)
+
+        this.toolbar = this.setToolbar()
+
+        this.drawerLayout = setDrawer()
+        drawerLayout?.let {
+            this.actionBarDrawerToggle = ActionBarDrawerToggle(this, it, this.toolbar, 0, 0)
+            it.addDrawerListener(this.actionBarDrawerToggle!!)
+        }
+
         setSupportActionBar(toolbar)
+
         supportActionBar?.apply {
             setDisplayShowTitleEnabled(false)
             setDisplayShowHomeEnabled(true)
             setHomeButtonEnabled(true)
             setDisplayHomeAsUpEnabled(true)
         }
+
+        appBarConfig = setAppBarConfig()
+
+        appBarConfig?.let {
+            navController?.let { it1 ->
+                NavigationUI.setupActionBarWithNavController(
+                    this,
+                    it1, it
+                )
+            }
+        }
+
+        this.views?.modifyViews()
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        return appBarConfig?.let { navController?.navigateUp(it) } ?: false || super.onSupportNavigateUp()
     }
 
     private fun initializeParameters() =
@@ -75,21 +101,16 @@ abstract class BaseUIActivity<VIEWMODEL : BaseViewModel, BASE_VIEWS : BaseActivi
         this.navController = this.views?.setNavigationGraph()?.let { navigationGraph ->
             Navigation.findNavController(this, navigationGraph)
         }
-        this.views?.modifyViews()
     }
 
     private fun initializeToolbar() {
         this.toolbar = this.setToolbar()
-        toolbar?.let { it ->
-            it.setNavigationOnClickListener { this@BaseUIActivity.onBackPressed() }
-            //this.toolbar.setNavigationIcon(R.drawable.ic_back)
-        }
     }
 
     private fun initializeNavigationDrawer(activityLayout: View) {
         this.drawerLayout = setDrawer()
         drawerLayout?.let {
-//            it.descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
+            //            it.descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
             this.actionBarDrawerToggle = ActionBarDrawerToggle(this, it, this.toolbar, 0, 0)
             it.addDrawerListener(this.actionBarDrawerToggle!!)
         }
@@ -117,6 +138,8 @@ abstract class BaseUIActivity<VIEWMODEL : BaseViewModel, BASE_VIEWS : BaseActivi
     protected open fun setDrawer(): DrawerLayout? = null
 
     protected open fun setToolbar(): Toolbar? = null
+
+    protected open fun setAppBarConfig(): AppBarConfiguration? = null
 
     abstract fun createViews(): BASE_VIEWS
 }

@@ -19,7 +19,8 @@ import android.os.Bundle
 import android.view.ViewOutlineProvider
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.lifecycle.Observer
-import androidx.navigation.ui.setupWithNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.NavigationUI
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
@@ -60,9 +61,11 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
 
         override fun modifyViews() {
             this@MainActivity.navController?.let {
-                binding.bottomMenu.setupWithNavController(it)
+                //                binding.bottomMenu.setupWithNavController(it)
+                NavigationUI.setupWithNavController(binding.bottomMenu, it)
             }
 //            setSupportActionBar(binding.toolbar)
+
 
             if (prefs.sessionCookie.isEmpty()) {
                 startActivity(Intent(this@MainActivity, LoginActivity::class.java))
@@ -113,6 +116,12 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
     override fun createViews(): Views = Views()
 
     override fun setBinding(): ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
+
+    override fun setAppBarConfig() = AppBarConfiguration.Builder(
+        R.id.scheduleFragment,
+        R.id.subjectsFragment,
+        R.id.emailFragment
+    ).setDrawerLayout(binding.drawer).build()
 
     override fun lowerToolbar() {
         binding.appbar.outlineProvider = null

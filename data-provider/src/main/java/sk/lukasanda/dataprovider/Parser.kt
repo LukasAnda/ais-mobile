@@ -379,7 +379,12 @@ object Parser {
             val form = items.findElementByAttValue("name", "wqqwqqwwqyw0", true, true)
             val table = form.findElementByName("tbody", true).findElementByName("tbody", true)
             val message = table.childTagList.last().findElementByName("small", true)
-                .allChildren.map { if (it is ContentNode) it.content else "\n" }.joinToString("")
+                .allChildren.map {
+                if (it is ContentNode) it.content else if (it is TagNode && it.hasAttribute(
+                        "href"
+                    )
+                ) it.content() else "\n"
+            }.joinToString("")
                 .replace("&nbsp;", " ")
             message
         } catch (e: Exception) {

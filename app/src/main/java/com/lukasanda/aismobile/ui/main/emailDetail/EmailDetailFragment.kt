@@ -70,4 +70,5 @@ class EmailDetailFragment :
     override lateinit var handler: EmailDetailHandler
 }
 
-interface EmailDetailHandler
+interface EmailDetailHandler {
+}

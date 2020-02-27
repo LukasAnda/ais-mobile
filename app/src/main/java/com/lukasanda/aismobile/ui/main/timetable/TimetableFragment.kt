@@ -63,7 +63,7 @@ class TimetableFragment :
             }
 
             binding.pager.apply {
-                offscreenPageLimit = 3
+                offscreenPageLimit = 1
                 adapter = weekAdapter
                 orientation = ViewPager2.ORIENTATION_HORIZONTAL
                 binding.pager.setCurrentItem(viewModel.getCurrentDay(), false)
