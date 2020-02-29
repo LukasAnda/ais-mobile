@@ -29,6 +29,8 @@ class Prefs(context: Context) {
     val SENT_DIRECTORY_ID = "sent_directory_id"
     val NEW_EMAIL_COUNT = "new_email_count"
     val EMAIL_CACHE_EXPIRATION = "email_cache_expiration"
+    val FULL_COURSE_CACHE_EXPIRATION = "full_course_cache_expiration"
+    val COURSE_CACHE_EXPIRATION = "course_cache_expiration"
 
     val prefs: SharedPreferences = context.getSharedPreferences(PREFS_FILENAME, 0)
 
@@ -57,6 +59,30 @@ class Prefs(context: Context) {
         )
         set(value) = prefs.edit().putString(
             EMAIL_CACHE_EXPIRATION,
+            value.toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
+        ).apply()
+
+    var courseExpiration: DateTime
+        get() = DateTime.parse(
+            prefs.getString(
+                COURSE_CACHE_EXPIRATION,
+                DateTime.now().minusDays(1).toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
+            ), DateTimeFormat.forPattern("dd.MM.yyyy hh:mm")
+        )
+        set(value) = prefs.edit().putString(
+            COURSE_CACHE_EXPIRATION,
+            value.toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
+        ).apply()
+
+    var fullCourseExpiration: DateTime
+        get() = DateTime.parse(
+            prefs.getString(
+                FULL_COURSE_CACHE_EXPIRATION,
+                DateTime.now().minusDays(1).toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
+            ), DateTimeFormat.forPattern("dd.MM.yyyy hh:mm")
+        )
+        set(value) = prefs.edit().putString(
+            FULL_COURSE_CACHE_EXPIRATION,
             value.toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
         ).apply()
 

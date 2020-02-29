@@ -27,6 +27,7 @@ import com.lukasanda.aismobile.data.repository.CourseRepository.UpdateType.NEWES
 import com.lukasanda.aismobile.util.authenticatedOrThrow
 import com.snakydesign.livedataextensions.map
 import kotlinx.coroutines.delay
+import org.joda.time.DateTime
 import sk.lukasanda.dataprovider.Parser
 import sk.lukasanda.dataprovider.data.Semester
 
@@ -64,15 +65,17 @@ class CourseRepository(
     val semestersLiveData = MutableLiveData(semesterName())
 
     fun get() =
-        courseDao.getCourses().map { it.groupBy { it.course?.semester } }.map { it.values.toList() }
+        courseDao.getCourses().map { it.groupBy { it.course.semester } }.map { it.values.toList() }
 
     fun get(courseId: String) = courseDao.getCourse(courseId)
 
     @Throws(AuthException::class, HTTPException::class)
     suspend fun update() {
 
+        if (prefs.courseExpiration.isBeforeNow) return
+
         val updateType =
-            if (semesters.size > 1) NEWEST else FETCH //If there is no semester fetch, if there is one semester only FETCH == NEWEST
+            if (prefs.fullCourseExpiration.isBeforeNow) NEWEST else FETCH //If there is no semester fetch, if there is one semester only FETCH == NEWEST
 
         val semestersResponse = aisApi.semesters().authenticatedOrThrow()
 
@@ -101,12 +104,7 @@ class CourseRepository(
                         ?: emptyList()
                 dbTeachers.addAll(teachers)
 
-//                println("TEACHERS-------------------")
-//                println(teachers)
-
                 val newSheets = parseSheets(course, semester)
-//                println("New sheeeeeeeeeets---------------------------")
-//                println(newSheets.joinToString("\n"))
 
                 dbSheets.addAll(newSheets)
 
@@ -116,10 +114,6 @@ class CourseRepository(
 
         when (updateType) {
             FETCH -> {
-//                semesters?.get(1)?.let {
-//                    updateSemester(it)
-//                }
-
                 semesters?.forEach {
                     updateSemester(it)
                 }
@@ -134,6 +128,9 @@ class CourseRepository(
                 courseDao.updateSingle(dbCourses, dbSheets, dbTeachers)
             }
         }
+
+        prefs.courseExpiration = DateTime.now().plusMinutes(15)
+        prefs.fullCourseExpiration = DateTime.now().plusWeeks(1)
     }
 
     fun setSemester(semester: Int) {
