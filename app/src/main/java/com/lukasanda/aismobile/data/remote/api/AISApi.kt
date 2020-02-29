@@ -112,13 +112,19 @@ interface AISApi {
         @Field("priloha", encoded = true) priloha5: String = "",
         @Field("priloha", encoded = true) priloha6: String = "",
         @Field("priloha", encoded = true) priloha7: String = "",
-//        @Field("zachovat_zpravu", encoded = true) keepMessage: String = "1",
-//        @Field("zachovat_adresy", encoded = true) keepRecipients: String = "1",
         @Field("ulozit_odesl_zpravu", encoded = true) saveSentMessage: String = "1",
         @Field("ulozit_do_sl", encoded = true) saveMessageTo: String,
         @Field("send", encoded = true) sendMessage: String = "ODOSLAŤ SPRÁVU",
         @Field("akce", encoded = true) action: String = "schranka",
         @Field("serializace", encoded = true) serialisation: String
+    ): Response<ResponseBody>
+
+    @GET("/auth/katalog/syllabus.pl")
+    suspend fun getCourseDetail(
+        @Query(
+            "predmet",
+            encoded = true
+        ) predmet: String
     ): Response<ResponseBody>
 
 }

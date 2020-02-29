@@ -18,6 +18,7 @@ import androidx.room.*
 import com.lukasanda.aismobile.data.db.entity.Course
 import com.lukasanda.aismobile.data.db.entity.FullCourse
 import com.lukasanda.aismobile.data.db.entity.Sheet
+import com.lukasanda.aismobile.data.db.entity.Teacher
 
 @Dao
 interface CourseDao {
@@ -27,11 +28,17 @@ interface CourseDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSheets(sheets: List<Sheet>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTeachers(teachers: List<Teacher>)
+
     @Query("DELETE FROM sheet")
     suspend fun deleteSheets()
 
     @Query("DELETE FROM course")
     suspend fun deleteCourses()
+
+    @Query("DELETE FROM teacher")
+    suspend fun deleteTeachers()
 
     @Query("SELECT * FROM COURSE WHERE id = :courseId")
     @Transaction
@@ -46,17 +53,20 @@ interface CourseDao {
     fun getSemesters(): LiveData<List<String>>
 
     @Transaction
-    suspend fun update(courses: List<Course>, sheets: List<Sheet>) {
+    suspend fun update(courses: List<Course>, sheets: List<Sheet>, teachers: List<Teacher>) {
         deleteSheets()
         deleteCourses()
+        deleteTeachers()
         insertCourses(courses)
         insertSheets(sheets)
+        insertTeachers(teachers)
     }
 
     @Transaction
-    suspend fun updateSingle(courses: List<Course>, sheets: List<Sheet>) {
+    suspend fun updateSingle(courses: List<Course>, sheets: List<Sheet>, teachers: List<Teacher>) {
         insertCourses(courses)
         insertSheets(sheets)
+        insertTeachers(teachers)
     }
 
 }

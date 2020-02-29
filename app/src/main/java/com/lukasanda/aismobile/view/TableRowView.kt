@@ -29,7 +29,11 @@ class TableRowView @JvmOverloads constructor(
         if (config.columnValue.matches("-?\\d+(\\.\\d+)?".toRegex())) {
             binding.columnValue.text = "${config.columnValue.toDouble()}b"
         } else {
-            binding.columnValue.text = config.columnValue
+            config.columnName.takeIf { it.isEmpty() }?.let {
+                binding.columnValue.text = "-"
+            } ?: run {
+                binding.columnValue.text = config.columnValue
+            }
         }
     }
 

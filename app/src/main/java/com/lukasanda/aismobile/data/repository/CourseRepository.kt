@@ -18,6 +18,7 @@ import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.db.dao.CourseDao
 import com.lukasanda.aismobile.data.db.entity.Course
 import com.lukasanda.aismobile.data.db.entity.Sheet
+import com.lukasanda.aismobile.data.db.entity.Teacher
 import com.lukasanda.aismobile.data.remote.AuthException
 import com.lukasanda.aismobile.data.remote.HTTPException
 import com.lukasanda.aismobile.data.remote.api.AISApi
@@ -81,6 +82,7 @@ class CourseRepository(
 
         val dbCourses = mutableListOf<Course>()
         val dbSheets = mutableListOf<Sheet>()
+        val dbTeachers = mutableListOf<Teacher>()
 
         suspend fun updateSemester(semester: Semester) {
             val courses = parseCourses(semester)
@@ -93,9 +95,18 @@ class CourseRepository(
 
             courses.forEach { course ->
 
+                val courseDetailResponse = aisApi.getCourseDetail(course.id).authenticatedOrThrow()
+                val teachers =
+                    Parser.getTeachers(courseDetailResponse)?.map { teachersToDb(course, it) }
+                        ?: emptyList()
+                dbTeachers.addAll(teachers)
+
+//                println("TEACHERS-------------------")
+//                println(teachers)
+
                 val newSheets = parseSheets(course, semester)
 //                println("New sheeeeeeeeeets---------------------------")
-//                println(newSheets)
+//                println(newSheets.joinToString("\n"))
 
                 dbSheets.addAll(newSheets)
 
@@ -105,21 +116,22 @@ class CourseRepository(
 
         when (updateType) {
             FETCH -> {
-//                semesters?.forEach {
+//                semesters?.get(1)?.let {
 //                    updateSemester(it)
 //                }
 
-                semesters?.get(3)?.let {
+                semesters?.forEach {
                     updateSemester(it)
                 }
+
                 println(dbSheets)
-                courseDao.update(dbCourses, dbSheets)
+                courseDao.update(dbCourses, dbSheets, dbTeachers)
             }
             NEWEST -> {
                 semesters?.last()?.let {
                     updateSemester(it)
                 }
-                courseDao.updateSingle(dbCourses, dbSheets)
+                courseDao.updateSingle(dbCourses, dbSheets, dbTeachers)
             }
         }
     }
@@ -154,6 +166,9 @@ class CourseRepository(
 
         return sheets.map { sheetToDb(it, course) }
     }
+
+    private fun teachersToDb(course: Course, teacher: sk.lukasanda.dataprovider.data.Teacher) =
+        Teacher(name = teacher.name, id = teacher.id, courseId = course.id)
 
     private fun courseToDb(
         course: sk.lukasanda.dataprovider.data.Course,

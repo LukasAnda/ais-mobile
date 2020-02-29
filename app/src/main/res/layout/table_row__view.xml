@@ -24,6 +24,7 @@
         android:layout_marginVertical="4dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="8dp"
+        android:includeFontPadding="false"
         android:layout_weight="1"
         android:fontFamily="@font/open_sans_bold"
         android:singleLine="true"

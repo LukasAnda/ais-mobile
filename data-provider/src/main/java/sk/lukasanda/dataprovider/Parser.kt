@@ -179,8 +179,8 @@ object Parser {
 
                     returnList.add(
                         Course(
-                            builder.toString(),
                             "",
+                            builder.toString(),
                             id,
                             name,
                             documentsId,
@@ -200,6 +200,7 @@ object Parser {
                         }
                         builder.append("#")
                     }
+                    returnList.last().coursePresence = returnList.last().seminarPresence
                     returnList.last().seminarPresence = builder.toString()
                 }
             }
@@ -227,10 +228,11 @@ object Parser {
             tables.forEach { table ->
                 val tableIndex = max(0, form.childTagList.indexOf(table))
 
-                val titleNode = if (tableIndex > 0) form.childTagList[tableIndex - 1] else null
-                var title = getTitle(titleNode)
-                if (title.isEmpty() || title.isBlank()) {
-                    title = getTitle(form.childTagList[tableIndex - 2])
+                var title = ""
+                var index = 1
+                while (title.isEmpty() && tableIndex - index > 0) {
+                    title = form.childTagList[tableIndex - index].getTitle()
+                    index++
                 }
 
                 val columnNames =
@@ -260,6 +262,29 @@ object Parser {
             returnList
         } catch (e: Exception) {
             e.printStackTrace()
+            returnList
+        }
+    }
+
+    fun getTeachers(webResponse: String): List<Teacher>? {
+        if (webResponse.isEmpty()) return null
+
+        val cleaner = HtmlCleaner()
+        val returnList = mutableListOf<Teacher>()
+
+        return try {
+            val items = cleaner.clean(webResponse)
+            val teachers = items.getElementListHavingAttribute("href", true)
+                .filter { it.getAttributeByName("href").contains("clovek.pl") }
+                .filter { it.parent.name == "small" }.map {
+                    val name = it.content()
+                    val id =
+                        it.getAttributeByName("href").substringAfter("id=").substringBefore(";")
+                    Teacher(name, id)
+                }
+
+            teachers
+        } catch (e: Exception) {
             returnList
         }
     }
@@ -479,10 +504,15 @@ object Parser {
         return null
     }
 
-    private fun getTitle(node: Any?): String {
-        if (node is ContentNode) return node.content
-        return node?.asTagNode {
-            getTitle(it.allChildren.first())
-        } ?: ""
+    private fun TagNode.getTitle(): String {
+        if (this.name == "b") {
+            return content()
+        }
+        getAllElementsList(true).forEach {
+            if (it.name == "b") {
+                return it.content()
+            }
+        }
+        return ""
     }
 }

@@ -63,8 +63,8 @@ class SyncCoroutineWorker(
             val wifiResponse = service.wifiInfo().authenticatedOrThrow()
             saveProfile(educationResponse, wifiResponse)
 
-            courseRepository.update()
-
+//            courseRepository.update()
+//
             emailRepository.update()
 
             Result.success()

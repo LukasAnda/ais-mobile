@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.lukasanda.aismobile.ui.main.subjectDetail
+package com.lukasanda.aismobile.ui.main.subjectDetail.adapters
 
 import android.view.ViewGroup
 import com.lukasanda.aismobile.data.db.entity.Sheet

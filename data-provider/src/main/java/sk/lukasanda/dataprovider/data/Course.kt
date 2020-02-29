@@ -14,7 +14,7 @@
 package sk.lukasanda.dataprovider.data
 
 data class Course(
-    val coursePresence: String = "", //Presence separated by "#
+    var coursePresence: String = "", //Presence separated by "#
     var seminarPresence: String = "", //Presence separated by "#
     val courseId: String = "",
     val courseName: String = "",
@@ -55,3 +55,5 @@ data class Sheet(
 
 data class Semester(var studiesId: String, val id: String, val name: String)
 data class Study(val id: String, val semesterCount: Int)
+
+data class Teacher(val name: String, val id: String)

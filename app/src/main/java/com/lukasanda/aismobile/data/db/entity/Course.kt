@@ -35,16 +35,21 @@ data class Course(
 
 class FullCourse {
     @Embedded
-    var course: Course? = null
+    var course: Course = Course()
 
     @Relation(parentColumn = "id", entityColumn = "courseId")
-    var sheets: List<Sheet>? = null
+    var sheets: List<Sheet> = emptyList()
 
     @Relation(parentColumn = "id", entityColumn = "courseId")
-    var timetable: List<TimetableItem>? = null
+    var timetable: List<TimetableItem> = emptyList()
+
+    @Relation(parentColumn = "id", entityColumn = "courseId")
+    var teachers: List<Teacher> = emptyList()
 
     override fun toString(): String {
-        return course?.courseName + "\n" + sheets?.joinToString("\n")
+        return course.courseName + "\n" + sheets.joinToString("\n") + "\n" + teachers.joinToString(
+            "\n"
+        )
     }
 }
 
@@ -67,7 +72,7 @@ data class Sheet(
         )
     }.filterNot { it.first.equals("Poznámka") || it.first.equals("Zlučka") }
 
-    fun comments() = comment.takeIf { it.isNotEmpty() } ?: kotlin.run {
+    fun comments() = comment.takeIf { it.isNotEmpty() } ?: run {
         val index = headers().indexOf("Poznámka")
         if (index > -1) {
             return@run values()[index]
@@ -76,6 +81,15 @@ data class Sheet(
     }
 
     override fun toString(): String {
-        return name + "\n" + getColumnPairs() + "\n" + comments()
+        return "Name: $name \n Values: ${getColumnPairs()}\nComment: ${comments()}\n\n"
     }
+}
+
+@Entity(tableName = "teacher", primaryKeys = ["id", "courseId"])
+data class Teacher(
+    val id: String,
+    val name: String,
+    val courseId: String
+) {
+    fun isLector() = name.contains("prednášajúci")
 }

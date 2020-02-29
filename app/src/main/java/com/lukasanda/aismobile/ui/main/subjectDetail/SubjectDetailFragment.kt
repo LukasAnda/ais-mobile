@@ -17,6 +17,8 @@ import android.os.Bundle
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
 import com.lukasanda.aismobile.databinding.SubjectDetailFragmentBinding
+import com.lukasanda.aismobile.ui.main.subjectDetail.adapters.SubjectTablesAdapter
+import com.lukasanda.aismobile.ui.main.subjectDetail.adapters.SubjectTeachersAdapter
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import sk.lukasanda.base.ui.activity.BaseViews
@@ -25,19 +27,25 @@ import sk.lukasanda.base.ui.recyclerview.bindLinear
 
 class SubjectDetailFragment :
     BaseFragment<SubjectDetailFragment.Views, SubjectDetailFragmentBinding, SubjectDetailViewModel, SubjectDetailHandler>() {
-    val adapter = SubjectTablesAdapter {
-
-    }
+    val sheetsAdapter = SubjectTablesAdapter {}
+    val teachersAdapter = SubjectTeachersAdapter {}
 
     inner class Views : BaseViews {
         override fun modifyViews() {
 
+            postponeEnterTransition()
+
             val args by navArgs<SubjectDetailFragmentArgs>()
 
-            binding.tablesRecycler.bindLinear(adapter)
+            binding.tablesRecycler.bindLinear(sheetsAdapter)
+            binding.teachersRecycler.bindLinear(teachersAdapter)
 
             viewModel.getCourse(args.courseId).observe(viewLifecycleOwner, Observer {
-                it.sheets?.let { it1 -> adapter.swapData(it1) }
+                sheetsAdapter.swapData(it.sheets)
+                teachersAdapter.swapData(it.teachers)
+                binding.infoView.setData(it)
+
+                startPostponedEnterTransition()
             })
         }
 
