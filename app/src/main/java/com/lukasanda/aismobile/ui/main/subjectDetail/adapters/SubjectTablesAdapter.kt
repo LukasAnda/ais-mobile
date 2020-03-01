@@ -42,7 +42,7 @@ class SubjectTableItemHolder(binding: SubjectTableItemBinding) :
         }
 
         binding.rowsContainer.removeAllViews()
-        item.getColumnPairs().forEach {
+        item.getColumnPairs().filterNot { it.second.isBlank() }.forEach {
             binding.rowsContainer.addView(TableRowView(binding.root.context).apply {
                 setData(TableRowView.Config(it.first, it.second))
             })

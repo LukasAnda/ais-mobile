@@ -49,6 +49,7 @@ class SubjectsFragment :
         override fun onPageSelected(position: Int) {
             super.onPageSelected(position)
             updateToolbar(position)
+            viewModel.setPage(position)
         }
     }
 
@@ -75,28 +76,25 @@ class SubjectsFragment :
                 (getChildAt(0) as? RecyclerView)?.overScrollMode = RecyclerView.OVER_SCROLL_NEVER
             }
             handler.lowerToolbar()
+
+            viewModel.courses().observe(viewLifecycleOwner, Observer {
+                if (it == null) return@Observer
+                startPostponedEnterTransition()
+                if (it.isEmpty()) {
+                    binding.toolbar.hide()
+                } else {
+                    semesterAdapter.swapData(it)
+                    viewModel.semesters.replaceWith(it.map { it.first().course.semester })
+
+
+                    binding.toolbar.show()
+                    binding.progress.hide()
+                    binding.pager.setCurrentItem(viewModel.getPage(), false)
+                    updateToolbar(viewModel.getPage())
+                    binding.pager.registerOnPageChangeCallback(pageChangeCallback)
+                }
+            })
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        viewModel.courses().observe(this@SubjectsFragment, Observer {
-            if (it == null) return@Observer
-            startPostponedEnterTransition()
-            if (it.isEmpty()) {
-                binding.toolbar.hide()
-            } else {
-                semesterAdapter.swapData(it)
-                viewModel.semesters.replaceWith(it.map { it.first().course.semester })
-
-
-                binding.toolbar.show()
-                binding.progress.hide()
-                binding.pager.setCurrentItem(it.size - 1, false)
-                updateToolbar(it.size - 1)
-                binding.pager.registerOnPageChangeCallback(pageChangeCallback)
-            }
-        })
     }
 
     private fun updateToolbar(position: Int) {

@@ -38,7 +38,7 @@ class CourseViewHolder(binding: CourseItemBinding) :
                 getTextDrawable(
                     item.course.courseName.split(" ").first().substringBefore(
                         "_"
-                    ), item.course.courseName, 40
+                    ), item.course.courseName, 30
                 )
             )
             root.setOnClickListener {

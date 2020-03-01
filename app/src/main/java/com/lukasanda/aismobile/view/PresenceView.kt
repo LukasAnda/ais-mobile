@@ -15,11 +15,12 @@ package com.lukasanda.aismobile.view
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+import androidx.core.content.ContextCompat
+import com.lukasanda.aismobile.R
 import sk.lukasanda.base.ui.recyclerview.replaceWith
 
 class PresenceView @JvmOverloads constructor(
@@ -28,14 +29,14 @@ class PresenceView @JvmOverloads constructor(
 
     private val presence = mutableListOf<PresenceType>()
     private val presencePaints = mutableListOf(
-        createCirclePaint(Color.GREEN),
-        createCirclePaint(Color.RED),
-        createCirclePaint(Color.GRAY),
-        createCirclePaint(Color.MAGENTA),
-        createCirclePaint(Color.BLUE),
-        createCirclePaint(Color.BLACK),
-        createCirclePaint(Color.YELLOW),
-        createCirclePaint(Color.CYAN)
+        createCirclePaint(ContextCompat.getColor(context, R.color.color_presence)),
+        createCirclePaint(ContextCompat.getColor(context, R.color.color_absence)),
+        createCirclePaint(ContextCompat.getColor(context, R.color.color_unknown)),
+        createCirclePaint(ContextCompat.getColor(context, R.color.color_excused)),
+        createCirclePaint(ContextCompat.getColor(context, R.color.color_late)),
+        createCirclePaint(ContextCompat.getColor(context, R.color.color_disqualified)),
+        createCirclePaint(ContextCompat.getColor(context, R.color.color_different)),
+        createCirclePaint(ContextCompat.getColor(context, R.color.color_early))
     )
 
     fun setPresence(items: List<PresenceType>) = presence.replaceWith(items).apply {
@@ -74,14 +75,14 @@ fun createCirclePaint(color: Int) = Paint().apply {
 fun String.toPresenceType() = when (this) {
     "doch-pritomen" -> PresenceType.Presence
     "doch-neomluven" -> PresenceType.Absence
-    "doch-omluven" -> PresenceType.ExcusedAbsence
-    "doch-pozde" -> PresenceType.LateComingAttendance
+    "doch-omluven" -> PresenceType.Excused
+    "doch-pozde" -> PresenceType.Late
     "doch-vyloucen" -> PresenceType.Disqualified
-    "bullet-j" -> PresenceType.PresentAtDifferent
-    "bullet-d" -> PresenceType.EarlyLeave
+    "bullet-j" -> PresenceType.Different
+    "bullet-d" -> PresenceType.Early
     else -> PresenceType.Unknown
 }
 
 enum class PresenceType {
-    Presence, Absence, Unknown, ExcusedAbsence, LateComingAttendance, Disqualified, PresentAtDifferent, EarlyLeave
+    Presence, Absence, Unknown, Excused, Late, Disqualified, Different, Early
 }

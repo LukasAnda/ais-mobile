@@ -19,6 +19,8 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.customview.customView
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.databinding.SubjectDetailFragmentBinding
 import com.lukasanda.aismobile.ui.main.subjectDetail.adapters.SubjectTablesAdapter
@@ -64,7 +66,10 @@ class SubjectDetailFragment :
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.info -> {
-
+                MaterialDialog(requireContext()).show {
+                    title(text = "Legend")
+                    customView(R.layout.presence_info__view)
+                }
             }
         }
         return super.onOptionsItemSelected(item)
