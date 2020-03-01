@@ -14,8 +14,8 @@
 package com.lukasanda.aismobile.ui.main.subjects
 
 import android.os.Bundle
-import android.util.Log
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.lukasanda.aismobile.databinding.FragmentSubjectsBinding
 import com.lukasanda.aismobile.ui.main.subjects.courses.SemesterAdapter
@@ -48,8 +48,7 @@ class SubjectsFragment :
     private val pageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
         override fun onPageSelected(position: Int) {
             super.onPageSelected(position)
-            Log.d("TAG", "Page change callback called")
-            binding.semester.text = viewModel.getSemesterName(position)
+            updateToolbar(position)
         }
     }
 
@@ -73,6 +72,7 @@ class SubjectsFragment :
                 offscreenPageLimit = 1
                 adapter = semesterAdapter
                 orientation = ViewPager2.ORIENTATION_HORIZONTAL
+                (getChildAt(0) as? RecyclerView)?.overScrollMode = RecyclerView.OVER_SCROLL_NEVER
             }
             handler.lowerToolbar()
         }
@@ -86,15 +86,32 @@ class SubjectsFragment :
             if (it.isEmpty()) {
                 binding.toolbar.hide()
             } else {
-                binding.toolbar.show()
-                binding.progress.hide()
                 semesterAdapter.swapData(it)
                 viewModel.semesters.replaceWith(it.map { it.first().course.semester })
+
+
+                binding.toolbar.show()
+                binding.progress.hide()
                 binding.pager.setCurrentItem(it.size - 1, false)
-                binding.semester.text = viewModel.getSemesterName(it.size - 1)
+                updateToolbar(it.size - 1)
                 binding.pager.registerOnPageChangeCallback(pageChangeCallback)
             }
         })
+    }
+
+    private fun updateToolbar(position: Int) {
+        binding.semester.text = viewModel.getSemesterName(position)
+
+        if (position == 0) {
+            binding.buttonBack.hide()
+        } else {
+            binding.buttonBack.show()
+        }
+        if (position == kotlin.math.max(semesterAdapter.itemCount - 1, 0)) {
+            binding.buttonForward.hide()
+        } else {
+            binding.buttonForward.show()
+        }
     }
 }
 

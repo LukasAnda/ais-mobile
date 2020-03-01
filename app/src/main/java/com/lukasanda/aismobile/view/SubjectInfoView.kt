@@ -14,14 +14,12 @@
 package com.lukasanda.aismobile.view
 
 import android.content.Context
-import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.LinearLayout
-import com.amulyakhare.textdrawable.TextDrawable
-import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.lukasanda.aismobile.data.db.entity.FullCourse
 import com.lukasanda.aismobile.databinding.SubjectInfoViewBinding
+import com.lukasanda.aismobile.util.getTextDrawable
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
 
@@ -33,15 +31,13 @@ class SubjectInfoView @JvmOverloads constructor(
     fun setData(course: FullCourse) {
         binding.apply {
             courseName.text = course.course.courseName.split(" ").drop(1).joinToString(" ")
-            val drawable =
-                TextDrawable.builder().beginConfig().textColor(Color.WHITE).fontSize(60).bold()
-                    .toUpperCase()
-                    .endConfig()
-                    .buildRound(
-                        course.course.courseName.split(" ").first().substringBefore("_"),
-                        ColorGenerator.MATERIAL.getColor(course.course.courseName)
-                    )
-            icon.setImageDrawable(drawable)
+            icon.setImageDrawable(
+                getTextDrawable(
+                    course.course.courseName.split(" ").first().substringBefore(
+                        "_"
+                    ), course.course.courseName, 60
+                )
+            )
 
             courseTeacher.text =
                 course.teachers.last().name

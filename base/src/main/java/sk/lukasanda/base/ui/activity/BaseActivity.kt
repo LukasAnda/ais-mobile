@@ -16,7 +16,6 @@ package sk.lukasanda.base.ui.activity
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.MenuItem
-import android.view.View
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -60,18 +59,14 @@ abstract class BaseUIActivity<VIEWMODEL : BaseViewModel, BASE_VIEWS : BaseActivi
         this.toolbar = this.setToolbar()
 
         this.drawerLayout = setDrawer()
-        drawerLayout?.let {
-            this.actionBarDrawerToggle = ActionBarDrawerToggle(this, it, this.toolbar, 0, 0)
-            it.addDrawerListener(this.actionBarDrawerToggle!!)
-        }
 
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
             setDisplayShowTitleEnabled(false)
             setDisplayShowHomeEnabled(true)
-            setHomeButtonEnabled(true)
-            setDisplayHomeAsUpEnabled(true)
+//            setHomeButtonEnabled(true)
+//            setDisplayHomeAsUpEnabled(true)
         }
 
         appBarConfig = setAppBarConfig()
@@ -107,14 +102,14 @@ abstract class BaseUIActivity<VIEWMODEL : BaseViewModel, BASE_VIEWS : BaseActivi
         this.toolbar = this.setToolbar()
     }
 
-    private fun initializeNavigationDrawer(activityLayout: View) {
-        this.drawerLayout = setDrawer()
-        drawerLayout?.let {
-            //            it.descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
-            this.actionBarDrawerToggle = ActionBarDrawerToggle(this, it, this.toolbar, 0, 0)
-            it.addDrawerListener(this.actionBarDrawerToggle!!)
-        }
-    }
+//    private fun initializeNavigationDrawer() {
+//        this.drawerLayout = setDrawer()
+//        drawerLayout?.let {
+//            //            it.descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
+//            this.actionBarDrawerToggle = ActionBarDrawerToggle(this, it, this.toolbar, 0, 0)
+//            it.addDrawerListener(this.actionBarDrawerToggle!!)
+//        }
+//    }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)

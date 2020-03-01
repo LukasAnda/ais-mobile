@@ -13,10 +13,10 @@
 
 package com.lukasanda.aismobile.ui.main.subjects.courses
 
-import android.util.Log
 import android.view.ViewGroup
 import com.lukasanda.aismobile.data.db.entity.FullCourse
 import com.lukasanda.aismobile.databinding.CourseItemBinding
+import com.lukasanda.aismobile.util.getTextDrawable
 import sk.lukasanda.base.ui.recyclerview.BaseAdapter
 import sk.lukasanda.base.ui.recyclerview.BindingViewHolder
 import sk.lukasanda.base.ui.recyclerview.create
@@ -32,9 +32,16 @@ class CourseViewHolder(binding: CourseItemBinding) :
 
     override fun bind(item: FullCourse, onClick: (FullCourse) -> Unit) {
         with(binding) {
-            name.text = item.course.courseName
+            name.text = item.course.courseName.split(" ").drop(1).joinToString(" ")
+            teacher.text = item.teachers.lastOrNull()?.name ?: "-"
+            icon.setImageDrawable(
+                getTextDrawable(
+                    item.course.courseName.split(" ").first().substringBefore(
+                        "_"
+                    ), item.course.courseName, 40
+                )
+            )
             root.setOnClickListener {
-                Log.d("TAG", "On Click invoked")
                 onClick.invoke(item)
             }
         }

@@ -14,8 +14,12 @@
 package com.lukasanda.aismobile.ui.main.subjectDetail
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
+import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.databinding.SubjectDetailFragmentBinding
 import com.lukasanda.aismobile.ui.main.subjectDetail.adapters.SubjectTablesAdapter
 import com.lukasanda.aismobile.ui.main.subjectDetail.adapters.SubjectTeachersAdapter
@@ -32,6 +36,7 @@ class SubjectDetailFragment :
 
     inner class Views : BaseViews {
         override fun modifyViews() {
+            setHasOptionsMenu(true)
 
             postponeEnterTransition()
 
@@ -49,6 +54,20 @@ class SubjectDetailFragment :
             })
         }
 
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.subject_detail__menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.info -> {
+
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override val viewModel: SubjectDetailViewModel by viewModel { parametersOf(Bundle()) }
