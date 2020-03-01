@@ -63,7 +63,7 @@
     <fragment
         android:id="@+id/subjectDetailFragment"
         android:name="com.lukasanda.aismobile.ui.main.subjectDetail.SubjectDetailFragment"
-        android:label="&#160;">
+        android:label="Detail predmetu">
         <argument
             android:name="courseId"
             app:argType="string" />
