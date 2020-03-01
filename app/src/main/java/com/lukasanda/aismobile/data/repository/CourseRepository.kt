@@ -13,7 +13,6 @@
 
 package com.lukasanda.aismobile.data.repository
 
-import androidx.lifecycle.MutableLiveData
 import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.db.dao.CourseDao
 import com.lukasanda.aismobile.data.db.entity.Course
@@ -36,33 +35,6 @@ class CourseRepository(
     private val courseDao: CourseDao,
     private val prefs: Prefs
 ) {
-
-    init {
-//        courseDao.getSemesters().observeForever {
-//            semesters.replaceWith(it)
-//        }
-    }
-
-
-    private var semesters = mutableListOf<String>()
-
-    var actualSemester = semesters.size - 1
-
-    fun semesterName() = try {
-        semesters[actualSemester]
-    } catch (e: Exception) {
-        ""
-    }
-
-    fun getCurrentSemester(): Int {
-        var pageToSelect = Int.MAX_VALUE / 2
-        while (pageToSelect % semesters.size != actualSemester) {
-            pageToSelect++
-        }
-        return pageToSelect
-    }
-
-    val semestersLiveData = MutableLiveData(semesterName())
 
     fun get() =
         courseDao.getCourses().map { it.groupBy { it.course.semester } }.map { it.values.toList() }
@@ -89,9 +61,6 @@ class CourseRepository(
 
         suspend fun updateSemester(semester: Semester) {
             val courses = parseCourses(semester)
-
-            println("Courses__________________________________")
-            println(courses.joinToString("\n"))
 
             dbCourses.addAll(courses)
             delay(1000)
@@ -131,15 +100,6 @@ class CourseRepository(
 
         prefs.courseExpiration = DateTime.now().plusMinutes(15)
         prefs.fullCourseExpiration = DateTime.now().plusWeeks(1)
-    }
-
-    fun setSemester(semester: Int) {
-        actualSemester = try {
-            semester % semesters.size
-        } catch (e: ArithmeticException) {
-            0
-        }
-        semestersLiveData.postValue(semesterName())
     }
 
 

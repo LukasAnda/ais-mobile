@@ -32,7 +32,7 @@ class CourseViewHolder(binding: CourseItemBinding) :
 
     override fun bind(item: FullCourse, onClick: (FullCourse) -> Unit) {
         with(binding) {
-            name.text = item.course?.courseName
+            name.text = item.course.courseName
             root.setOnClickListener {
                 Log.d("TAG", "On Click invoked")
                 onClick.invoke(item)

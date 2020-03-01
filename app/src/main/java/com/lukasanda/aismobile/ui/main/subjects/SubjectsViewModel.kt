@@ -22,9 +22,9 @@ class SubjectsViewModel(
     private val handle: SavedStateHandle
 ) : BaseViewModel(handle) {
     fun courses() = courseRepository.get()
-    fun semesters() = courseRepository.semestersLiveData
-    fun setSemester(semester: Int) = courseRepository.setSemester(semester)
-    fun getCurrentSemester() = courseRepository.actualSemester
-    fun getActualSemester() = courseRepository.actualSemester
-    fun getCurrentSemesterName() = courseRepository.semesterName()
+
+    val semesters = mutableListOf<String>()
+
+    fun getSemesterName(position: Int) =
+        if (semesters.isNotEmpty()) semesters[position % semesters.size] else ""
 }

@@ -43,6 +43,7 @@ class EmailFragment :
 
     inner class Views : BaseViews {
         override fun modifyViews() {
+            postponeEnterTransition()
             binding.recycler.bindLinear(adapter)
 
             binding.pullToRefresh.setOnRefreshListener {
@@ -59,6 +60,7 @@ class EmailFragment :
                     )
                 })
                 handler.riseToolbar()
+                startPostponedEnterTransition()
             })
             binding.compose.setOnClickListener {
                 handler.composeEmail()

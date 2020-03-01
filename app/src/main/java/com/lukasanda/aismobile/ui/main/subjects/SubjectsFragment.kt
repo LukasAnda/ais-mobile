@@ -20,11 +20,14 @@ import androidx.viewpager2.widget.ViewPager2
 import com.lukasanda.aismobile.databinding.FragmentSubjectsBinding
 import com.lukasanda.aismobile.ui.main.subjects.courses.SemesterAdapter
 import com.lukasanda.aismobile.util.dec
+import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.inc
+import com.lukasanda.aismobile.util.show
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import sk.lukasanda.base.ui.activity.BaseViews
 import sk.lukasanda.base.ui.fragment.BaseFragment
+import sk.lukasanda.base.ui.recyclerview.replaceWith
 
 class SubjectsFragment :
     BaseFragment<SubjectsFragment.Views, FragmentSubjectsBinding, SubjectsViewModel, SubjectsFragmentHandler>() {
@@ -38,15 +41,15 @@ class SubjectsFragment :
 
     private val semesterAdapter by lazy {
         SemesterAdapter {
-            Log.d("TAG", "On click is here")
-            handler.showDetailFromSubjects(it.course?.id ?: "")
+            handler.showDetailFromSubjects(it.course.id)
         }
     }
 
     private val pageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
         override fun onPageSelected(position: Int) {
             super.onPageSelected(position)
-            viewModel.setSemester(position)
+            Log.d("TAG", "Page change callback called")
+            binding.semester.text = viewModel.getSemesterName(position)
         }
     }
 
@@ -57,6 +60,7 @@ class SubjectsFragment :
 
     inner class Views : BaseViews {
         override fun modifyViews() {
+            postponeEnterTransition()
             binding.buttonBack.setOnClickListener {
                 binding.pager.dec()
             }
@@ -66,27 +70,31 @@ class SubjectsFragment :
             }
 
             binding.pager.apply {
-                offscreenPageLimit = 3
+                offscreenPageLimit = 1
                 adapter = semesterAdapter
                 orientation = ViewPager2.ORIENTATION_HORIZONTAL
-                binding.pager.setCurrentItem(viewModel.getCurrentSemester(), false)
-
-                binding.pager.registerOnPageChangeCallback(pageChangeCallback)
             }
+            handler.lowerToolbar()
+        }
+    }
 
-            viewModel.courses().observe(this@SubjectsFragment, Observer {
+    override fun onStart() {
+        super.onStart()
+        viewModel.courses().observe(this@SubjectsFragment, Observer {
+            if (it == null) return@Observer
+            startPostponedEnterTransition()
+            if (it.isEmpty()) {
+                binding.toolbar.hide()
+            } else {
+                binding.toolbar.show()
                 binding.progress.hide()
                 semesterAdapter.swapData(it)
-                handler.lowerToolbar()
-            })
-
-            viewModel.semesters().observe(this@SubjectsFragment, Observer {
-                binding.semester.text = it
-            })
-
-            viewModel.setSemester(viewModel.getActualSemester())
-        }
-
+                viewModel.semesters.replaceWith(it.map { it.first().course.semester })
+                binding.pager.setCurrentItem(it.size - 1, false)
+                binding.semester.text = viewModel.getSemesterName(it.size - 1)
+                binding.pager.registerOnPageChangeCallback(pageChangeCallback)
+            }
+        })
     }
 }
 
