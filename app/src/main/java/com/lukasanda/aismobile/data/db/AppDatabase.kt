@@ -25,7 +25,7 @@ import com.lukasanda.aismobile.data.db.dao.TimetableDao
 import com.lukasanda.aismobile.data.db.entity.*
 
 @Database(
-    entities = [TimetableItem::class, Profile::class, Course::class, Sheet::class, Email::class],
+    entities = [TimetableItem::class, Profile::class, Course::class, Sheet::class, Email::class, Teacher::class],
     version = DB_VERSION,
     exportSchema = false
 )

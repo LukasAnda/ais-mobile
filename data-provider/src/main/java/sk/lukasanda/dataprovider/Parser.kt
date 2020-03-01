@@ -18,6 +18,7 @@ import org.htmlcleaner.ContentNode
 import org.htmlcleaner.HtmlCleaner
 import org.htmlcleaner.TagNode
 import sk.lukasanda.dataprovider.data.*
+import kotlin.math.max
 
 object Parser {
 
@@ -178,8 +179,8 @@ object Parser {
 
                     returnList.add(
                         Course(
-                            builder.toString(),
                             "",
+                            builder.toString(),
                             id,
                             name,
                             documentsId,
@@ -199,6 +200,7 @@ object Parser {
                         }
                         builder.append("#")
                     }
+                    returnList.last().coursePresence = returnList.last().seminarPresence
                     returnList.last().seminarPresence = builder.toString()
                 }
             }
@@ -217,57 +219,87 @@ object Parser {
         return try {
             val items = cleaner.clean(webResponse)
 
-            val form = items.evaluateXPath("/body/div[2]/div/div/form")
+            val form = items.findElementByName("form", true)
 
-            for (i in 2..Int.MAX_VALUE) {
-                val table = items.evaluateXPath("/body/div[2]/div/div/form/table[$i]")
-                if (table.isEmpty()) break
+            val tables = form.getElementsByName("table", true)
+                .filter { !it.hasAttribute("id") || !it.getAttributeByName("id").contains("table") }
+                .filter { it.childTagList.size == 2 }
 
-                val tableIndex = form.asTagNode {
-                    it.allChildren.indexOf(table.first())
-                } ?: 0
+            tables.forEach { table ->
+                val tableIndex = max(0, form.childTagList.indexOf(table))
 
-                val titleNode = form.asTagNode {
-                    if (tableIndex > 0) it.allChildren[tableIndex - 1] else null
+                var title = ""
+                var index = 1
+                while (title.isEmpty() && tableIndex - index > 0) {
+                    title = form.childTagList[tableIndex - index].getTitle()
+                    index++
                 }
 
-                val title = getTitle(titleNode)
+                val columnNames =
+                    table.findElementByName("thead", true).findElementByName("tr", true)
+                        .childTagList.map { it.getString() }.joinToString("#")
 
 
-                val tr = items.evaluateXPath("/body/div[2]/div/div/form/table[$i]/thead/tr")
-                val size = tr.asTagNode { it.allChildren.size } ?: 0
+                val columnValues =
+                    table.findElementByName("tbody", true).findElementByName("tr", true)
+                        .childTagList.map { it.getString() }.joinToString("#")
 
-                val headers = StringBuilder()
-                val values = StringBuilder()
-                for (j in 1..size) {
-                    items.evaluateXPath("/body/div[2]/div/div/form/table[$i]/thead/tr/th[$j]/*")
-                        .asTagNode {
-                            headers.append((it.allChildren.first() as ContentNode).content)
-                        }
-
-                    items.evaluateXPath("/body/div[2]/div/div/form/table[$i]/tbody/tr/td[$j]/*")
-                        .asTagNode {
-                            values.append((it.allChildren.first() as ContentNode).content)
-                        }
-
-                    items.evaluateXPath("/body/div[2]/div/div/form/table[$i]/tbody/tr/td[$j]/*/*")
-                        .asTagNode {
-                            values.append((it.allChildren.first() as ContentNode).content)
-                        }
-
-
-                    headers.append("#")
-                    values.append("#")
+                //Mame tu komentar
+                val comment = if (table.findElementByName("tbody", true).childTagList.size > 1) {
+                    table.findElementByName("tbody", true).getElementListByName("tr", true).last()
+                        .childTagList.last().let {
+                        it.parseMessage()
+                    }
+                } else {
+                    ""
                 }
 
-                headers.deleteCharAt(headers.length - 1)
-                values.deleteCharAt(values.length - 1)
+                returnList.add(Sheet(title, comment, columnNames, columnValues))
 
-                returnList.add(Sheet(title, headers.toString(), values.toString()))
             }
+
+
             returnList
         } catch (e: Exception) {
+            e.printStackTrace()
             returnList
+        }
+    }
+
+    fun getTeachers(webResponse: String): List<Teacher>? {
+        if (webResponse.isEmpty()) return null
+
+        val cleaner = HtmlCleaner()
+        val returnList = mutableListOf<Teacher>()
+
+        return try {
+            val items = cleaner.clean(webResponse)
+            val teachers = items.getElementListHavingAttribute("href", true)
+                .filter { it.getAttributeByName("href").contains("clovek.pl") }
+                .filter { it.parent.name == "small" }.map {
+                    val name = it.content()
+                    val id =
+                        it.getAttributeByName("href").substringAfter("id=").substringBefore(";")
+                    Teacher(name, id)
+                }
+
+            teachers
+        } catch (e: Exception) {
+            returnList
+        }
+    }
+
+    fun TagNode.parseMessage(): String {
+        return if (this.allChildren.filter { it is ContentNode }.isNotEmpty()) {
+            this.allChildren.map {
+                if (it is ContentNode) it.content else if (it is TagNode && it.hasAttribute(
+                        "href"
+                    )
+                ) it.content() else "\n"
+            }.joinToString("")
+                .replace("&nbsp;", " ")
+        } else {
+            childTagList.firstOrNull()?.parseMessage() ?: ""
         }
     }
 
@@ -455,6 +487,12 @@ object Parser {
         return null
     }
 
+    private fun TagNode.getString(): String {
+        return (allChildren.firstOrNull() as? ContentNode)?.content ?: kotlin.run {
+            childTagList.firstOrNull()?.getString() ?: ""
+        }
+    }
+
     private fun <T> Any.asTagNode(function: (TagNode) -> T): T? {
         if (this is TagNode) {
             return try {
@@ -466,10 +504,15 @@ object Parser {
         return null
     }
 
-    private fun getTitle(node: Any?): String {
-        if (node is ContentNode) return node.content
-        return node?.asTagNode {
-            getTitle(it.allChildren.first())
-        } ?: ""
+    private fun TagNode.getTitle(): String {
+        if (this.name == "b") {
+            return content()
+        }
+        getAllElementsList(true).forEach {
+            if (it.name == "b") {
+                return it.content()
+            }
+        }
+        return ""
     }
 }

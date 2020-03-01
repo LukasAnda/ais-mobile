@@ -24,7 +24,8 @@ import sk.lukasanda.base.ui.recyclerview.BaseAdapter
 import sk.lukasanda.base.ui.recyclerview.BaseBindingViewHolder
 import sk.lukasanda.base.ui.recyclerview.create
 
-class WeekAdapter : BaseAdapter<List<TimetableItem>, TimetableItem, WeekItemHolder>() {
+class WeekAdapter(private val listener: (TimetableItem) -> Unit) :
+    BaseAdapter<List<TimetableItem>, TimetableItem, WeekItemHolder>(listener) {
     private val pool = RecyclerView.RecycledViewPool()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         parent.create(::WeekItemHolder, WeekItemBinding::inflate).apply {
@@ -35,15 +36,15 @@ class WeekAdapter : BaseAdapter<List<TimetableItem>, TimetableItem, WeekItemHold
 
     override fun onBindViewHolder(holder: WeekItemHolder, position: Int) {
         if (items.isNotEmpty()) {
-            holder.bind(items[position % items.size])
+            holder.bind(items[position % items.size], listener)
         }
     }
 }
 
 class WeekItemHolder(binding: WeekItemBinding) :
     BaseBindingViewHolder<List<TimetableItem>, TimetableItem, WeekItemBinding>(binding) {
-    override fun bind(item: List<TimetableItem>, onClick: ((TimetableItem) -> Unit)?) {
-        val adapter = TimetableAdapter()
+    override fun bind(item: List<TimetableItem>, onClick: (TimetableItem) -> Unit) {
+        val adapter = TimetableAdapter(onClick)
         binding.recycler.apply {
             layoutManager = LinearLayoutManager(context)
             this.adapter = adapter

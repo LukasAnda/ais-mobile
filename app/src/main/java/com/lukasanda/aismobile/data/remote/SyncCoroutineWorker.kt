@@ -64,7 +64,7 @@ class SyncCoroutineWorker(
             saveProfile(educationResponse, wifiResponse)
 
 //            courseRepository.update()
-
+//
             emailRepository.update()
 
             Result.success()

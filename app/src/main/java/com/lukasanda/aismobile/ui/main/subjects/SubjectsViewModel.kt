@@ -16,15 +16,26 @@ package com.lukasanda.aismobile.ui.main.subjects
 import androidx.lifecycle.SavedStateHandle
 import com.lukasanda.aismobile.data.repository.CourseRepository
 import sk.lukasanda.base.ui.viewmodel.BaseViewModel
+import kotlin.math.max
 
 class SubjectsViewModel(
     private val courseRepository: CourseRepository,
     private val handle: SavedStateHandle
 ) : BaseViewModel(handle) {
     fun courses() = courseRepository.get()
-    fun semesters() = courseRepository.semestersLiveData
-    fun setSemester(semester: Int) = courseRepository.setSemester(semester)
-    fun getCurrentSemester() = courseRepository.actualSemester
-    fun getActualSemester() = courseRepository.actualSemester
-    fun getCurrentSemesterName() = courseRepository.semesterName()
+
+    val semesters = mutableListOf<String>()
+
+    fun getSemesterName(position: Int) =
+        if (semesters.isNotEmpty()) semesters[position % semesters.size] else ""
+
+    fun setPage(position: Int) {
+        handle.set(PAGE, position)
+    }
+
+    fun getPage(): Int = handle.get<Int>(PAGE) ?: max(0, semesters.size - 1)
+
+    companion object {
+        const val PAGE = "page"
+    }
 }

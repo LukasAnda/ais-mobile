@@ -45,4 +45,6 @@
     <string name="notification_subtitle">Prebieha aktualizácia</string>
     <string name="no_subjects">Žiadne predmety pre zvolený semester</string>
     <string name="action__send">Send</string>
+    <string name="course_presence">Course presence:</string>
+    <string name="seminar_presence">Seminar presence:</string>
 </resources>

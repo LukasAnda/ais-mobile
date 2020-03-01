@@ -25,6 +25,7 @@
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
+            android:visibility="visible"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:contentInsetEnd="16dp"

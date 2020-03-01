@@ -15,15 +15,19 @@ package com.lukasanda.aismobile.ui.main.subjects
 
 import android.os.Bundle
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.lukasanda.aismobile.databinding.FragmentSubjectsBinding
 import com.lukasanda.aismobile.ui.main.subjects.courses.SemesterAdapter
 import com.lukasanda.aismobile.util.dec
+import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.inc
+import com.lukasanda.aismobile.util.show
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import sk.lukasanda.base.ui.activity.BaseViews
 import sk.lukasanda.base.ui.fragment.BaseFragment
+import sk.lukasanda.base.ui.recyclerview.replaceWith
 
 class SubjectsFragment :
     BaseFragment<SubjectsFragment.Views, FragmentSubjectsBinding, SubjectsViewModel, SubjectsFragmentHandler>() {
@@ -36,13 +40,16 @@ class SubjectsFragment :
     override lateinit var handler: SubjectsFragmentHandler
 
     private val semesterAdapter by lazy {
-        SemesterAdapter()
+        SemesterAdapter {
+            handler.showDetailFromSubjects(it.course.id)
+        }
     }
 
     private val pageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
         override fun onPageSelected(position: Int) {
             super.onPageSelected(position)
-            viewModel.setSemester(position)
+            updateToolbar(position)
+            viewModel.setPage(position)
         }
     }
 
@@ -53,6 +60,7 @@ class SubjectsFragment :
 
     inner class Views : BaseViews {
         override fun modifyViews() {
+            postponeEnterTransition()
             binding.buttonBack.setOnClickListener {
                 binding.pager.dec()
             }
@@ -62,30 +70,50 @@ class SubjectsFragment :
             }
 
             binding.pager.apply {
-                offscreenPageLimit = 3
+                offscreenPageLimit = 1
                 adapter = semesterAdapter
                 orientation = ViewPager2.ORIENTATION_HORIZONTAL
-                binding.pager.setCurrentItem(viewModel.getCurrentSemester(), false)
-
-                binding.pager.registerOnPageChangeCallback(pageChangeCallback)
+                (getChildAt(0) as? RecyclerView)?.overScrollMode = RecyclerView.OVER_SCROLL_NEVER
             }
+            handler.lowerToolbar()
 
-            viewModel.courses().observe(this@SubjectsFragment, Observer {
-                binding.progress.hide()
-                semesterAdapter.swapData(it)
-                handler.lowerToolbar()
+            viewModel.courses().observe(viewLifecycleOwner, Observer {
+                if (it == null) return@Observer
+                startPostponedEnterTransition()
+                if (it.isEmpty()) {
+                    binding.toolbar.hide()
+                } else {
+                    semesterAdapter.swapData(it)
+                    viewModel.semesters.replaceWith(it.map { it.first().course.semester })
+
+
+                    binding.toolbar.show()
+                    binding.progress.hide()
+                    binding.pager.setCurrentItem(viewModel.getPage(), false)
+                    updateToolbar(viewModel.getPage())
+                    binding.pager.registerOnPageChangeCallback(pageChangeCallback)
+                }
             })
-
-            viewModel.semesters().observe(this@SubjectsFragment, Observer {
-                binding.semester.text = it
-            })
-
-            viewModel.setSemester(viewModel.getActualSemester())
         }
+    }
 
+    private fun updateToolbar(position: Int) {
+        binding.semester.text = viewModel.getSemesterName(position)
+
+        if (position == 0) {
+            binding.buttonBack.hide()
+        } else {
+            binding.buttonBack.show()
+        }
+        if (position == kotlin.math.max(semesterAdapter.itemCount - 1, 0)) {
+            binding.buttonForward.hide()
+        } else {
+            binding.buttonForward.show()
+        }
     }
 }
 
 interface SubjectsFragmentHandler {
     fun lowerToolbar()
+    fun showDetailFromSubjects(courseId: String)
 }

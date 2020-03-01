@@ -96,6 +96,8 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.2'
+
     //application
     def multidex__version = "2.0.1"
     implementation "androidx.multidex:multidex:$multidex__version"

@@ -41,6 +41,8 @@ import androidx.core.app.NotificationCompat.PRIORITY_MAX
 import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
 import androidx.work.*
+import com.amulyakhare.textdrawable.TextDrawable
+import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.remote.AuthException
 import com.lukasanda.aismobile.data.remote.HTTPException
@@ -167,14 +169,29 @@ fun Int.toARGB(): Int {
     return Color.parseColor(stringColor)
 }
 
+fun String.getNameFromSender(): String {
+    return if (this.contains("@")) {
+        this.substringBefore("@").replace(".", " ")
+    } else if (!this.contains(",")) {
+        Pattern.compile("(\\w{2,}+\\.( ){1,})|(, \\w+)").matcher(this).replaceAll("")
+    } else {
+        this.substringBefore(",").substringAfterLast(". ")
+    }
+}
 
-fun String.getNameFromSender() =
-    Pattern.compile("(\\w{2,}+\\.( ){1,})|(, \\w+)").matcher(this).replaceAll("").substringBefore("@").replace(
-        ".",
-        " "
-    ).trim()
+fun String.getInitialsFromName() =
+    if (this.isEmpty()) "" else this.split(" ").filterNot { it.isEmpty() }.map {
+        it.first().toUpperCase()
+    }.joinToString("")
 
-fun String.getInitialsFromName() = this.split(" ").map { it.first().toUpperCase() }.joinToString("")
+fun getTextDrawable(text: String, seed: String, size: Int) =
+    TextDrawable.builder().beginConfig().textColor(Color.WHITE).fontSize(size).bold()
+        .toUpperCase()
+        .endConfig()
+        .buildRound(
+            text,
+            ColorGenerator.MATERIAL.getColor(seed)
+        )
 
 fun getSuggestionRequestString(query: String) =
 //    "_suggestKey=${query}&upresneni_default=aktivni_a_preruseni,absolventi,zamestnanci,externiste&_suggestMaxItems=25&vzorek=&_suggestHandler=lide&lang=undefined"

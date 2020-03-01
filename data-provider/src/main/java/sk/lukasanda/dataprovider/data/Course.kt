@@ -14,7 +14,7 @@
 package sk.lukasanda.dataprovider.data
 
 data class Course(
-    val coursePresence: String = "", //Presence separated by "#
+    var coursePresence: String = "", //Presence separated by "#
     var seminarPresence: String = "", //Presence separated by "#
     val courseId: String = "",
     val courseName: String = "",
@@ -26,16 +26,34 @@ data class Course(
 
 data class Sheet(
     val name: String = "",
+    val comment: String = "",
     val headers: String = "", // headers sepatated by #
     val values: String = "" //values separated by #
 ) {
-    fun headers() = headers.split("#")
-    fun values() = values.split("#")
+    private fun headers() = headers.split("#")
+    private fun values() = values.split("#")
+
+    fun getColumnPairs() = headers().zip(values()) { a, b ->
+        Pair(
+            a,
+            b
+        )
+    }.filterNot { it.first.equals("Poznámka") || it.first.equals("Zlučka") }
+
+    fun comments() = comment.takeIf { it.isNotEmpty() } ?: kotlin.run {
+        val index = headers().indexOf("Poznámka")
+        if (index > -1) {
+            return@run values()[index]
+        }
+        ""
+    }
 
     override fun toString(): String {
-        return name + "\n" + headers().zip(values()).joinToString("\n")
+        return name + "\n" + getColumnPairs() + "\n" + comments()
     }
 }
 
 data class Semester(var studiesId: String, val id: String, val name: String)
 data class Study(val id: String, val semesterCount: Int)
+
+data class Teacher(val name: String, val id: String)

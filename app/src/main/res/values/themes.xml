@@ -65,6 +65,10 @@
 
         <!-- Transition -->
         <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
+
+        <item name="md_font_title">@font/open_sans_bold</item>
+        <item name="md_font_body">@font/open_sans</item>
+        <item name="md_font_button">@font/open_sans</item>
     </style>
 
     <style name="Base.MaterialThemeBuilder" parent="Theme.MaterialComponents.DayNight.NoActionBar">

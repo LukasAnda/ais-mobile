@@ -55,4 +55,14 @@
     <color name="color_on_surface">#000000</color>
     <color name="color_on_error">#ffffff</color>
 
+    <!-- Presence colors -->
+    <color name="color_presence">#4caf50</color>
+    <color name="color_absence">#f44336</color>
+    <color name="color_unknown">#bdbdbd</color>
+    <color name="color_excused">#e91e63</color>
+    <color name="color_late">#2196f3</color>
+    <color name="color_disqualified">#cddc39</color>
+    <color name="color_different">#ff9800</color>
+    <color name="color_early">#03a9f4</color>
+
 </resources>

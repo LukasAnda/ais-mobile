@@ -13,11 +13,11 @@
 
 package com.lukasanda.aismobile.data.repository
 
-import androidx.lifecycle.MutableLiveData
 import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.db.dao.CourseDao
 import com.lukasanda.aismobile.data.db.entity.Course
 import com.lukasanda.aismobile.data.db.entity.Sheet
+import com.lukasanda.aismobile.data.db.entity.Teacher
 import com.lukasanda.aismobile.data.remote.AuthException
 import com.lukasanda.aismobile.data.remote.HTTPException
 import com.lukasanda.aismobile.data.remote.api.AISApi
@@ -26,7 +26,7 @@ import com.lukasanda.aismobile.data.repository.CourseRepository.UpdateType.NEWES
 import com.lukasanda.aismobile.util.authenticatedOrThrow
 import com.snakydesign.livedataextensions.map
 import kotlinx.coroutines.delay
-import sk.lukasanda.base.ui.recyclerview.replaceWith
+import org.joda.time.DateTime
 import sk.lukasanda.dataprovider.Parser
 import sk.lukasanda.dataprovider.data.Semester
 
@@ -36,43 +36,18 @@ class CourseRepository(
     private val prefs: Prefs
 ) {
 
-    init {
-        courseDao.getSemesters().observeForever {
-            semesters.replaceWith(it)
-        }
-    }
-
-
-    private var semesters = mutableListOf<String>()
-
-    var actualSemester = semesters.size - 1
-
-    fun semesterName() = try {
-        semesters[actualSemester]
-    } catch (e: Exception) {
-        ""
-    }
-
-    fun getCurrentSemester(): Int {
-        var pageToSelect = Int.MAX_VALUE / 2
-        while (pageToSelect % semesters.size != actualSemester) {
-            pageToSelect++
-        }
-        return pageToSelect
-    }
-
-    val semestersLiveData = MutableLiveData(semesterName())
-
     fun get() =
-        courseDao.getCourses().map { it.groupBy { it.course?.semester } }.map { it.values.toList() }
+        courseDao.getCourses().map { it.groupBy { it.course.semester } }.map { it.values.toList() }
 
     fun get(courseId: String) = courseDao.getCourse(courseId)
 
     @Throws(AuthException::class, HTTPException::class)
     suspend fun update() {
 
+        if (prefs.courseExpiration.isBeforeNow) return
+
         val updateType =
-            if (semesters.size > 1) NEWEST else FETCH //If there is no semester fetch, if there is one semester only FETCH == NEWEST
+            if (prefs.fullCourseExpiration.isBeforeNow) NEWEST else FETCH //If there is no semester fetch, if there is one semester only FETCH == NEWEST
 
         val semestersResponse = aisApi.semesters().authenticatedOrThrow()
 
@@ -82,19 +57,25 @@ class CourseRepository(
 
         val dbCourses = mutableListOf<Course>()
         val dbSheets = mutableListOf<Sheet>()
+        val dbTeachers = mutableListOf<Teacher>()
 
         suspend fun updateSemester(semester: Semester) {
             val courses = parseCourses(semester)
-
-            println("Courses__________________________________")
-            println(courses.joinToString("\n"))
 
             dbCourses.addAll(courses)
             delay(1000)
 
             courses.forEach { course ->
 
-                dbSheets.addAll(parseSheets(course, semester))
+                val courseDetailResponse = aisApi.getCourseDetail(course.id).authenticatedOrThrow()
+                val teachers =
+                    Parser.getTeachers(courseDetailResponse)?.map { teachersToDb(course, it) }
+                        ?: emptyList()
+                dbTeachers.addAll(teachers)
+
+                val newSheets = parseSheets(course, semester)
+
+                dbSheets.addAll(newSheets)
 
                 delay(1000)
             }
@@ -105,24 +86,20 @@ class CourseRepository(
                 semesters?.forEach {
                     updateSemester(it)
                 }
-                courseDao.update(dbCourses, dbSheets)
+
+                println(dbSheets)
+                courseDao.update(dbCourses, dbSheets, dbTeachers)
             }
             NEWEST -> {
                 semesters?.last()?.let {
                     updateSemester(it)
                 }
-                courseDao.updateSingle(dbCourses, dbSheets)
+                courseDao.updateSingle(dbCourses, dbSheets, dbTeachers)
             }
         }
-    }
 
-    fun setSemester(semester: Int) {
-        actualSemester = try {
-            semester % semesters.size
-        } catch (e: ArithmeticException) {
-            0
-        }
-        semestersLiveData.postValue(semesterName())
+        prefs.courseExpiration = DateTime.now().plusMinutes(15)
+        prefs.fullCourseExpiration = DateTime.now().plusWeeks(1)
     }
 
 
@@ -142,8 +119,13 @@ class CourseRepository(
         val sheets =
             Parser.getSheets(sheetResponse) ?: mutableListOf()
 
+//        println(sheets.joinToString("\n"))
+
         return sheets.map { sheetToDb(it, course) }
     }
+
+    private fun teachersToDb(course: Course, teacher: sk.lukasanda.dataprovider.data.Teacher) =
+        Teacher(name = teacher.name, id = teacher.id, courseId = course.id)
 
     private fun courseToDb(
         course: sk.lukasanda.dataprovider.data.Course,
@@ -168,10 +150,11 @@ class CourseRepository(
         course: Course
     ) = Sheet(
         course.id + sheet.name,
-        course.id,
-        sheet.name,
-        sheet.headers,
-        sheet.values
+        courseId = course.id,
+        name = sheet.name,
+        comment = sheet.comment,
+        headers = sheet.headers,
+        values = sheet.values
     )
 
     enum class UpdateType {
