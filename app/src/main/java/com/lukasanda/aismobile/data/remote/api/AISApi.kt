@@ -119,6 +119,35 @@ interface AISApi {
         @Field("serializace", encoded = true) serialisation: String
     ): Response<ResponseBody>
 
+    @FormUrlEncoded
+    @POST("/auth/posta/nova_zprava.pl")
+    suspend fun replyMessage(
+        @Field("lang", encoded = true) lang: String = "sk",
+        @Field("zprava", encoded = true) zprava: String = "1",
+        @Field("To", encoded = true) to: String,
+        @Field("Cc", encoded = true) copy: String = "",
+        @Field("Bcc", encoded = true) hiddenCopy: String = "",
+        @Field("Subject", encoded = true) subject: String,
+        @Field("Data", encoded = true) message: String,
+        @Field("priloha", encoded = true) priloha1: String = "",
+        @Field("priloha", encoded = true) priloha2: String = "",
+        @Field("priloha", encoded = true) priloha3: String = "",
+        @Field("priloha", encoded = true) priloha4: String = "",
+        @Field("priloha", encoded = true) priloha5: String = "",
+        @Field("priloha", encoded = true) priloha6: String = "",
+        @Field("priloha", encoded = true) priloha7: String = "",
+        @Field("ulozit_odesl_zpravu", encoded = true) saveSentMessage: String = "1",
+        @Field("ulozit_do_sl", encoded = true) saveMessageTo: String,
+        @Field("send", encoded = true) sendMessage: String = "ODOSLAŤ SPRÁVU",
+        @Field("akce", encoded = true) action: String = "schranka",
+        @Field("serializace", encoded = true) serialisation: String,
+        @Field("old_fid", encoded = true) oldFid: String,
+        @Field("old_eid", encoded = true) oldEid: String,
+        @Field("fid", encoded = true) fid: String,
+        @Field("eid", encoded = true) eid: String,
+        @Field("menu_akce", encoded = true) menu_action: String = "odpovedet"
+    ): Response<ResponseBody>
+
     @GET("/auth/katalog/syllabus.pl")
     suspend fun getCourseDetail(
         @Query(

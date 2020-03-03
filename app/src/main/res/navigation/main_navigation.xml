@@ -55,11 +55,25 @@
         <argument
             android:name="email"
             app:argType="com.lukasanda.aismobile.data.db.entity.Email" />
+        <action
+            android:id="@+id/action_emailDetailFragment_to_composeEmailFragment"
+            app:destination="@id/composeEmailFragment" />
     </fragment>
     <fragment
         android:id="@+id/composeEmailFragment"
         android:name="com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailFragment"
-        android:label="Vytvor email" />
+        android:label="Vytvor email">
+        <argument
+            android:name="email"
+            android:defaultValue="@null"
+            app:argType="com.lukasanda.aismobile.data.db.entity.Email"
+            app:nullable="true" />
+        <argument
+            android:name="teacher"
+            android:defaultValue="@null"
+            app:argType="com.lukasanda.aismobile.data.db.entity.Teacher"
+            app:nullable="true" />
+    </fragment>
     <fragment
         android:id="@+id/subjectDetailFragment"
         android:name="com.lukasanda.aismobile.ui.main.subjectDetail.SubjectDetailFragment"
@@ -67,5 +81,8 @@
         <argument
             android:name="courseId"
             app:argType="string" />
+        <action
+            android:id="@+id/action_subjectDetailFragment_to_composeEmailFragment"
+            app:destination="@id/composeEmailFragment" />
     </fragment>
 </navigation>

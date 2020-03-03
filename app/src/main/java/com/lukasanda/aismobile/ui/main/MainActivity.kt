@@ -27,12 +27,16 @@ import com.bumptech.glide.load.model.LazyHeaders
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.db.entity.Email
+import com.lukasanda.aismobile.data.db.entity.Teacher
 import com.lukasanda.aismobile.databinding.ActivityMainBinding
+import com.lukasanda.aismobile.databinding.DrawerHeaderViewBinding
 import com.lukasanda.aismobile.ui.login.LoginActivity
 import com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailHandler
 import com.lukasanda.aismobile.ui.main.email.EmailFragmentDirections
 import com.lukasanda.aismobile.ui.main.email.EmailFragmentHandler
+import com.lukasanda.aismobile.ui.main.emailDetail.EmailDetailFragmentDirections
 import com.lukasanda.aismobile.ui.main.emailDetail.EmailDetailHandler
+import com.lukasanda.aismobile.ui.main.subjectDetail.SubjectDetailFragmentDirections
 import com.lukasanda.aismobile.ui.main.subjectDetail.SubjectDetailHandler
 import com.lukasanda.aismobile.ui.main.subjects.SubjectsFragmentDirections
 import com.lukasanda.aismobile.ui.main.subjects.SubjectsFragmentHandler
@@ -40,8 +44,7 @@ import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentDirections
 import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentHandler
 import com.lukasanda.aismobile.util.createLiveData
 import com.lukasanda.aismobile.util.startWorker
-import kotlinx.android.synthetic.main.item_header_drawer.*
-import kotlinx.android.synthetic.main.item_header_drawer.view.*
+import kotlinx.android.synthetic.main.drawer_header__view.*
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -56,12 +59,16 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
 
     private lateinit var toggle: ActionBarDrawerToggle
 
+    private lateinit var drawerHeaderBinding: DrawerHeaderViewBinding
+
     override val viewModel by viewModel<MainViewModel> { parametersOf(Bundle()) }
     private val prefs by inject<Prefs>()
 
     inner class Views : BaseActivityViews {
 
         override fun modifyViews() {
+            drawerHeaderBinding =
+                DrawerHeaderViewBinding.bind(binding.navigationView.getHeaderView(0))
             this@MainActivity.navController?.let {
                 NavigationUI.setupWithNavController(binding.bottomMenu, it)
             }
@@ -85,10 +92,11 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
                 if (profile == null) return@Observer
 
 
-                Glide.with(this@MainActivity).load(url).circleCrop().into(binding.drawer.profile)
-                binding.drawer.aisId.text = "AIS ID: ${it.id}"
-                binding.drawer.wifiName.text = "Wifi username: ${it.email}"
-                binding.drawer.wifiPassword.text = "Wifi password: ${it.password}"
+                Glide.with(this@MainActivity).load(url)
+                    .into(drawerHeaderBinding.profile)
+                drawerHeaderBinding.aisId.text = it.id.toString()
+                drawerHeaderBinding.username.text = it.email
+                drawerHeaderBinding.password.text = it.password
             })
 
             navController?.addOnDestinationChangedListener { controller, destination, arguments ->
@@ -163,5 +171,21 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
 
     override fun closeFragment() {
         navController?.popBackStack()
+    }
+
+    override fun reply(email: Email) {
+        navController?.navigateSafe(
+            EmailDetailFragmentDirections.actionEmailDetailFragmentToComposeEmailFragment(
+                email = email
+            )
+        )
+    }
+
+    override fun writeToTeacher(teacher: Teacher) {
+        navController?.navigateSafe(
+            SubjectDetailFragmentDirections.actionSubjectDetailFragmentToComposeEmailFragment(
+                teacher = teacher
+            )
+        )
     }
 }

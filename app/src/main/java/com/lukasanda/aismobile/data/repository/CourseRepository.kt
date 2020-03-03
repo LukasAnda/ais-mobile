@@ -44,10 +44,10 @@ class CourseRepository(
     @Throws(AuthException::class, HTTPException::class)
     suspend fun update() {
 
-        if (prefs.courseExpiration.isBeforeNow) return
+        if (prefs.courseExpiration.isAfterNow) return
 
         val updateType =
-            if (prefs.fullCourseExpiration.isBeforeNow) NEWEST else FETCH //If there is no semester fetch, if there is one semester only FETCH == NEWEST
+            if (prefs.fullCourseExpiration.isAfterNow) NEWEST else FETCH //If there is no semester fetch, if there is one semester only FETCH == NEWEST
 
         val semestersResponse = aisApi.semesters().authenticatedOrThrow()
 

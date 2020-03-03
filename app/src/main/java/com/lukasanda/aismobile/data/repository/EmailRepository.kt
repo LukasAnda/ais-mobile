@@ -64,6 +64,7 @@ class EmailRepository(
                 Email(
                     it.eid.substringAfter("="),
                     it.fid.substringAfter("="),
+                    it.senderId,
                     it.sender,
                     it.subject,
                     it.date,
@@ -114,6 +115,36 @@ class EmailRepository(
             message = message,
             saveMessageTo = prefs.sentDirectoryId,
             serialisation = token
+        )
+
+        return response.code() == 302
+    }
+
+    suspend fun replyMail(
+        to: String,
+        subject: String,
+        message: String,
+        originalEmail: Email
+    ): Boolean {
+        val newMailResponse = service.newMessagePage().authenticatedOrThrow()
+        val token = Parser.getNewMessageToken(newMailResponse)
+        if (token.isEmpty()) {
+            Log.d("TAG", "Empty token, something went wrong")
+            return false
+        } else {
+            Log.d("TAG", "Sending message")
+        }
+
+        val response = service.replyMessage(
+            to = to,
+            subject = subject,
+            message = message,
+            saveMessageTo = prefs.sentDirectoryId,
+            serialisation = token,
+            oldEid = originalEmail.eid,
+            oldFid = originalEmail.fid,
+            eid = originalEmail.eid,
+            fid = originalEmail.fid
         )
 
         return response.code() == 302

@@ -247,9 +247,7 @@ object Parser {
                 //Mame tu komentar
                 val comment = if (table.findElementByName("tbody", true).childTagList.size > 1) {
                     table.findElementByName("tbody", true).getElementListByName("tr", true).last()
-                        .childTagList.last().let {
-                        it.parseMessage()
-                    }
+                        .childTagList.last().parseMessage()
                 } else {
                     ""
                 }
@@ -365,6 +363,11 @@ object Parser {
                     true
                 ).firstOrNull()?.content() ?: ""
 
+                val senderId = it.getElementList(
+                    { it.name == "a" && it.getAttributeByName("href").contains("lide/") },
+                    true
+                ).firstOrNull()?.getAttributeByName("href")?.substringAfterLast("id=") ?: ""
+
                 val date = it.getElementList(
                     { it.name == "small" && it.content().matches(Regex("^([1-9]|([012][0-9])|(3[01]))\\. ([0]{0,1}[1-9]|1[012])\\. \\d\\d\\d\\d\\s([0-1]?[0-9]|2?[0-3]):([0-5]\\d)\$")) },
                     true
@@ -389,6 +392,7 @@ object Parser {
                     Email(
                         eid,
                         fid,
+                        senderId,
                         sender.ifEmpty { "Akademický informačný systém" },
                         subject,
                         date,

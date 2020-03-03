@@ -17,6 +17,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.data.repository.EmailRepository
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
@@ -64,6 +65,21 @@ class ComposeEmailViewModel(
                 to,
                 subject,
                 message
+            )
+            if (success) {
+                _sendMailLiveData.postValue(EmailSendState.Success)
+            } else {
+                _sendMailLiveData.postValue(EmailSendState.Fail)
+            }
+        }
+
+    fun replyMail(to: String, subject: String, message: String, originalMail: Email) =
+        viewModelScope.launch(coroutineExceptionHandler) {
+            val success = emailRepository.replyMail(
+                to,
+                subject,
+                message,
+                originalMail
             )
             if (success) {
                 _sendMailLiveData.postValue(EmailSendState.Success)

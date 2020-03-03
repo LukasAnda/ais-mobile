@@ -44,6 +44,10 @@ class TeacherItemHolder(binding: TeacherContactItemBinding) :
                 .endConfig()
                 .buildRound(initials, ColorGenerator.MATERIAL.getColor(item.name))
         binding.icon.setImageDrawable(drawable)
+
+        binding.root.setOnClickListener {
+            onClick(item)
+        }
     }
 
 }

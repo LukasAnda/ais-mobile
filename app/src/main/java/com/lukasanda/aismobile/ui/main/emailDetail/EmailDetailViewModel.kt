@@ -26,6 +26,12 @@ class EmailDetailViewModel(
     private val handle: SavedStateHandle
 ) : BaseViewModel(handle) {
 
+    fun setEmail(email: Email) {
+        handle[EMAIL] = email
+    }
+
+    fun getEmail(): Email? = handle[EMAIL]
+
     private val coroutineExceptionHandler = CoroutineExceptionHandler { _, t ->
         run {
             t.printStackTrace()
@@ -38,5 +44,9 @@ class EmailDetailViewModel(
 
     fun getEmailDetail(email: Email) = viewModelScope.launch(coroutineExceptionHandler) {
         emailRepository.getEmailDetail(email)
+    }
+
+    companion object {
+        const val EMAIL = "email"
     }
 }
