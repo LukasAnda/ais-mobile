@@ -14,8 +14,6 @@
 package com.lukasanda.aismobile.data.repository
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.db.dao.EmailDao
 import com.lukasanda.aismobile.data.db.entity.Email
@@ -35,10 +33,6 @@ class EmailRepository(
     private val prefs: Prefs,
     private val service: AISApi
 ) {
-
-    private val _emailDetail = MutableLiveData<String?>()
-    fun emailDetail(): LiveData<String?> = _emailDetail
-    fun clearDetail() = _emailDetail.postValue(null)
 
 
     @Throws(AuthException::class, HTTPException::class)
@@ -75,15 +69,20 @@ class EmailRepository(
         prefs.emailExpiration = DateTime.now().plusMinutes(10)
     }
 
-    suspend fun getEmailDetail(email: Email) {
-        val response =
-            service.emailDetail("${email.eid};fid=${email.fid};on=0").authenticatedOrThrow()
+    @Throws(AuthException::class, HTTPException::class)
+    suspend fun delete(email: Email) {
+        service.deleteEmail("${email.fid};eid=${email.eid};on=0;menu_akce=vymazat").authenticatedOrThrow()
+        emailDao.deleteSingle(email)
+    }
+
+    suspend fun getEmailDetail(email: Email): String {
+        val response = service.emailDetail("${email.eid};fid=${email.fid};on=0").authenticatedOrThrow()
         val message = Parser.getEmailDetail(response)
-        _emailDetail.postValue(message)
         if (!email.opened) {
             prefs.newEmailCount--
         }
         emailDao.update(email.copy(opened = true))
+        return message
     }
 
     fun getEmails() = emailDao.getEmails()

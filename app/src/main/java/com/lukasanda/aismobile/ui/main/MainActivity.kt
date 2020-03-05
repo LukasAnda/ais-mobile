@@ -154,6 +154,10 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
         navController?.navigateSafe(EmailFragmentDirections.actionEmailFragmentToEmailDetailFragment(email))
     }
 
+    override fun replyToEmail(email: Email) {
+        navController?.navigateSafe(EmailFragmentDirections.actionEmailFragmentToComposeEmailFragment(email = email))
+    }
+
     override fun composeEmail() {
         navController?.navigateSafe(EmailFragmentDirections.actionEmailFragmentToComposeEmailFragment())
     }

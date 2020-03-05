@@ -276,8 +276,7 @@ object Parser {
                 .filter { it.getAttributeByName("href").contains("clovek.pl") }
                 .filter { it.parent.name == "small" }.map {
                     val name = it.content()
-                    val id =
-                        it.getAttributeByName("href").substringAfter("id=").substringBefore(";")
+                    val id = it.getAttributeByName("href").substringAfter("id=").substringBefore(";")
                     Teacher(name, id)
                 }
 

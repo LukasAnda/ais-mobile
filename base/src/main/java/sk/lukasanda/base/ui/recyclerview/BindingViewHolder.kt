@@ -15,6 +15,7 @@ package sk.lukasanda.base.ui.recyclerview
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -38,8 +39,26 @@ abstract class BaseAdapter<ITEM : Any, LISTENER_ITEM : Any, VIEWHOLDER : BaseBin
     override fun onBindViewHolder(holder: VIEWHOLDER, position: Int) =
         holder.bind(items[position], onClick)
 
-    fun swapData(newItems: List<ITEM>) = items.replaceWith(newItems).also { notifyDataSetChanged() }
+    fun swapData(newItems: List<ITEM>) {
+        val callback = ItemDiffCallback(items, newItems)
+        val result = DiffUtil.calculateDiff(callback)
+
+        items.replaceWith(newItems)
+        notifyDataSetChanged()
+//        result.dispatchUpdatesTo(this)
+    }
+
+    inner class ItemDiffCallback(private val oldItems: List<ITEM>, private val newItems: List<ITEM>) : DiffUtil.Callback() {
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) = oldItems[oldItemPosition].equals(newItems[newItemPosition])
+
+        override fun getOldListSize() = oldItems.size
+
+        override fun getNewListSize() = newItems.size
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) = oldItems[oldItemPosition].equals(newItems[newItemPosition])
+    }
 }
+
 
 inline fun <ITEM, LISTENER_ITEM, reified VIEW_BINDING : ViewBinding, reified T : BaseBindingViewHolder<ITEM, LISTENER_ITEM, VIEW_BINDING>> ViewGroup.create(
     createHolder: (VIEW_BINDING) -> T

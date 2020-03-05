@@ -27,4 +27,12 @@ data class Email(
     val subject: String,
     val date: String,
     var opened: Boolean
-) : Parcelable
+) : Parcelable {
+    override fun equals(other: Any?): Boolean {
+        return if (other is Email) {
+            eid === other.eid && fid === other.fid
+        } else {
+            return super.equals(other)
+        }
+    }
+}

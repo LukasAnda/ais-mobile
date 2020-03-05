@@ -13,8 +13,16 @@
 
 package com.lukasanda.aismobile.ui.main.email
 
+import android.annotation.SuppressLint
+import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
+import androidx.appcompat.widget.AppCompatDrawableManager
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.RecyclerView
+import com.lukasanda.aismobile.R
+import com.lukasanda.aismobile.core.SwipeHelper
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.databinding.EmailFragmentBinding
 import com.lukasanda.aismobile.ui.main.email.adapter.EmailAdapter
@@ -25,6 +33,7 @@ import org.koin.core.parameter.parametersOf
 import sk.lukasanda.base.ui.activity.BaseViews
 import sk.lukasanda.base.ui.fragment.BaseFragment
 import sk.lukasanda.base.ui.recyclerview.bindLinear
+
 
 class EmailFragment :
     BaseFragment<EmailFragment.Views, EmailFragmentBinding, EmailViewModel, EmailFragmentHandler>() {
@@ -45,6 +54,34 @@ class EmailFragment :
         override fun modifyViews() {
             postponeEnterTransition()
             binding.recycler.bindLinear(adapter)
+
+            val swipeHelper: SwipeHelper = object : SwipeHelper() {
+                @SuppressLint("RestrictedApi")
+                override fun instantiateUnderlayButton(viewHolder: RecyclerView.ViewHolder?, underlayButtons: MutableList<UnderlayButton>?) {
+                    underlayButtons?.add(UnderlayButton("", AppCompatDrawableManager.get().getDrawable(requireContext(), R.drawable.ic_delete), Color.parseColor("#E57373"),
+                        object : UnderlayButtonClickListener {
+                            override fun onClick(pos: Int) {
+                                val email = adapter.getEmailAt(pos)
+                                viewModel.deleteEmail(email)
+                                Log.d("TAG", "Delete clicked")
+                            }
+                        }
+                    ))
+                    underlayButtons?.add(UnderlayButton("",
+                        AppCompatDrawableManager.get().getDrawable(requireContext(), R.drawable.ic_reply),
+                        ContextCompat.getColor(requireContext(), R.color.color_primary_variant),
+                        object : UnderlayButtonClickListener {
+                            override fun onClick(pos: Int) {
+                                val email = adapter.getEmailAt(pos)
+                                handler.replyToEmail(email)
+                                Log.d("TAG", "Reply clicked")
+                            }
+                        }
+                    ))
+                }
+            }
+
+            swipeHelper.attachToRecyclerView(binding.recycler)
 
             binding.pullToRefresh.setOnRefreshListener {
                 binding.pullToRefresh.isRefreshing = true
@@ -73,5 +110,6 @@ class EmailFragment :
 interface EmailFragmentHandler {
     fun riseToolbar()
     fun showEmailDetail(email: Email)
+    fun replyToEmail(email: Email)
     fun composeEmail()
 }

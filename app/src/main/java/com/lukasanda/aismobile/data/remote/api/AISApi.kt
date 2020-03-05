@@ -88,6 +88,14 @@ interface AISApi {
         ) params: String = "8851469;fid=620955;on=0"
     ): Response<ResponseBody>
 
+    @GET("/auth/posta/slozka.pl")
+    suspend fun deleteEmail(
+        @Query(
+            "fid",
+            encoded = true
+        ) params: String
+    ): Response<ResponseBody>
+
     @Headers("Content-Type: application/x-www-form-urlencoded;charset=UTF-8")
     @POST("/auth/system/uissuggest.pl")
     suspend fun getSuggestions(@Body body: RequestBody): Response<ResponseBody>

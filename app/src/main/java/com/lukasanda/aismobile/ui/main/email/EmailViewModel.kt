@@ -15,6 +15,7 @@ package com.lukasanda.aismobile.ui.main.email
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.data.repository.EmailRepository
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
@@ -32,6 +33,9 @@ class EmailViewModel(
     }
 
     fun emails() = emailRepository.getEmails()
+
+    fun deleteEmail(email: Email) = viewModelScope.launch(coroutineExceptionHandler) { emailRepository.delete(email) }
+
     fun update() = viewModelScope.launch(coroutineExceptionHandler) {
         emailRepository.update(updateType = EmailRepository.UpdateType.Purge)
     }

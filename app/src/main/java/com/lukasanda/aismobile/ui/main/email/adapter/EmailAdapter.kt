@@ -28,6 +28,7 @@ import sk.lukasanda.base.ui.recyclerview.create
 
 class EmailAdapter(listener: (Email) -> Unit) :
     BaseAdapter<Email, Email, EmailItemHolder>(listener) {
+    fun getEmailAt(position: Int) = items[position]
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         parent.create(::EmailItemHolder, EmailItemBinding::inflate)
 }

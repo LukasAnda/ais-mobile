@@ -28,7 +28,7 @@
         android:layout_weight="1"
         android:fontFamily="@font/open_sans_bold"
         android:singleLine="true"
-        android:textColor="@android:color/black"
+        android:textColor="@color/color_on_surface"
         android:textSize="14sp"
         tools:text="Stlpec 1" />
 

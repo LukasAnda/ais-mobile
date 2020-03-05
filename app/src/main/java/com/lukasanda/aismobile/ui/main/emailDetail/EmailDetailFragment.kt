@@ -38,7 +38,6 @@ class EmailDetailFragment :
         override fun modifyViews() {
             setHasOptionsMenu(true)
             val args by navArgs<EmailDetailFragmentArgs>()
-            viewModel.clear()
 
             binding.sender.text = args.email.sender
             binding.subject.text = args.email.subject
