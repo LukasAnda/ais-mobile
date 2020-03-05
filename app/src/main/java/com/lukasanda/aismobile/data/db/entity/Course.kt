@@ -13,10 +13,12 @@
 
 package com.lukasanda.aismobile.data.db.entity
 
+import android.os.Parcelable
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.Relation
+import kotlinx.android.parcel.Parcelize
 
 @Entity(tableName = "course")
 data class Course(
@@ -85,11 +87,12 @@ data class Sheet(
     }
 }
 
+@Parcelize
 @Entity(tableName = "teacher", primaryKeys = ["id", "courseId"])
 data class Teacher(
     val id: String,
     val name: String,
     val courseId: String
-) {
+) : Parcelable {
     fun isLector() = name.contains("prednášajúci")
 }

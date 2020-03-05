@@ -54,4 +54,9 @@
         <item name="android:fontFamily">@font/open_sans_bold</item>
     </style>
 
+    <style name="circular_image_view" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
 </resources>

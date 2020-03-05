@@ -13,6 +13,8 @@
 
 package com.lukasanda.aismobile.ui.main.emailDetail
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.lukasanda.aismobile.data.db.entity.Email
@@ -26,17 +28,26 @@ class EmailDetailViewModel(
     private val handle: SavedStateHandle
 ) : BaseViewModel(handle) {
 
+    private val _emailDetail = MutableLiveData<String?>()
+    fun emailDetail(): LiveData<String?> = _emailDetail
+
+    fun setEmail(email: Email) {
+        handle[EMAIL] = email
+    }
+
+    fun getEmail(): Email? = handle[EMAIL]
+
     private val coroutineExceptionHandler = CoroutineExceptionHandler { _, t ->
         run {
             t.printStackTrace()
         }
     }
 
-    fun emailDetail() = emailRepository.emailDetail()
-
-    fun clear() = emailRepository.clearDetail()
-
     fun getEmailDetail(email: Email) = viewModelScope.launch(coroutineExceptionHandler) {
-        emailRepository.getEmailDetail(email)
+        _emailDetail.postValue(emailRepository.getEmailDetail(email))
+    }
+
+    companion object {
+        const val EMAIL = "email"
     }
 }

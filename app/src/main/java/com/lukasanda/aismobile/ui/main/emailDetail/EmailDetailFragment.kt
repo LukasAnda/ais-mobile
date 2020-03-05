@@ -15,10 +15,15 @@ package com.lukasanda.aismobile.ui.main.emailDetail
 
 import android.graphics.Color
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
 import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
+import com.lukasanda.aismobile.R
+import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.databinding.EmailDetailFragmentBinding
 import com.lukasanda.aismobile.util.getInitialsFromName
 import com.lukasanda.aismobile.util.getNameFromSender
@@ -31,8 +36,8 @@ class EmailDetailFragment :
     BaseFragment<EmailDetailFragment.Views, EmailDetailFragmentBinding, EmailDetailViewModel, EmailDetailHandler>() {
     inner class Views : BaseViews {
         override fun modifyViews() {
+            setHasOptionsMenu(true)
             val args by navArgs<EmailDetailFragmentArgs>()
-            viewModel.clear()
 
             binding.sender.text = args.email.sender
             binding.subject.text = args.email.subject
@@ -56,8 +61,25 @@ class EmailDetailFragment :
                 }
             })
 
+            viewModel.setEmail(args.email)
             viewModel.getEmailDetail(args.email)
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.email_detail__menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.reply -> {
+                viewModel.getEmail()?.let {
+                    handler.reply(it)
+                }
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override val viewModel: EmailDetailViewModel by viewModel { parametersOf(Bundle()) }
@@ -71,4 +93,5 @@ class EmailDetailFragment :
 }
 
 interface EmailDetailHandler {
+    fun reply(email: Email)
 }

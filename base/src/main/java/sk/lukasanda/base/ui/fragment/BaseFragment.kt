@@ -18,6 +18,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
 import sk.lukasanda.base.ui.activity.BaseViews
@@ -43,6 +44,17 @@ abstract class BaseFragment<VIEWS : BaseViews, BINDING : ViewBinding, VIEWMODEL 
     ): View? {
         this.binding = this.setBinding()
         return binding.root
+    }
+
+    override fun onPause() {
+        super.onPause()
+        val inputMethodManager =
+            context?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+        inputMethodManager?.let {
+            if (it.isActive) {
+                it.hideSoftInputFromWindow(view?.windowToken, 0)
+            }
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

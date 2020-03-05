@@ -22,6 +22,7 @@ import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Bitmap.createBitmap
 import android.graphics.Canvas
@@ -192,6 +193,16 @@ fun getTextDrawable(text: String, seed: String, size: Int) =
             text,
             ColorGenerator.MATERIAL.getColor(seed)
         )
+
+val Int.dp: Int
+    get() = (this / Resources.getSystem().displayMetrics.density).toInt()
+val Int.px: Int
+    get() = (this * Resources.getSystem().displayMetrics.density).toInt()
+
+val Float.dp: Float
+    get() = (this / Resources.getSystem().displayMetrics.density)
+val Float.px: Float
+    get() = (this * Resources.getSystem().displayMetrics.density)
 
 fun getSuggestionRequestString(query: String) =
 //    "_suggestKey=${query}&upresneni_default=aktivni_a_preruseni,absolventi,zamestnanci,externiste&_suggestMaxItems=25&vzorek=&_suggestHandler=lide&lang=undefined"

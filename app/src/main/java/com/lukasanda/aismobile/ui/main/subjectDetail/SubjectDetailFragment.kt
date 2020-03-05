@@ -22,6 +22,7 @@ import androidx.navigation.fragment.navArgs
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
 import com.lukasanda.aismobile.R
+import com.lukasanda.aismobile.data.db.entity.Teacher
 import com.lukasanda.aismobile.databinding.SubjectDetailFragmentBinding
 import com.lukasanda.aismobile.ui.main.subjectDetail.adapters.SubjectTablesAdapter
 import com.lukasanda.aismobile.ui.main.subjectDetail.adapters.SubjectTeachersAdapter
@@ -34,7 +35,9 @@ import sk.lukasanda.base.ui.recyclerview.bindLinear
 class SubjectDetailFragment :
     BaseFragment<SubjectDetailFragment.Views, SubjectDetailFragmentBinding, SubjectDetailViewModel, SubjectDetailHandler>() {
     val sheetsAdapter = SubjectTablesAdapter {}
-    val teachersAdapter = SubjectTeachersAdapter {}
+    val teachersAdapter = SubjectTeachersAdapter {
+        handler.writeToTeacher(it)
+    }
 
     inner class Views : BaseViews {
         override fun modifyViews() {
@@ -85,4 +88,6 @@ class SubjectDetailFragment :
     override lateinit var handler: SubjectDetailHandler
 }
 
-interface SubjectDetailHandler
+interface SubjectDetailHandler {
+    fun writeToTeacher(teacher: Teacher)
+}

@@ -15,6 +15,7 @@ package com.lukasanda.aismobile.di
 
 import com.google.gson.GsonBuilder
 import com.lukasanda.aismobile.BuildConfig
+import com.lukasanda.aismobile.core.TLSSocketFactoryCompat
 import com.lukasanda.aismobile.util.AuthInterceptor
 import com.lukasanda.aismobile.util.EncodingInterceptor
 import okhttp3.Cache
@@ -40,6 +41,7 @@ val networkModule = module {
     single {
         OkHttpClient.Builder().apply {
             cache(get())
+            sslSocketFactory(TLSSocketFactoryCompat())
             connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
             writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
             readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)

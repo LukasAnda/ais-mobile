@@ -25,6 +25,9 @@ interface EmailDao {
     @Query("DELETE FROM email")
     suspend fun deleteAll()
 
+    @Delete
+    suspend fun deleteSingle(email: Email)
+
     @Query("SELECT * FROM email ")
     fun getEmails(): LiveData<List<Email>>
 

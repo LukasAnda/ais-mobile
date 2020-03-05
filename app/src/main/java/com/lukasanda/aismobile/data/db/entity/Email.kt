@@ -22,8 +22,17 @@ import kotlinx.android.parcel.Parcelize
 data class Email(
     val eid: String,
     val fid: String,
+    val senderId: String,
     val sender: String,
     val subject: String,
     val date: String,
     var opened: Boolean
-) : Parcelable
+) : Parcelable {
+    override fun equals(other: Any?): Boolean {
+        return if (other is Email) {
+            eid === other.eid && fid === other.fid
+        } else {
+            return super.equals(other)
+        }
+    }
+}

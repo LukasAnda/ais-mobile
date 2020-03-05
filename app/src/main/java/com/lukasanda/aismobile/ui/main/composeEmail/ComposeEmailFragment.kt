@@ -24,11 +24,13 @@ import android.widget.Toast
 import androidx.core.view.isEmpty
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.google.android.material.chip.Chip
 import com.lukasanda.aismobile.R
+import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.databinding.ComposeEmailFragmentBinding
 import com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailViewModel.EmailSendState.Fail
 import com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailViewModel.EmailSendState.Success
@@ -45,6 +47,8 @@ class ComposeEmailFragment :
     BaseFragment<ComposeEmailFragment.Views, ComposeEmailFragmentBinding, ComposeEmailViewModel, ComposeEmailHandler>() {
 
     private val selected = mutableListOf<Suggestion>()
+
+    private lateinit var type: SendType
 
 
     private val contactAdapter: ContactAdapter = ContactAdapter {
@@ -79,6 +83,42 @@ class ComposeEmailFragment :
     inner class Views : BaseViews {
         override fun modifyViews() {
             setHasOptionsMenu(true)
+
+            val args by navArgs<ComposeEmailFragmentArgs>()
+
+            args.teacher?.let {
+                val suggestion = Suggestion(it.name, it.id, "")
+                selected.add(suggestion)
+                binding.chipGroup.addView(createChip(suggestion))
+                binding.chipGroup.show()
+
+                binding.recipients.hide()
+
+                binding.recipients.isEnabled = false
+            }
+
+            type = args.email?.let {
+                if (it.subject.contains("Re:")) {
+                    binding.subject.setText(it.subject)
+                } else {
+                    binding.subject.setText("Re: ${it.subject}")
+                }
+                binding.subject.isEnabled = false
+                binding.subject.isClickable = false
+
+                val suggestion = Suggestion(it.sender, it.senderId, "")
+                selected.add(suggestion)
+                binding.chipGroup.addView(createChip(suggestion))
+                binding.chipGroup.show()
+
+                binding.recipients.hide()
+                binding.recipients.isEnabled = false
+
+                SendType.Reply(it)
+            } ?: run {
+                SendType.Send()
+            }
+
             binding.recipients.apply {
                 doOnTextChanged { text, start, count, after ->
                     if (text?.length ?: 0 > 2) {
@@ -140,11 +180,23 @@ class ComposeEmailFragment :
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.send -> {
-                viewModel.sendMail(
-                    getEmails(),
-                    binding.subject.text.toString(),
-                    binding.message.text.toString()
-                )
+                when (type) {
+                    is SendType.Reply -> {
+                        viewModel.replyMail(
+                            getEmails(),
+                            binding.subject.text.toString(),
+                            binding.message.text.toString(),
+                            (type as SendType.Reply).email
+                        )
+                    }
+                    is SendType.Send -> {
+                        viewModel.sendMail(
+                            getEmails(),
+                            binding.subject.text.toString(),
+                            binding.message.text.toString()
+                        )
+                    }
+                }
             }
         }
         return super.onOptionsItemSelected(item)
@@ -187,6 +239,11 @@ class ComposeEmailFragment :
     override fun createViews() = Views()
 
     override lateinit var handler: ComposeEmailHandler
+
+    sealed class SendType {
+        class Reply(val email: Email) : SendType()
+        class Send() : SendType()
+    }
 
 }
 
