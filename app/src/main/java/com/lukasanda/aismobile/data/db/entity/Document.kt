@@ -11,12 +11,17 @@
  * limitations under the License.
  */
 
-package sk.lukasanda.dataprovider.data
+package com.lukasanda.aismobile.data.db.entity
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "document")
 data class Document(
+    @PrimaryKey(autoGenerate = false)
+    val id: String,
     val name: String,
     val mimeType: String,
-    val id: String,
     val parentFolderId: String,
     val openable: Boolean
 )

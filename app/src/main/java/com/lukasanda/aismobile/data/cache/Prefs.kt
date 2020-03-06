@@ -22,9 +22,6 @@ import org.joda.time.format.DateTimeFormat
 class Prefs(context: Context) {
     val PREFS_FILENAME = "${BuildConfig.APPLICATION_ID}.prefs"
     val SESSION_EXPIRATION = "session_expiration_date"
-    val COOKIES = "cookies"
-    val USERNAME = "username"
-    val PASSWORD = "password"
     val AISID = "aisid"
     val SENT_DIRECTORY_ID = "sent_directory_id"
     val NEW_EMAIL_COUNT = "new_email_count"
@@ -33,10 +30,6 @@ class Prefs(context: Context) {
     val COURSE_CACHE_EXPIRATION = "course_cache_expiration"
 
     val prefs: SharedPreferences = context.getSharedPreferences(PREFS_FILENAME, 0)
-
-    var sessionCookie: String
-        get() = prefs.getString(COOKIES, "") ?: ""
-        set(value) = prefs.edit().putString(COOKIES, value).apply()
 
     var expiration: DateTime
         get() = DateTime.parse(
@@ -66,7 +59,7 @@ class Prefs(context: Context) {
         get() = DateTime.parse(
             prefs.getString(
                 COURSE_CACHE_EXPIRATION,
-                DateTime.now().minusDays(1).toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
+                DateTime.now().minusHours(2).toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
             ), DateTimeFormat.forPattern("dd.MM.yyyy hh:mm")
         )
         set(value) = prefs.edit().putString(
@@ -78,21 +71,13 @@ class Prefs(context: Context) {
         get() = DateTime.parse(
             prefs.getString(
                 FULL_COURSE_CACHE_EXPIRATION,
-                DateTime.now().minusDays(1).toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
+                DateTime.now().minusWeeks(2).toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
             ), DateTimeFormat.forPattern("dd.MM.yyyy hh:mm")
         )
         set(value) = prefs.edit().putString(
             FULL_COURSE_CACHE_EXPIRATION,
             value.toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
         ).apply()
-
-    var username: String
-        get() = prefs.getString(USERNAME, "") ?: ""
-        set(value) = prefs.edit().putString(USERNAME, value).apply()
-
-    var password: String
-        get() = prefs.getString(PASSWORD, "") ?: ""
-        set(value) = prefs.edit().putString(PASSWORD, value).apply()
 
     var id: Int
         get() = prefs.getInt(AISID, 0)

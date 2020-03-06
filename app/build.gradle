@@ -96,11 +96,17 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.2'
+//    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.2'
 
     //application
     def multidex__version = "2.0.1"
     implementation "androidx.multidex:multidex:$multidex__version"
+
+    //download files
+    implementation "androidx.tonyodev.fetch2:xfetch2:3.1.4"
+
+    //crypto
+    implementation "de.adorsys.android:securestoragelibrary:1.2.4"
 
     //application components
     implementation "androidx.activity:activity-ktx:$libraries.activity__version"

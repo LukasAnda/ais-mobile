@@ -19,6 +19,7 @@ import com.lukasanda.aismobile.core.TLSSocketFactoryCompat
 import com.lukasanda.aismobile.util.AuthInterceptor
 import com.lukasanda.aismobile.util.EncodingInterceptor
 import okhttp3.Cache
+import okhttp3.ConnectionSpec
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -45,6 +46,15 @@ val networkModule = module {
             connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
             writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
             readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
+            connectionSpecs(
+                listOf(
+                    ConnectionSpec.CLEARTEXT,
+                    ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+                        .allEnabledTlsVersions()
+                        .allEnabledCipherSuites()
+                        .build()
+                )
+            )
             followSslRedirects(false)
             followRedirects(false)
             retryOnConnectionFailure(true)

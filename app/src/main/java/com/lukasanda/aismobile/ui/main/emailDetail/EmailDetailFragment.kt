@@ -39,9 +39,9 @@ class EmailDetailFragment :
             setHasOptionsMenu(true)
             val args by navArgs<EmailDetailFragmentArgs>()
 
-            binding.sender.text = args.email.sender
-            binding.subject.text = args.email.subject
-            binding.date.text = args.email.date
+            binding?.sender?.text = args.email.sender
+            binding?.subject?.text = args.email.subject
+            binding?.date?.text = args.email.date
 
             val initials = args.email.sender.getNameFromSender().getInitialsFromName()
             val drawable =
@@ -49,15 +49,15 @@ class EmailDetailFragment :
                     .endConfig()
                     .buildRound(initials, ColorGenerator.MATERIAL.getColor(args.email.sender))
 
-            binding.icon.setImageDrawable(drawable)
+            binding?.icon?.setImageDrawable(drawable)
 
             viewModel.emailDetail().observe(viewLifecycleOwner, Observer {
                 it?.let {
-                    binding.progress.hide()
-                    binding.content.text = it
+                    binding?.progress?.hide()
+                    binding?.content?.text = it
                 } ?: kotlin.run {
-                    binding.content.text = ""
-                    binding.progress.show()
+                    binding?.content?.text = ""
+                    binding?.progress?.show()
                 }
             })
 

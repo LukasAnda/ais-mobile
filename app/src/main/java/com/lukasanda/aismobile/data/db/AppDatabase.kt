@@ -18,14 +18,11 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.lukasanda.aismobile.data.db.AppDatabase.Companion.DB_VERSION
-import com.lukasanda.aismobile.data.db.dao.CourseDao
-import com.lukasanda.aismobile.data.db.dao.EmailDao
-import com.lukasanda.aismobile.data.db.dao.ProfileDao
-import com.lukasanda.aismobile.data.db.dao.TimetableDao
+import com.lukasanda.aismobile.data.db.dao.*
 import com.lukasanda.aismobile.data.db.entity.*
 
 @Database(
-    entities = [TimetableItem::class, Profile::class, Course::class, Sheet::class, Email::class, Teacher::class],
+    entities = [TimetableItem::class, Profile::class, Course::class, Sheet::class, Email::class, Teacher::class, Document::class],
     version = DB_VERSION,
     exportSchema = false
 )
@@ -34,6 +31,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun getProfileDao(): ProfileDao
     abstract fun getCourseDao(): CourseDao
     abstract fun getEmailDao(): EmailDao
+    abstract fun getDocumentDao(): DocumentDao
 
     companion object {
         const val DB_VERSION = 1
@@ -50,7 +48,6 @@ abstract class AppDatabase : RoomDatabase() {
         private fun build(context: Context) =
             Room.databaseBuilder(context.applicationContext, AppDatabase::class.java, DB_NAME)
                 .fallbackToDestructiveMigration()
-//                .addMigrations(MIGRATION_1_TO_2)
                 .build()
     }
 }

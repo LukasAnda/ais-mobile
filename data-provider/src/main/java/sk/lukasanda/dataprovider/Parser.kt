@@ -427,7 +427,7 @@ object Parser {
         }
     }
 
-    fun getDocuments(webResponse: String): List<Document>? {
+    fun getDocuments(webResponse: String, parentFolder: String = ""): List<Document>? {
         if (webResponse.isEmpty()) return null
 
         val cleaner = HtmlCleaner()
@@ -435,32 +435,33 @@ object Parser {
         return try {
             val items = cleaner.clean(webResponse)
 
-            val topTable = items.findElementByAttValue("name", "wqqwqqwwqyw0", true, true)
+            val topTable = items.findElementByAttValue("name", "wqqwqqwwqyw0", true, true).findElementByName("tbody", true)
             topTable.childTagList.forEach {
                 if (it.childTagList.size == 1) return@forEach
 
-                val name = it.childTagList.component2().content()
-                val link: String = it.getElementList(
-                    { it.name == "a" && it.getAttributeByName("href").contains("slozka.pl") },
-                    true
-                ).firstOrNull()?.getAttributeByName("href") ?: ""
-                val id = link.substringAfter("id=").substringBefore(";")
-                val parentId = link.substringAfter("dok=").substringBefore(";")
-                returnList.add(Document(name, id, parentId, true))
+                val name = it.childTagList.component2().findElementByName("small", true).content()
+                val link: String = it.getElementList({ it.name == "a" && it.getAttributeByName("href").contains("slozka.pl") }, true).firstOrNull()?.getAttributeByName("href") ?: ""
+                val id = link.substringAfter("download=").substringBefore(";")
+                val parentId = link.substringAfter("id=").substringBefore(";")
+
+                val mimeType = it.getElementList({ it.name == "img" && it.getAttributeByName("sysid").contains("mime") }, true).firstOrNull()?.getAttributeByName("sysid") ?: ""
+                returnList.add(Document(name, mimeType, id, parentId, true))
             }
-            val bottomTable = items.findElementByAttValue("name", "wqqwqqwwqyw1", true, true)
+            val bottomTable = items.findElementByAttValue("name", "wqqwqqwwqyw1", true, true).findElementByName("tbody", true)
 
             bottomTable.childTagList.forEach {
                 if (it.childTagList.size == 1) return@forEach
 
-                val name = it.childTagList.component2().content()
+                val name = it.childTagList.component2().findElementByName("small", true).content()
                 val link: String = it.getElementList(
                     { it.name == "a" && it.getAttributeByName("href").contains("slozka.pl") },
                     true
                 ).firstOrNull()?.getAttributeByName("href") ?: ""
                 val id = link.substringAfter("id=").substringBefore(";")
                 val parentId = link.substringAfter("dok=").substringBefore(";")
-                returnList.add(Document(name, id, parentId, false))
+
+                println("Name: $name, Link: $link, id: $id, parentid: $parentId")
+                returnList.add(Document(name, "", id, parentFolder, false))
             }
 
             returnList

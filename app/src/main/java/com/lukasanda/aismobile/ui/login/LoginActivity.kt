@@ -21,7 +21,7 @@ import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.Snackbar
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.core.State
-import com.lukasanda.aismobile.data.cache.Prefs
+import com.lukasanda.aismobile.data.cache.SafePrefs
 import com.lukasanda.aismobile.databinding.ActivityLoginBinding
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
@@ -33,17 +33,17 @@ import sk.lukasanda.base.ui.activity.BaseActivityViews
 import sk.lukasanda.base.ui.activity.BaseUIActivity
 
 class LoginActivity : BaseUIActivity<LoginViewModel, LoginActivity.Views, ActivityLoginBinding>() {
-    private val prefs by inject<Prefs>()
+    private val prefs by inject<SafePrefs>()
     private var hasPressedBack = false
 
     inner class Views : BaseActivityViews {
         override fun setNavigationGraph(): Int? = null
 
         override fun modifyViews() {
-            binding.emailEditText.setText(prefs.username)
+            binding.emailEditText.setText(prefs.email)
             binding.passwordEditText.setText(prefs.password)
 
-            if (prefs.username.isNotEmpty() && prefs.password.isNotEmpty()) {
+            if (prefs.email.isNotEmpty() && prefs.password.isNotEmpty()) {
                 viewModel.login(
                     binding.emailEditText.text.toString(),
                     binding.passwordEditText.text.toString()

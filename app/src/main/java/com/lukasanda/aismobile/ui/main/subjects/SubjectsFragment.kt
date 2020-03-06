@@ -54,22 +54,22 @@ class SubjectsFragment :
     }
 
     override fun onDestroyView() {
-        binding.pager.unregisterOnPageChangeCallback(pageChangeCallback)
+        binding?.pager?.unregisterOnPageChangeCallback(pageChangeCallback)
         super.onDestroyView()
     }
 
     inner class Views : BaseViews {
         override fun modifyViews() {
             postponeEnterTransition()
-            binding.buttonBack.setOnClickListener {
-                binding.pager.dec()
+            binding?.buttonBack?.setOnClickListener {
+                binding?.pager?.dec()
             }
 
-            binding.buttonForward.setOnClickListener {
-                binding.pager.inc()
+            binding?.buttonForward?.setOnClickListener {
+                binding?.pager?.inc()
             }
 
-            binding.pager.apply {
+            binding?.pager?.apply {
                 offscreenPageLimit = 1
                 adapter = semesterAdapter
                 orientation = ViewPager2.ORIENTATION_HORIZONTAL
@@ -81,34 +81,34 @@ class SubjectsFragment :
                 if (it == null) return@Observer
                 startPostponedEnterTransition()
                 if (it.isEmpty()) {
-                    binding.toolbar.hide()
+                    binding?.toolbar?.hide()
                 } else {
                     semesterAdapter.swapData(it)
                     viewModel.semesters.replaceWith(it.map { it.first().course.semester })
 
 
-                    binding.toolbar.show()
-                    binding.progress.hide()
-                    binding.pager.setCurrentItem(viewModel.getPage(), false)
+                    binding?.toolbar?.show()
+                    binding?.progress?.hide()
+                    binding?.pager?.setCurrentItem(viewModel.getPage(), false)
                     updateToolbar(viewModel.getPage())
-                    binding.pager.registerOnPageChangeCallback(pageChangeCallback)
+                    binding?.pager?.registerOnPageChangeCallback(pageChangeCallback)
                 }
             })
         }
     }
 
     private fun updateToolbar(position: Int) {
-        binding.semester.text = viewModel.getSemesterName(position)
+        binding?.semester?.text = viewModel.getSemesterName(position)
 
         if (position == 0) {
-            binding.buttonBack.hide()
+            binding?.buttonBack?.hide()
         } else {
-            binding.buttonBack.show()
+            binding?.buttonBack?.show()
         }
         if (position == kotlin.math.max(semesterAdapter.itemCount - 1, 0)) {
-            binding.buttonForward.hide()
+            binding?.buttonForward?.hide()
         } else {
-            binding.buttonForward.show()
+            binding?.buttonForward?.show()
         }
     }
 }

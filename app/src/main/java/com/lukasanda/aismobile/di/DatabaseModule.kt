@@ -14,6 +14,7 @@
 package com.lukasanda.aismobile.di
 
 import com.lukasanda.aismobile.data.cache.Prefs
+import com.lukasanda.aismobile.data.cache.SafePrefs
 import com.lukasanda.aismobile.data.db.AppDatabase
 import org.koin.android.ext.koin.androidApplication
 import org.koin.dsl.module
@@ -24,8 +25,10 @@ val roomModule = module {
     single(createdAtStart = false) { get<AppDatabase>().getProfileDao() }
     single(createdAtStart = false) { get<AppDatabase>().getTimetableDao() }
     single(createdAtStart = false) { get<AppDatabase>().getEmailDao() }
+    single(createdAtStart = false) { get<AppDatabase>().getDocumentDao() }
 }
 
 val prefsModule = module {
     single { Prefs(androidApplication()) }
+    single { SafePrefs(androidApplication()) }
 }

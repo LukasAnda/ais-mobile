@@ -21,6 +21,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.lukasanda.aismobile.core.State
 import com.lukasanda.aismobile.data.cache.Prefs
+import com.lukasanda.aismobile.data.cache.SafePrefs
 import com.lukasanda.aismobile.data.remote.api.AISApi
 import com.lukasanda.aismobile.util.getSessionId
 import kotlinx.coroutines.launch
@@ -30,7 +31,9 @@ import retrofit2.Response
 import sk.lukasanda.base.ui.viewmodel.BaseViewModel
 
 class LoginViewModel(
-    private val service: AISApi, private val prefs: Prefs,
+    private val service: AISApi,
+    private val prefs: Prefs,
+    private val safePrefs: SafePrefs,
     private val context: Application,
     private val handle: SavedStateHandle
 ) : BaseViewModel(handle) {
@@ -41,7 +44,7 @@ class LoginViewModel(
     fun login(name: String, password: String) {
         _state.postValue(State.Loading)
 
-        if (prefs.expiration.isBeforeNow || name != prefs.username || password != prefs.password) {
+        if (prefs.expiration.isBeforeNow || name != safePrefs.email || password != safePrefs.password) {
             //Need new token
             requestNewCookie(name, password)
         } else {
@@ -76,11 +79,11 @@ class LoginViewModel(
     ): Boolean {
         val cookies = response.headers().get("Set-Cookie") ?: return false
 
-        prefs.sessionCookie = getSessionId(cookies)
         prefs.expiration = DateTime.now().plusDays(1)
 
-        prefs.username = name
-        prefs.password = password
+        safePrefs.sessionCookie = getSessionId(cookies)
+        safePrefs.email = name
+        safePrefs.password = password
 
         return true
     }

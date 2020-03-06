@@ -13,12 +13,17 @@
 
 package com.lukasanda.aismobile.ui.main
 
+import android.Manifest
+import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.ViewOutlineProvider
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.core.app.ActivityCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.Observer
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
@@ -31,12 +36,16 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.cache.Prefs
+import com.lukasanda.aismobile.data.cache.SafePrefs
+import com.lukasanda.aismobile.data.db.entity.Document
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.data.db.entity.Teacher
 import com.lukasanda.aismobile.databinding.ActivityMainBinding
 import com.lukasanda.aismobile.databinding.DrawerHeaderViewBinding
 import com.lukasanda.aismobile.ui.login.LoginActivity
 import com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailHandler
+import com.lukasanda.aismobile.ui.main.documents.DocumentsFragmentDirections
+import com.lukasanda.aismobile.ui.main.documents.DocumentsHandler
 import com.lukasanda.aismobile.ui.main.email.EmailFragmentDirections
 import com.lukasanda.aismobile.ui.main.email.EmailFragmentHandler
 import com.lukasanda.aismobile.ui.main.emailDetail.EmailDetailFragmentDirections
@@ -48,6 +57,7 @@ import com.lukasanda.aismobile.ui.main.subjects.SubjectsFragmentHandler
 import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentDirections
 import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentHandler
 import com.lukasanda.aismobile.util.createLiveData
+import com.lukasanda.aismobile.util.getMimeType
 import com.lukasanda.aismobile.util.show
 import com.lukasanda.aismobile.util.startWorker
 import org.koin.android.ext.android.inject
@@ -59,14 +69,15 @@ import sk.lukasanda.base.ui.activity.BaseUIActivity
 
 
 class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityMainBinding>(),
-        TimetableFragmentHandler, SubjectsFragmentHandler, EmailFragmentHandler, EmailDetailHandler,
-        ComposeEmailHandler, SubjectDetailHandler {
+    TimetableFragmentHandler, SubjectsFragmentHandler, EmailFragmentHandler, EmailDetailHandler,
+    ComposeEmailHandler, SubjectDetailHandler, DocumentsHandler {
 
     private lateinit var toggle: ActionBarDrawerToggle
 
     private lateinit var drawerHeaderBinding: DrawerHeaderViewBinding
 
     override val viewModel by viewModel<MainViewModel> { parametersOf(Bundle()) }
+    private val safePrefs by inject<SafePrefs>()
     private val prefs by inject<Prefs>()
 
     inner class Views : BaseActivityViews {
@@ -78,7 +89,7 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
             }
 
 
-            if (prefs.sessionCookie.isEmpty()) {
+            if (safePrefs.sessionCookie.isEmpty()) {
                 startActivity(Intent(this@MainActivity, LoginActivity::class.java))
             } else {
                 startWorker(applicationContext)
@@ -87,7 +98,7 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
             viewModel.profile().observe(this@MainActivity, Observer {
                 if (it == null) return@Observer
 
-                val builder = LazyHeaders.Builder().addHeader("Cookie", prefs.sessionCookie)
+                val builder = LazyHeaders.Builder().addHeader("Cookie", safePrefs.sessionCookie)
 
                 val url = GlideUrl("https://is.stuba.sk/auth/lide/foto.pl?id=${it.id}", builder.build())
 
@@ -119,6 +130,21 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
                     }
                 }
             })
+
+            viewModel.fileHandle().observe(this@MainActivity, Observer {
+                val (file, _) = it
+                val intent = Intent(Intent.ACTION_VIEW)
+                val uri = FileProvider.getUriForFile(this@MainActivity, this@MainActivity.applicationContext.packageName + ".provider", file)
+                intent.setDataAndType(uri, getMimeType(file.path))
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+                try {
+                    startActivity(intent)
+                } catch (e: ActivityNotFoundException) {
+                    e.printStackTrace()
+                }
+            })
         }
 
         override fun setNavigationGraph() = R.id.homeNavigationContainer
@@ -132,7 +158,7 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
 
     override fun setBinding(): ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
 
-    override fun setAppBarConfig() = AppBarConfiguration.Builder(R.id.scheduleFragment, R.id.subjectsFragment, R.id.emailFragment).setDrawerLayout(binding.drawer).build()
+    override fun setAppBarConfig() = AppBarConfiguration.Builder(R.id.scheduleFragment, R.id.subjectsFragment, R.id.emailFragment, R.id.documentsFragment).setDrawerLayout(binding.drawer).build()
 
     override fun lowerToolbar() {
         binding.appbar.outlineProvider = null
@@ -172,5 +198,21 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
 
     override fun writeToTeacher(teacher: Teacher) {
         navController?.navigateSafe(SubjectDetailFragmentDirections.actionSubjectDetailFragmentToComposeEmailFragment(teacher = teacher))
+    }
+
+    override fun openFolder(document: Document) {
+        navController?.navigateSafe(DocumentsFragmentDirections.actionDocumentsFragmentSelf(document.id))
+    }
+
+    override fun openDocument(document: Document) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            viewModel.downloadFile(document, this)
+        } else {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), PERMISSION_REQUEST_CODE)
+        }
+    }
+
+    companion object {
+        const val PERMISSION_REQUEST_CODE = 1234
     }
 }

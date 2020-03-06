@@ -45,7 +45,7 @@ class TimetableFragment :
     }
 
     override fun onDestroyView() {
-        binding.pager.unregisterOnPageChangeCallback(pageChangeCallback)
+        binding?.pager?.unregisterOnPageChangeCallback(pageChangeCallback)
         super.onDestroyView()
     }
 
@@ -56,31 +56,31 @@ class TimetableFragment :
 
     inner class Views : BaseViews {
         override fun modifyViews() {
-            binding.buttonBack.setOnClickListener {
-                binding.pager.dec()
+            binding?.buttonBack?.setOnClickListener {
+                binding?.pager?.dec()
             }
 
-            binding.buttonForward.setOnClickListener {
-                binding.pager.inc()
+            binding?.buttonForward?.setOnClickListener {
+                binding?.pager?.inc()
             }
 
-            binding.pager.apply {
+            binding?.pager?.apply {
                 offscreenPageLimit = 1
                 adapter = weekAdapter
                 orientation = ViewPager2.ORIENTATION_HORIZONTAL
-                binding.pager.setCurrentItem(viewModel.getCurrentDay(), false)
+                binding?.pager?.setCurrentItem(viewModel.getCurrentDay(), false)
 
-                binding.pager.registerOnPageChangeCallback(pageChangeCallback)
+                binding?.pager?.registerOnPageChangeCallback(pageChangeCallback)
             }
 
             viewModel.timetable().observe(this@TimetableFragment, Observer {
-                binding.progress.hide()
+                binding?.progress?.hide()
                 weekAdapter.swapData(it)
                 handler.lowerToolbar()
             })
 
             viewModel.days().observe(this@TimetableFragment, Observer {
-                binding.day.text = it
+                binding?.day?.text = it
             })
 
             viewModel.setDay(viewModel.getActualDay())

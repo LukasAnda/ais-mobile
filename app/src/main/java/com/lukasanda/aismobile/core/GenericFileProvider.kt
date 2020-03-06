@@ -11,12 +11,8 @@
  * limitations under the License.
  */
 
-package sk.lukasanda.dataprovider.data
+package com.lukasanda.aismobile.core
 
-data class Document(
-    val name: String,
-    val mimeType: String,
-    val id: String,
-    val parentFolderId: String,
-    val openable: Boolean
-)
+import androidx.core.content.FileProvider
+
+class GenericFileProvider : FileProvider()

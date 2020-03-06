@@ -28,7 +28,7 @@ import sk.lukasanda.base.ui.viewmodel.BaseViewModel
 
 abstract class BaseFragment<VIEWS : BaseViews, BINDING : ViewBinding, VIEWMODEL : BaseViewModel, HANDLER : Any> :
     Fragment(), LifecycleTrait, HandlerTrait<HANDLER> {
-    protected lateinit var binding: BINDING
+    protected var binding: BINDING? = null
     private lateinit var views: VIEWS
     abstract val viewModel: VIEWMODEL
 
@@ -43,13 +43,17 @@ abstract class BaseFragment<VIEWS : BaseViews, BINDING : ViewBinding, VIEWMODEL 
         savedInstanceState: Bundle?
     ): View? {
         this.binding = this.setBinding()
-        return binding.root
+        return binding?.root
+    }
+
+    override fun onDestroyView() {
+        binding = null
+        super.onDestroyView()
     }
 
     override fun onPause() {
         super.onPause()
-        val inputMethodManager =
-            context?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+        val inputMethodManager = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
         inputMethodManager?.let {
             if (it.isActive) {
                 it.hideSoftInputFromWindow(view?.windowToken, 0)

@@ -19,7 +19,7 @@
         android:title="" />
     <item
         android:id="@+id/subjectsFragment"
-        android:icon="@drawable/ic_subjects"
+        android:icon="@drawable/ic_evaluation"
         android:title="" />
     <item
         android:id="@+id/notificationsFragment"

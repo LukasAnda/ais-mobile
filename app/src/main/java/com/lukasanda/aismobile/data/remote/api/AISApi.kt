@@ -81,20 +81,10 @@ interface AISApi {
     suspend fun emailPage(@Field("on", encoded = true) page: String): Response<ResponseBody>
 
     @GET("/auth/posta/email.pl")
-    suspend fun emailDetail(
-        @Query(
-            "eid",
-            encoded = true
-        ) params: String = "8851469;fid=620955;on=0"
-    ): Response<ResponseBody>
+    suspend fun emailDetail(@Query("eid", encoded = true) params: String = "8851469;fid=620955;on=0"): Response<ResponseBody>
 
     @GET("/auth/posta/slozka.pl")
-    suspend fun deleteEmail(
-        @Query(
-            "fid",
-            encoded = true
-        ) params: String
-    ): Response<ResponseBody>
+    suspend fun deleteEmail(@Query("fid", encoded = true) params: String): Response<ResponseBody>
 
     @Headers("Content-Type: application/x-www-form-urlencoded;charset=UTF-8")
     @POST("/auth/system/uissuggest.pl")
@@ -157,11 +147,13 @@ interface AISApi {
     ): Response<ResponseBody>
 
     @GET("/auth/katalog/syllabus.pl")
-    suspend fun getCourseDetail(
-        @Query(
-            "predmet",
-            encoded = true
-        ) predmet: String
-    ): Response<ResponseBody>
+    suspend fun getCourseDetail(@Query("predmet", encoded = true) predmet: String): Response<ResponseBody>
+
+    @GET("/auth/dok_server/slozka.pl")
+    suspend fun getDocumentsInFolder(@Query("ds", encoded = true) folder: String): Response<ResponseBody>
+
+    @GET("/auth/dok_server/slozka.pl")
+    suspend fun getDocumentInfo(@Query("id", encoded = true) id: String): Response<ResponseBody>
+
 
 }

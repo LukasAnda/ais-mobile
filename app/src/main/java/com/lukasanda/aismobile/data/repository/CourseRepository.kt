@@ -15,7 +15,9 @@ package com.lukasanda.aismobile.data.repository
 
 import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.db.dao.CourseDao
+import com.lukasanda.aismobile.data.db.dao.DocumentDao
 import com.lukasanda.aismobile.data.db.entity.Course
+import com.lukasanda.aismobile.data.db.entity.Document
 import com.lukasanda.aismobile.data.db.entity.Sheet
 import com.lukasanda.aismobile.data.db.entity.Teacher
 import com.lukasanda.aismobile.data.remote.AuthException
@@ -33,21 +35,20 @@ import sk.lukasanda.dataprovider.data.Semester
 class CourseRepository(
     private val aisApi: AISApi,
     private val courseDao: CourseDao,
+    private val documentDao: DocumentDao,
     private val prefs: Prefs
 ) {
 
-    fun get() =
-        courseDao.getCourses().map { it.groupBy { it.course.semester } }.map { it.values.toList() }
+    fun get() = courseDao.getCourses().map { it.groupBy { it.course.semester } }.map { it.values.toList() }
 
     fun get(courseId: String) = courseDao.getCourse(courseId)
 
     @Throws(AuthException::class, HTTPException::class)
     suspend fun update() {
 
-        if (prefs.courseExpiration.isAfterNow) return
+        if (prefs.courseExpiration.plusHours(1).isAfterNow) return
 
-        val updateType =
-            if (prefs.fullCourseExpiration.isAfterNow) NEWEST else FETCH //If there is no semester fetch, if there is one semester only FETCH == NEWEST
+        val updateType = if (prefs.fullCourseExpiration.plusWeeks(1).isAfterNow) NEWEST else FETCH //If there is no semester fetch, if there is one semester only FETCH == NEWEST
 
         val semestersResponse = aisApi.semesters().authenticatedOrThrow()
 
@@ -87,19 +88,26 @@ class CourseRepository(
                     updateSemester(it)
                 }
 
-                println(dbSheets)
+                val dbDocuments = dbCourses.map { Document(it.documentsId, it.courseName.substringAfter(" "), "", "", false) }.filterNot { it.id.isEmpty() }
+                documentDao.updateFolder("", dbDocuments)
+
                 courseDao.update(dbCourses, dbSheets, dbTeachers)
             }
             NEWEST -> {
                 semesters?.last()?.let {
                     updateSemester(it)
                 }
+
+                // We need only insert because update would delete the folders we are not updating
+                val dbDocuments = dbCourses.map { Document(it.documentsId, it.courseName.substringAfter(" "), "", "", false) }.filterNot { it.id.isEmpty() }
+                documentDao.insertDocuments(dbDocuments)
+
                 courseDao.updateSingle(dbCourses, dbSheets, dbTeachers)
             }
         }
 
-        prefs.courseExpiration = DateTime.now().plusMinutes(15)
-        prefs.fullCourseExpiration = DateTime.now().plusWeeks(1)
+        prefs.courseExpiration = DateTime.now()
+        prefs.fullCourseExpiration = DateTime.now()
     }
 
 
@@ -116,21 +124,14 @@ class CourseRepository(
         val sheetResponse =
             aisApi.subjectSheets(semester.studiesId, semester.id, course.id)
                 .authenticatedOrThrow()
-        val sheets =
-            Parser.getSheets(sheetResponse) ?: mutableListOf()
-
-//        println(sheets.joinToString("\n"))
+        val sheets = Parser.getSheets(sheetResponse) ?: mutableListOf()
 
         return sheets.map { sheetToDb(it, course) }
     }
 
-    private fun teachersToDb(course: Course, teacher: sk.lukasanda.dataprovider.data.Teacher) =
-        Teacher(name = teacher.name, id = teacher.id, courseId = course.id)
+    private fun teachersToDb(course: Course, teacher: sk.lukasanda.dataprovider.data.Teacher) = Teacher(name = teacher.name, id = teacher.id, courseId = course.id)
 
-    private fun courseToDb(
-        course: sk.lukasanda.dataprovider.data.Course,
-        semester: Semester
-    ) =
+    private fun courseToDb(course: sk.lukasanda.dataprovider.data.Course, semester: Semester) =
         Course(
             id = course.courseId,
             courseName = course.courseName,
@@ -145,10 +146,7 @@ class CourseRepository(
             finalMark = "-"
         )
 
-    private fun sheetToDb(
-        sheet: sk.lukasanda.dataprovider.data.Sheet,
-        course: Course
-    ) = Sheet(
+    private fun sheetToDb(sheet: sk.lukasanda.dataprovider.data.Sheet, course: Course) = Sheet(
         course.id + sheet.name,
         courseId = course.id,
         name = sheet.name,

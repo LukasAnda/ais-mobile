@@ -53,7 +53,7 @@ class EmailFragment :
     inner class Views : BaseViews {
         override fun modifyViews() {
             postponeEnterTransition()
-            binding.recycler.bindLinear(adapter)
+            binding?.recycler?.bindLinear(adapter)
 
             val swipeHelper: SwipeHelper = object : SwipeHelper() {
                 @SuppressLint("RestrictedApi")
@@ -81,15 +81,15 @@ class EmailFragment :
                 }
             }
 
-            swipeHelper.attachToRecyclerView(binding.recycler)
+            swipeHelper.attachToRecyclerView(binding?.recycler!!)
 
-            binding.pullToRefresh.setOnRefreshListener {
-                binding.pullToRefresh.isRefreshing = true
+            binding?.pullToRefresh?.setOnRefreshListener {
+                binding?.pullToRefresh?.isRefreshing = true
                 viewModel.update()
             }
 
             viewModel.emails().observe(viewLifecycleOwner, Observer {
-                binding.pullToRefresh.isRefreshing = false
+                binding?.pullToRefresh?.isRefreshing = false
                 adapter.swapData(it.sortedByDescending {
                     DateTime.parse(
                         it.date,
@@ -99,7 +99,7 @@ class EmailFragment :
                 handler.riseToolbar()
                 startPostponedEnterTransition()
             })
-            binding.compose.setOnClickListener {
+            binding?.compose?.setOnClickListener {
                 handler.composeEmail()
             }
         }

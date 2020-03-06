@@ -47,13 +47,13 @@ class SubjectDetailFragment :
 
             val args by navArgs<SubjectDetailFragmentArgs>()
 
-            binding.tablesRecycler.bindLinear(sheetsAdapter)
-            binding.teachersRecycler.bindLinear(teachersAdapter)
+            binding?.tablesRecycler?.bindLinear(sheetsAdapter)
+            binding?.teachersRecycler?.bindLinear(teachersAdapter)
 
             viewModel.getCourse(args.courseId).observe(viewLifecycleOwner, Observer {
                 sheetsAdapter.swapData(it.sheets)
                 teachersAdapter.swapData(it.teachers)
-                binding.infoView.setData(it)
+                binding?.infoView?.setData(it)
 
                 startPostponedEnterTransition()
             })

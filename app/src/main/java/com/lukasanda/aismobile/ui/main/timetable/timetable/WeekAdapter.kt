@@ -32,6 +32,11 @@ class WeekAdapter(private val listener: (TimetableItem) -> Unit) :
             binding.recycler.setRecycledViewPool(pool)
         }
 
+    override fun onViewRecycled(holder: WeekItemHolder) {
+        super.onViewRecycled(holder)
+        holder.binding.recycler.adapter = null
+    }
+
     override fun getItemCount() = Int.MAX_VALUE
 
     override fun onBindViewHolder(holder: WeekItemHolder, position: Int) {

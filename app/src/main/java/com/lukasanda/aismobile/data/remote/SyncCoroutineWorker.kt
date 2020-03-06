@@ -18,6 +18,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.google.gson.Gson
 import com.lukasanda.aismobile.data.cache.Prefs
+import com.lukasanda.aismobile.data.cache.SafePrefs
 import com.lukasanda.aismobile.data.db.dao.ProfileDao
 import com.lukasanda.aismobile.data.db.entity.Profile
 import com.lukasanda.aismobile.data.remote.api.AISApi
@@ -44,6 +45,7 @@ class SyncCoroutineWorker(
     private val courseRepository: CourseRepository by inject()
     private val service: AISApi by inject()
     private val prefs: Prefs by inject()
+    private val safePrefs: SafePrefs by inject()
     private val profileDao: ProfileDao by inject()
 
     private val emailRepository: EmailRepository by inject()
@@ -63,15 +65,14 @@ class SyncCoroutineWorker(
             val wifiResponse = service.wifiInfo().authenticatedOrThrow()
             saveProfile(educationResponse, wifiResponse)
 
-            courseRepository.update()
-//
             emailRepository.update()
+            courseRepository.update()
 
             Result.success()
         } catch (e: Exception) {
             if (e is AuthException) {
-                val response = service.login(login = prefs.username, password = prefs.password)
-                saveCookie(prefs.username, prefs.password, response)
+                val response = service.login(login = safePrefs.email, password = safePrefs.password)
+                saveCookie(safePrefs.email, safePrefs.password, response)
             }
 
             println(e.message)
@@ -95,11 +96,11 @@ class SyncCoroutineWorker(
     ): Boolean {
         val cookies = response.headers().get("Set-Cookie") ?: return false
 
-        prefs.sessionCookie = getSessionId(cookies)
+        safePrefs.sessionCookie = getSessionId(cookies)
         prefs.expiration = DateTime.now().plusDays(1)
 
-        prefs.username = name
-        prefs.password = password
+        safePrefs.email = name
+        safePrefs.password = password
 
         return true
     }

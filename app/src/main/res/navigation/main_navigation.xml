@@ -85,4 +85,17 @@
             android:id="@+id/action_subjectDetailFragment_to_composeEmailFragment"
             app:destination="@id/composeEmailFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/documentsFragment"
+        android:name="com.lukasanda.aismobile.ui.main.documents.DocumentsFragment"
+        android:label="DocumentsFragment">
+        <action
+            android:id="@+id/action_documentsFragment_self"
+            app:destination="@id/documentsFragment" />
+        <argument
+            android:name="folder"
+            android:defaultValue=""
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
 </navigation>
