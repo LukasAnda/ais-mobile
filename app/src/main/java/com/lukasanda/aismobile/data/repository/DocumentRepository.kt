@@ -24,6 +24,8 @@ class DocumentRepository(private val prefs: Prefs, private val documentDao: Docu
 
     fun getDocuments(folder: String) = documentDao.getDocuments(folder)
 
+    suspend fun deleteAll() = documentDao.deleteAllDocuments()
+
     suspend fun fetchDocument(folder: String) {
         val response = aisApi.getDocumentsInFolder("1;id=$folder").authenticatedOrThrow()
         val documents = Parser.getDocuments(response, folder)?.map { Document(it.id, it.name, it.mimeType, it.parentFolderId, it.openable) } ?: emptyList()

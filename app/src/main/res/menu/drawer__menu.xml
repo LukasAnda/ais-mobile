@@ -24,7 +24,7 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/logout"
+        android:id="@+id/logoutFragment"
         android:title="@string/logout"
         app:showAsAction="ifRoom" />
 </menu>

@@ -28,7 +28,7 @@ import org.koin.dsl.module
 
 val viewModelModule = module {
     viewModel { (handle: SavedStateHandle) -> LoginViewModel(get(), get(), get(), get(), handle) }
-    viewModel { (handle: SavedStateHandle) -> MainViewModel(get(), get(), get(), handle) }
+    viewModel { (handle: SavedStateHandle) -> MainViewModel(get(), get(), get(), get(), get(), get(), get(), get(), handle) }
     viewModel { (handle: SavedStateHandle) -> SubjectsViewModel(get(), handle) }
     viewModel { (handle: SavedStateHandle) -> TimetableViewModel(get(), get(), handle) }
     viewModel { (handle: SavedStateHandle) -> EmailViewModel(get(), handle) }

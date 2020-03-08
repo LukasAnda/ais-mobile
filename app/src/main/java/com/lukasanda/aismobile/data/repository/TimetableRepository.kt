@@ -62,6 +62,8 @@ class TimetableRepository(
         saveCourses(scheduleResponse)
     }
 
+    suspend fun deleteAll() = timetableDao.deleteAll()
+
     private suspend fun saveCourses(response: String) {
         val schedule =
             Parser.getSchedule(response) ?: return

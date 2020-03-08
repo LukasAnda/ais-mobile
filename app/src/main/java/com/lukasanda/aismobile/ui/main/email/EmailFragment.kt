@@ -29,6 +29,7 @@ import com.lukasanda.aismobile.ui.activity.BaseViews
 import com.lukasanda.aismobile.ui.fragment.BaseFragment
 import com.lukasanda.aismobile.ui.main.email.adapter.EmailAdapter
 import com.lukasanda.aismobile.ui.recyclerview.bindLinear
+import com.lukasanda.aismobile.ui.trait.ACTION_EMAIL_DELETE
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -61,6 +62,7 @@ class EmailFragment :
                     underlayButtons?.add(UnderlayButton("", AppCompatDrawableManager.get().getDrawable(requireContext(), R.drawable.ic_delete), Color.parseColor("#E57373"),
                         object : UnderlayButtonClickListener {
                             override fun onClick(pos: Int) {
+                                logEvent(ACTION_EMAIL_DELETE)
                                 val email = adapter.getEmailAt(pos)
                                 viewModel.deleteEmail(email)
                                 Log.d("TAG", "Delete clicked")

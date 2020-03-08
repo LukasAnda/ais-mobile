@@ -75,6 +75,10 @@ class EmailRepository(
         emailDao.deleteSingle(email)
     }
 
+    suspend fun deleteAll() {
+        emailDao.deleteAll()
+    }
+
     suspend fun getEmailDetail(email: Email): String {
         val response = service.emailDetail("${email.eid};fid=${email.fid};on=0").authenticatedOrThrow()
         val message = Parser.getEmailDetail(response)

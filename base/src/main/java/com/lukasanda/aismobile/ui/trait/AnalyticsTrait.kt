@@ -25,8 +25,10 @@ const val ACTION_COMPOSE_EMAIL = "action_email_compose"
 const val ACTION_COMPOSE_EMAIL_TO_TEACHER = "action_email_compose_teacher"
 const val ACTION_SEND_REPLY = "action_email_send_reply"
 const val ACTION_SEND_COMPOSED = "action_email_send_composed"
+const val ACTION_EMAIL_DELETE = "actione_email_delete"
 const val ACTION_OPEN_FOLDER = "action_documents_folder_open"
 const val ACTION_OPEN_DOCUMENT = "action_documents_document_open"
+const val ACTION_LOGOUT = "action_logout"
 
 
 const val EVENT_WRONG_PASSWORD = "event_wrong_password"

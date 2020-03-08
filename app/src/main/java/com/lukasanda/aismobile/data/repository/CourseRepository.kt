@@ -110,6 +110,12 @@ class CourseRepository(
         prefs.fullCourseExpiration = DateTime.now()
     }
 
+    suspend fun deleteAll() {
+        courseDao.deleteTeachers()
+        courseDao.deleteCourses()
+        courseDao.deleteSheets()
+    }
+
 
     private suspend fun parseCourses(semester: Semester): List<Course> {
         val coursesResponse =

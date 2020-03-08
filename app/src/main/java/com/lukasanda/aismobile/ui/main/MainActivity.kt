@@ -27,6 +27,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.Observer
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
+import androidx.navigation.ui.setupWithNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -53,6 +54,7 @@ import com.lukasanda.aismobile.ui.main.email.EmailFragmentDirections
 import com.lukasanda.aismobile.ui.main.email.EmailFragmentHandler
 import com.lukasanda.aismobile.ui.main.emailDetail.EmailDetailFragmentDirections
 import com.lukasanda.aismobile.ui.main.emailDetail.EmailDetailHandler
+import com.lukasanda.aismobile.ui.main.logout.LogoutHandler
 import com.lukasanda.aismobile.ui.main.subjectDetail.SubjectDetailFragmentDirections
 import com.lukasanda.aismobile.ui.main.subjectDetail.SubjectDetailHandler
 import com.lukasanda.aismobile.ui.main.subjects.SubjectsFragmentDirections
@@ -71,7 +73,7 @@ import org.koin.core.parameter.parametersOf
 
 class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityMainBinding>(),
     TimetableFragmentHandler, SubjectsFragmentHandler, EmailFragmentHandler, EmailDetailHandler,
-    ComposeEmailHandler, SubjectDetailHandler, DocumentsHandler {
+    ComposeEmailHandler, SubjectDetailHandler, DocumentsHandler, LogoutHandler {
 
     private lateinit var toggle: ActionBarDrawerToggle
 
@@ -149,6 +151,12 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
                     e.printStackTrace()
                 }
             })
+
+            viewModel.logoutData().observe(this@MainActivity, Observer {
+                startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+            })
+
+            navController?.let { binding.navigationView.setupWithNavController(it) }
         }
 
         override fun setNavigationGraph() = R.id.homeNavigationContainer
@@ -230,5 +238,10 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
 
     companion object {
         const val PERMISSION_REQUEST_CODE = 1234
+    }
+
+    override fun logout() {
+        logEvent(ACTION_LOGOUT)
+        viewModel.logout()
     }
 }
