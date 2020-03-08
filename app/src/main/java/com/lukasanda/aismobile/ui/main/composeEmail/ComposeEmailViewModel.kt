@@ -17,11 +17,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.data.repository.EmailRepository
 import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
 import com.lukasanda.dataprovider.data.Suggestion
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -31,18 +31,16 @@ class ComposeEmailViewModel(
     private val handle: SavedStateHandle
 ) : BaseViewModel(handle) {
 
+    override fun logToCrashlytics(e: Throwable) {
+        FirebaseCrashlytics.getInstance().recordException(e)
+    }
+
     private val downloadJobs = mutableListOf<Job>()
 
     private val _sendMailLiveData = MutableLiveData<EmailSendState>(EmailSendState.Unknown)
     fun sentMailState(): LiveData<EmailSendState> = _sendMailLiveData
 
     private val _suggestionsLiveData = MutableLiveData<List<Suggestion>>()
-
-    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, t ->
-        run {
-            t.printStackTrace()
-        }
-    }
 
     fun getSuggestions(query: String) {
         cancelJobs()

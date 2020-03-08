@@ -37,6 +37,8 @@ import com.lukasanda.aismobile.ui.fragment.BaseFragment
 import com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailViewModel.EmailSendState.Fail
 import com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailViewModel.EmailSendState.Success
 import com.lukasanda.aismobile.ui.recyclerview.bindLinear
+import com.lukasanda.aismobile.ui.trait.ACTION_SEND_COMPOSED
+import com.lukasanda.aismobile.ui.trait.ACTION_SEND_REPLY
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
 import com.lukasanda.dataprovider.data.Suggestion
@@ -157,7 +159,13 @@ class ComposeEmailFragment :
 
             viewModel.sentMailState().observe(viewLifecycleOwner, Observer { emailSendState ->
                 when (emailSendState) {
-                    Success -> handler.closeFragment()
+                    Success -> {
+                        when (type) {
+                            is SendType.Reply -> logEvent(ACTION_SEND_REPLY)
+                            is SendType.Send -> logEvent(ACTION_SEND_COMPOSED)
+                        }
+                        handler.closeFragment()
+                    }
                     Fail -> {
                         Toast.makeText(
                             requireContext(),

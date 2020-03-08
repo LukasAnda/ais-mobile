@@ -15,6 +15,7 @@ package com.lukasanda.aismobile
 
 //import net.danlew.android.joda.JodaTimeAndroid
 import android.app.Application
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.lukasanda.aismobile.di.*
 import com.lukasanda.aismobile.util.ThemeHelper
 import org.koin.android.ext.koin.androidContext
@@ -44,6 +45,8 @@ class AISApp : Application() {
             )
             androidLogger()
         }
+
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
 
         ThemeHelper.applyTheme(ThemeHelper.default)
     }

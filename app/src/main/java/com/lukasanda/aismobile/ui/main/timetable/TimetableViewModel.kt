@@ -16,6 +16,7 @@ package com.lukasanda.aismobile.ui.main.timetable
 import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.SavedStateHandle
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.repository.TimetableRepository
 import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
@@ -25,6 +26,12 @@ class TimetableViewModel(
     private val timetableRepository: TimetableRepository,
     private val handle: SavedStateHandle
 ) : BaseViewModel(handle) {
+
+    override fun logToCrashlytics(e: Throwable) {
+        FirebaseCrashlytics.getInstance().recordException(e)
+    }
+
+
     val days = context.resources.getStringArray(R.array.days).toList()
 
     fun timetable() = timetableRepository.get()

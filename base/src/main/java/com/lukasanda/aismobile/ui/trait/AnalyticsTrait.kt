@@ -16,6 +16,21 @@ package com.lukasanda.aismobile.ui.trait
 import android.os.Bundle
 import com.google.firebase.analytics.FirebaseAnalytics
 
+const val ACTION_LOGIN = "action_login"
+const val ACTION_EXIT = "action_exit"
+const val ACTION_SHOW_COURSE_DETAIL = "action_course_detail"
+const val ACTION_SHOW_EMAIL_DETAIL = "action_email_detail"
+const val ACTION_COMPOSE_REPLY = "action_email_reply_compose"
+const val ACTION_COMPOSE_EMAIL = "action_email_compose"
+const val ACTION_COMPOSE_EMAIL_TO_TEACHER = "action_email_compose_teacher"
+const val ACTION_SEND_REPLY = "action_email_send_reply"
+const val ACTION_SEND_COMPOSED = "action_email_send_composed"
+const val ACTION_OPEN_FOLDER = "action_documents_folder_open"
+const val ACTION_OPEN_DOCUMENT = "action_documents_document_open"
+
+
+const val EVENT_WRONG_PASSWORD = "event_wrong_password"
+
 interface AnalyticsTrait {
     fun getAnalytics(): FirebaseAnalytics
 

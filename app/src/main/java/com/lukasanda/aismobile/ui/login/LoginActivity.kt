@@ -25,6 +25,9 @@ import com.lukasanda.aismobile.data.cache.SafePrefs
 import com.lukasanda.aismobile.databinding.ActivityLoginBinding
 import com.lukasanda.aismobile.ui.activity.BaseActivityViews
 import com.lukasanda.aismobile.ui.activity.BaseUIActivity
+import com.lukasanda.aismobile.ui.trait.ACTION_EXIT
+import com.lukasanda.aismobile.ui.trait.ACTION_LOGIN
+import com.lukasanda.aismobile.ui.trait.EVENT_WRONG_PASSWORD
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
 import com.lukasanda.aismobile.util.startWorker
@@ -63,6 +66,7 @@ class LoginActivity : BaseUIActivity<LoginViewModel, LoginActivity.Views, Activi
                         showProgress()
                     }
                     is State.Success -> {
+                        logEvent(ACTION_LOGIN)
                         hideProgress()
                         startWorker(applicationContext)
                         finish()
@@ -71,6 +75,9 @@ class LoginActivity : BaseUIActivity<LoginViewModel, LoginActivity.Views, Activi
                         hideProgress()
                         when (it.errorType) {
                             LoginViewModel.ErrorState.Auth -> {
+
+                                logEvent(EVENT_WRONG_PASSWORD)
+
                                 binding.emailInputLayout.error = "Zlé meno alebo heslo"
                                 binding.passwordInputLayout.error = "Zlé meno alebo heslo"
                             }
@@ -91,6 +98,7 @@ class LoginActivity : BaseUIActivity<LoginViewModel, LoginActivity.Views, Activi
 
     override fun onBackPressed() {
         if (hasPressedBack) {
+            logEvent(ACTION_EXIT)
             //exit the whole app
             this.finishAffinity()
         } else {

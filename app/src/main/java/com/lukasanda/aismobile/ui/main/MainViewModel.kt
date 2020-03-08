@@ -20,6 +20,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.lukasanda.aismobile.data.cache.SafePrefs
 import com.lukasanda.aismobile.data.db.dao.ProfileDao
 import com.lukasanda.aismobile.data.db.entity.Document
@@ -28,7 +29,6 @@ import com.lukasanda.aismobile.data.remote.api.AISApi
 import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
 import com.tonyodev.fetch2.*
 import com.tonyodev.fetch2core.Func
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -39,10 +39,9 @@ class MainViewModel(
     private val handle: SavedStateHandle
 ) :
     BaseViewModel(handle) {
-    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, t ->
-        run {
-            t.printStackTrace()
-        }
+
+    override fun logToCrashlytics(e: Throwable) {
+        FirebaseCrashlytics.getInstance().recordException(e)
     }
 
     private val _fileHandle = MutableLiveData<Pair<File, String>>()

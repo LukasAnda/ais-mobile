@@ -19,6 +19,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.lukasanda.aismobile.core.State
 import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.cache.SafePrefs
@@ -39,6 +40,10 @@ class LoginViewModel(
 ) : BaseViewModel(handle) {
     private val _state = MutableLiveData<State<Int, ErrorState>>()
     val state: LiveData<State<Int, ErrorState>> = _state
+
+    override fun logToCrashlytics(e: Throwable) {
+        FirebaseCrashlytics.getInstance().recordException(e)
+    }
 
 
     fun login(name: String, password: String) {
@@ -66,6 +71,7 @@ class LoginViewModel(
                     _state.postValue(State.Failure(ErrorState.Auth))
                 }
             }.onFailure {
+                FirebaseCrashlytics.getInstance().recordException(it)
                 _state.postValue(State.Failure(ErrorState.Network))
                 Log.e("TAG", "network error", it)
             }

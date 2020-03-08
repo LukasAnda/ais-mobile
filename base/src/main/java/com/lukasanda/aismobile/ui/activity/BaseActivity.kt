@@ -28,11 +28,13 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.navigateUp
 import androidx.viewbinding.ViewBinding
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.lukasanda.aismobile.ui.trait.AnalyticsTrait
 import com.lukasanda.aismobile.ui.trait.LifecycleTrait
 import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
 
 abstract class BaseUIActivity<VIEWMODEL : BaseViewModel, BASE_VIEWS : BaseActivityViews, BINDING : ViewBinding> :
-    AppCompatActivity(), LifecycleTrait {
+    AppCompatActivity(), LifecycleTrait, AnalyticsTrait {
 
     protected var views: BASE_VIEWS? = null
     abstract val viewModel: VIEWMODEL
@@ -108,7 +110,9 @@ abstract class BaseUIActivity<VIEWMODEL : BaseViewModel, BASE_VIEWS : BaseActivi
         this.toolbar = this.setToolbar()
     }
 
-//    private fun initializeNavigationDrawer() {
+    override fun getAnalytics() = FirebaseAnalytics.getInstance(this)
+
+    //    private fun initializeNavigationDrawer() {
 //        this.drawerLayout = setDrawer()
 //        drawerLayout?.let {
 //            //            it.descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS

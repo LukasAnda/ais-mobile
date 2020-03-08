@@ -59,6 +59,7 @@ import com.lukasanda.aismobile.ui.main.subjects.SubjectsFragmentDirections
 import com.lukasanda.aismobile.ui.main.subjects.SubjectsFragmentHandler
 import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentDirections
 import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentHandler
+import com.lukasanda.aismobile.ui.trait.*
 import com.lukasanda.aismobile.util.createLiveData
 import com.lukasanda.aismobile.util.getMimeType
 import com.lukasanda.aismobile.util.show
@@ -132,6 +133,9 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
             })
 
             viewModel.fileHandle().observe(this@MainActivity, Observer {
+
+                logEvent(ACTION_OPEN_DOCUMENT)
+
                 val (file, _) = it
                 val intent = Intent(Intent.ACTION_VIEW)
                 val uri = FileProvider.getUriForFile(this@MainActivity, this@MainActivity.applicationContext.packageName + ".provider", file)
@@ -165,10 +169,12 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
     }
 
     override fun showDetailFromSubjects(courseId: String) {
+        logEvent(ACTION_SHOW_COURSE_DETAIL)
         navController?.navigateSafe(SubjectsFragmentDirections.actionSubjectsFragmentToSubjectDetailFragment(courseId))
     }
 
     override fun showDetailFromTimetable(courseId: String) {
+        logEvent(ACTION_SHOW_COURSE_DETAIL)
         navController?.navigateSafe(TimetableFragmentDirections.actionScheduleFragmentToSubjectDetailFragment(courseId))
     }
 
@@ -177,14 +183,17 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
     }
 
     override fun showEmailDetail(email: Email) {
+        logEvent(ACTION_SHOW_EMAIL_DETAIL)
         navController?.navigateSafe(EmailFragmentDirections.actionEmailFragmentToEmailDetailFragment(email))
     }
 
     override fun replyToEmail(email: Email) {
+        logEvent(ACTION_COMPOSE_REPLY)
         navController?.navigateSafe(EmailFragmentDirections.actionEmailFragmentToComposeEmailFragment(email = email))
     }
 
     override fun composeEmail() {
+        logEvent(ACTION_COMPOSE_EMAIL)
         navController?.navigateSafe(EmailFragmentDirections.actionEmailFragmentToComposeEmailFragment())
     }
 
@@ -193,14 +202,17 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
     }
 
     override fun reply(email: Email) {
+        logEvent(ACTION_COMPOSE_REPLY)
         navController?.navigateSafe(EmailDetailFragmentDirections.actionEmailDetailFragmentToComposeEmailFragment(email = email))
     }
 
     override fun writeToTeacher(teacher: Teacher) {
+        logEvent(ACTION_COMPOSE_EMAIL_TO_TEACHER)
         navController?.navigateSafe(SubjectDetailFragmentDirections.actionSubjectDetailFragmentToComposeEmailFragment(teacher = teacher))
     }
 
     override fun openFolder(document: Document) {
+        logEvent(ACTION_OPEN_FOLDER)
         navController?.navigateSafe(DocumentsFragmentDirections.actionDocumentsFragmentSelf(document.id))
     }
 

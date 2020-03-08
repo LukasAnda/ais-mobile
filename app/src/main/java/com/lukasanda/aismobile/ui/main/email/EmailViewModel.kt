@@ -15,10 +15,10 @@ package com.lukasanda.aismobile.ui.main.email
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.data.repository.EmailRepository
 import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 
 class EmailViewModel(
@@ -26,10 +26,8 @@ class EmailViewModel(
     private val handle: SavedStateHandle
 ) :
     BaseViewModel(handle) {
-    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, t ->
-        run {
-            t.printStackTrace()
-        }
+    override fun logToCrashlytics(e: Throwable) {
+        FirebaseCrashlytics.getInstance().recordException(e)
     }
 
     fun emails() = emailRepository.getEmails()

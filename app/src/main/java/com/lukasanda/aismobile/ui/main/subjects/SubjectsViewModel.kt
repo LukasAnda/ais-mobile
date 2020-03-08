@@ -14,6 +14,7 @@
 package com.lukasanda.aismobile.ui.main.subjects
 
 import androidx.lifecycle.SavedStateHandle
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.lukasanda.aismobile.data.repository.CourseRepository
 import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
 import kotlin.math.max
@@ -22,6 +23,11 @@ class SubjectsViewModel(
     private val courseRepository: CourseRepository,
     private val handle: SavedStateHandle
 ) : BaseViewModel(handle) {
+
+    override fun logToCrashlytics(e: Throwable) {
+        FirebaseCrashlytics.getInstance().recordException(e)
+    }
+
     fun courses() = courseRepository.get()
 
     val semesters = mutableListOf<String>()

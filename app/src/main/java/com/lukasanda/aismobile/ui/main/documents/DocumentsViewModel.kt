@@ -15,18 +15,16 @@ package com.lukasanda.aismobile.ui.main.documents
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.lukasanda.aismobile.data.repository.DocumentRepository
 import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 
 private const val FOLDER = "FOLDER"
 
 class DocumentsViewModel(private val documentRepository: DocumentRepository, private val handle: SavedStateHandle) : BaseViewModel(handle) {
-    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, t ->
-        run {
-            t.printStackTrace()
-        }
+    override fun logToCrashlytics(e: Throwable) {
+        FirebaseCrashlytics.getInstance().recordException(e)
     }
 
     fun setFolder(folder: String) {

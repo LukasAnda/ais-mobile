@@ -16,6 +16,7 @@ package com.lukasanda.aismobile.ui.viewmodel
 import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 
 abstract class BaseViewModel(private val handle: SavedStateHandle) : ViewModel() {
 
@@ -24,6 +25,15 @@ abstract class BaseViewModel(private val handle: SavedStateHandle) : ViewModel()
             handle.set(key, bundle[key])
         }
     }
+
+    protected val coroutineExceptionHandler = CoroutineExceptionHandler { _, t ->
+        run {
+            t.printStackTrace()
+            logToCrashlytics(t)
+        }
+    }
+
+    abstract fun logToCrashlytics(e: Throwable)
 
     fun <T> getValue(key: String): T? = handle[key]
     fun <T> setValue(key: String, value: T?) = handle.set(key, value)
