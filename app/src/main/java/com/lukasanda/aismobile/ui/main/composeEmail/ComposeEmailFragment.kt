@@ -29,7 +29,11 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.google.android.material.chip.Chip
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.lukasanda.aismobile.R
+import com.lukasanda.aismobile.core.ACTION_SEND_COMPOSED
+import com.lukasanda.aismobile.core.ACTION_SEND_REPLY
+import com.lukasanda.aismobile.core.AnalyticsTrait
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.databinding.ComposeEmailFragmentBinding
 import com.lukasanda.aismobile.ui.activity.BaseViews
@@ -37,8 +41,6 @@ import com.lukasanda.aismobile.ui.fragment.BaseFragment
 import com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailViewModel.EmailSendState.Fail
 import com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailViewModel.EmailSendState.Success
 import com.lukasanda.aismobile.ui.recyclerview.bindLinear
-import com.lukasanda.aismobile.ui.trait.ACTION_SEND_COMPOSED
-import com.lukasanda.aismobile.ui.trait.ACTION_SEND_REPLY
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
 import com.lukasanda.dataprovider.data.Suggestion
@@ -46,7 +48,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
 class ComposeEmailFragment :
-    BaseFragment<ComposeEmailFragment.Views, ComposeEmailFragmentBinding, ComposeEmailViewModel, ComposeEmailHandler>() {
+    BaseFragment<ComposeEmailFragment.Views, ComposeEmailFragmentBinding, ComposeEmailViewModel, ComposeEmailHandler>(), AnalyticsTrait {
 
     private val selected = mutableListOf<Suggestion>()
 
@@ -209,6 +211,8 @@ class ComposeEmailFragment :
         }
         return super.onOptionsItemSelected(item)
     }
+
+    override fun getAnalytics() = FirebaseAnalytics.getInstance(requireContext())
 
     private fun getEmails(): String {
         val builder = StringBuilder()

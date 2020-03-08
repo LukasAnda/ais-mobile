@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.lukasanda.aismobile.ui.trait
+package com.lukasanda.aismobile.core
 
 import android.os.Bundle
 import com.google.firebase.analytics.FirebaseAnalytics

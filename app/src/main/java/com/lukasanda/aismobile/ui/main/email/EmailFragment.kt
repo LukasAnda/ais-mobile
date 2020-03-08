@@ -21,7 +21,10 @@ import androidx.appcompat.widget.AppCompatDrawableManager
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.lukasanda.aismobile.R
+import com.lukasanda.aismobile.core.ACTION_EMAIL_DELETE
+import com.lukasanda.aismobile.core.AnalyticsTrait
 import com.lukasanda.aismobile.core.SwipeHelper
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.databinding.EmailFragmentBinding
@@ -29,7 +32,6 @@ import com.lukasanda.aismobile.ui.activity.BaseViews
 import com.lukasanda.aismobile.ui.fragment.BaseFragment
 import com.lukasanda.aismobile.ui.main.email.adapter.EmailAdapter
 import com.lukasanda.aismobile.ui.recyclerview.bindLinear
-import com.lukasanda.aismobile.ui.trait.ACTION_EMAIL_DELETE
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -37,7 +39,7 @@ import org.koin.core.parameter.parametersOf
 
 
 class EmailFragment :
-    BaseFragment<EmailFragment.Views, EmailFragmentBinding, EmailViewModel, EmailFragmentHandler>() {
+    BaseFragment<EmailFragment.Views, EmailFragmentBinding, EmailViewModel, EmailFragmentHandler>(), AnalyticsTrait {
 
     override val viewModel: EmailViewModel by viewModel { parametersOf(Bundle()) }
 
@@ -51,6 +53,8 @@ class EmailFragment :
         handler.showEmailDetail(it)
     }
 
+    override fun getAnalytics() = FirebaseAnalytics.getInstance(requireContext())
+
     inner class Views : BaseViews {
         override fun modifyViews() {
             postponeEnterTransition()
@@ -59,7 +63,9 @@ class EmailFragment :
             val swipeHelper: SwipeHelper = object : SwipeHelper() {
                 @SuppressLint("RestrictedApi")
                 override fun instantiateUnderlayButton(viewHolder: RecyclerView.ViewHolder?, underlayButtons: MutableList<UnderlayButton>?) {
-                    underlayButtons?.add(UnderlayButton("", AppCompatDrawableManager.get().getDrawable(requireContext(), R.drawable.ic_delete), Color.parseColor("#E57373"),
+                    underlayButtons?.add(
+                        UnderlayButton(
+                            "", AppCompatDrawableManager.get().getDrawable(requireContext(), R.drawable.ic_delete), Color.parseColor("#E57373"),
                         object : UnderlayButtonClickListener {
                             override fun onClick(pos: Int) {
                                 logEvent(ACTION_EMAIL_DELETE)

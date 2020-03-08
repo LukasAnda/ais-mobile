@@ -13,7 +13,6 @@
 
 package com.lukasanda.aismobile.ui.fragment
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -22,15 +21,13 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.lukasanda.aismobile.ui.activity.BaseViews
-import com.lukasanda.aismobile.ui.trait.AnalyticsTrait
 import com.lukasanda.aismobile.ui.trait.HandlerTrait
 import com.lukasanda.aismobile.ui.trait.LifecycleTrait
 import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
 
 abstract class BaseFragment<VIEWS : BaseViews, BINDING : ViewBinding, VIEWMODEL : BaseViewModel, HANDLER : Any> :
-    Fragment(), LifecycleTrait, HandlerTrait<HANDLER>, AnalyticsTrait {
+    Fragment(), LifecycleTrait, HandlerTrait<HANDLER> {
     protected var binding: BINDING? = null
     private lateinit var views: VIEWS
     abstract val viewModel: VIEWMODEL
@@ -73,7 +70,4 @@ abstract class BaseFragment<VIEWS : BaseViews, BINDING : ViewBinding, VIEWMODEL 
     abstract fun setBinding(): BINDING
 
     abstract fun createViews(): VIEWS
-
-    @SuppressLint("MissingPermission")
-    override fun getAnalytics() = FirebaseAnalytics.getInstance(requireContext())
 }

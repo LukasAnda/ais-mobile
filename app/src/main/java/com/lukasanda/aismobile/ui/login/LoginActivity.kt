@@ -19,15 +19,13 @@ import android.os.Handler
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.lukasanda.aismobile.R
-import com.lukasanda.aismobile.core.State
+import com.lukasanda.aismobile.core.*
 import com.lukasanda.aismobile.data.cache.SafePrefs
 import com.lukasanda.aismobile.databinding.ActivityLoginBinding
 import com.lukasanda.aismobile.ui.activity.BaseActivityViews
 import com.lukasanda.aismobile.ui.activity.BaseUIActivity
-import com.lukasanda.aismobile.ui.trait.ACTION_EXIT
-import com.lukasanda.aismobile.ui.trait.ACTION_LOGIN
-import com.lukasanda.aismobile.ui.trait.EVENT_WRONG_PASSWORD
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
 import com.lukasanda.aismobile.util.startWorker
@@ -35,7 +33,7 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
-class LoginActivity : BaseUIActivity<LoginViewModel, LoginActivity.Views, ActivityLoginBinding>() {
+class LoginActivity : BaseUIActivity<LoginViewModel, LoginActivity.Views, ActivityLoginBinding>(), AnalyticsTrait {
     private val prefs by inject<SafePrefs>()
     private var hasPressedBack = false
 
@@ -125,4 +123,5 @@ class LoginActivity : BaseUIActivity<LoginViewModel, LoginActivity.Views, Activi
 
     override fun setBinding(): ActivityLoginBinding = ActivityLoginBinding.inflate(layoutInflater)
     override fun createViews() = Views()
+    override fun getAnalytics() = FirebaseAnalytics.getInstance(this)
 }

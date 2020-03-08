@@ -87,10 +87,10 @@ android {
 
     buildTypes {
         debug{
-            resValue("bool", "FIREBASE_ANALYTICS_DEACTIVATED", "true")
+            resValue "bool", "FIREBASE_ANALYTICS_DEACTIVATED", "true"
         }
         release {
-            resValue("bool", "FIREBASE_ANALYTICS_DEACTIVATED", "false")
+            resValue "bool", "FIREBASE_ANALYTICS_DEACTIVATED", "false"
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

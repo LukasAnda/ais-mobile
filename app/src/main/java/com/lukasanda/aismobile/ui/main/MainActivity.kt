@@ -35,7 +35,9 @@ import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.lukasanda.aismobile.R
+import com.lukasanda.aismobile.core.*
 import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.cache.SafePrefs
 import com.lukasanda.aismobile.data.db.entity.Document
@@ -61,7 +63,6 @@ import com.lukasanda.aismobile.ui.main.subjects.SubjectsFragmentDirections
 import com.lukasanda.aismobile.ui.main.subjects.SubjectsFragmentHandler
 import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentDirections
 import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentHandler
-import com.lukasanda.aismobile.ui.trait.*
 import com.lukasanda.aismobile.util.createLiveData
 import com.lukasanda.aismobile.util.getMimeType
 import com.lukasanda.aismobile.util.show
@@ -73,7 +74,7 @@ import org.koin.core.parameter.parametersOf
 
 class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityMainBinding>(),
     TimetableFragmentHandler, SubjectsFragmentHandler, EmailFragmentHandler, EmailDetailHandler,
-    ComposeEmailHandler, SubjectDetailHandler, DocumentsHandler, LogoutHandler {
+    ComposeEmailHandler, SubjectDetailHandler, DocumentsHandler, LogoutHandler, AnalyticsTrait {
 
     private lateinit var toggle: ActionBarDrawerToggle
 
@@ -235,6 +236,8 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
     override fun navigateToParent() {
         navController?.popBackStack()
     }
+
+    override fun getAnalytics() = FirebaseAnalytics.getInstance(this)
 
     companion object {
         const val PERMISSION_REQUEST_CODE = 1234
