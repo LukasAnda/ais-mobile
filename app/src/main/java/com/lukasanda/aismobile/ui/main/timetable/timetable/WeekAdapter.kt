@@ -18,11 +18,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lukasanda.aismobile.data.db.entity.TimetableItem
 import com.lukasanda.aismobile.databinding.WeekItemBinding
+import com.lukasanda.aismobile.ui.recyclerview.BaseAdapter
+import com.lukasanda.aismobile.ui.recyclerview.BaseBindingViewHolder
+import com.lukasanda.aismobile.ui.recyclerview.create
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
-import sk.lukasanda.base.ui.recyclerview.BaseAdapter
-import sk.lukasanda.base.ui.recyclerview.BaseBindingViewHolder
-import sk.lukasanda.base.ui.recyclerview.create
 
 class WeekAdapter(private val listener: (TimetableItem) -> Unit) :
     BaseAdapter<List<TimetableItem>, TimetableItem, WeekItemHolder>(listener) {

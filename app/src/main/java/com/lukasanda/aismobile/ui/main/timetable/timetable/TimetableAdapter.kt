@@ -18,11 +18,11 @@ import androidx.core.content.ContextCompat
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.db.entity.TimetableItem
 import com.lukasanda.aismobile.databinding.ScheduleItemBinding
+import com.lukasanda.aismobile.ui.recyclerview.BaseAdapter
+import com.lukasanda.aismobile.ui.recyclerview.BindingViewHolder
+import com.lukasanda.aismobile.ui.recyclerview.create
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
-import sk.lukasanda.base.ui.recyclerview.BaseAdapter
-import sk.lukasanda.base.ui.recyclerview.BindingViewHolder
-import sk.lukasanda.base.ui.recyclerview.create
 
 class TimetableAdapter(private val listener: (TimetableItem) -> Unit) :
     BaseAdapter<TimetableItem, TimetableItem, TimetableCourseViewHolder>(listener) {

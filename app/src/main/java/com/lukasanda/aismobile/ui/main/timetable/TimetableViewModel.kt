@@ -18,7 +18,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.SavedStateHandle
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.repository.TimetableRepository
-import sk.lukasanda.base.ui.viewmodel.BaseViewModel
+import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
 
 class TimetableViewModel(
     private val context: Application,

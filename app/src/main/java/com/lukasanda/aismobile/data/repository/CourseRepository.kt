@@ -26,11 +26,11 @@ import com.lukasanda.aismobile.data.remote.api.AISApi
 import com.lukasanda.aismobile.data.repository.CourseRepository.UpdateType.FETCH
 import com.lukasanda.aismobile.data.repository.CourseRepository.UpdateType.NEWEST
 import com.lukasanda.aismobile.util.authenticatedOrThrow
+import com.lukasanda.dataprovider.Parser
+import com.lukasanda.dataprovider.data.Semester
 import com.snakydesign.livedataextensions.map
 import kotlinx.coroutines.delay
 import org.joda.time.DateTime
-import sk.lukasanda.dataprovider.Parser
-import sk.lukasanda.dataprovider.data.Semester
 
 class CourseRepository(
     private val aisApi: AISApi,
@@ -129,9 +129,9 @@ class CourseRepository(
         return sheets.map { sheetToDb(it, course) }
     }
 
-    private fun teachersToDb(course: Course, teacher: sk.lukasanda.dataprovider.data.Teacher) = Teacher(name = teacher.name, id = teacher.id, courseId = course.id)
+    private fun teachersToDb(course: Course, teacher: com.lukasanda.dataprovider.data.Teacher) = Teacher(name = teacher.name, id = teacher.id, courseId = course.id)
 
-    private fun courseToDb(course: sk.lukasanda.dataprovider.data.Course, semester: Semester) =
+    private fun courseToDb(course: com.lukasanda.dataprovider.data.Course, semester: Semester) =
         Course(
             id = course.courseId,
             courseName = course.courseName,
@@ -146,7 +146,7 @@ class CourseRepository(
             finalMark = "-"
         )
 
-    private fun sheetToDb(sheet: sk.lukasanda.dataprovider.data.Sheet, course: Course) = Sheet(
+    private fun sheetToDb(sheet: com.lukasanda.dataprovider.data.Sheet, course: Course) = Sheet(
         course.id + sheet.name,
         courseId = course.id,
         name = sheet.name,

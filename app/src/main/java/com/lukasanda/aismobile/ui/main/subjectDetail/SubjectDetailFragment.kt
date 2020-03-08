@@ -24,13 +24,13 @@ import com.afollestad.materialdialogs.customview.customView
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.db.entity.Teacher
 import com.lukasanda.aismobile.databinding.SubjectDetailFragmentBinding
+import com.lukasanda.aismobile.ui.activity.BaseViews
+import com.lukasanda.aismobile.ui.fragment.BaseFragment
 import com.lukasanda.aismobile.ui.main.subjectDetail.adapters.SubjectTablesAdapter
 import com.lukasanda.aismobile.ui.main.subjectDetail.adapters.SubjectTeachersAdapter
+import com.lukasanda.aismobile.ui.recyclerview.bindLinear
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import sk.lukasanda.base.ui.activity.BaseViews
-import sk.lukasanda.base.ui.fragment.BaseFragment
-import sk.lukasanda.base.ui.recyclerview.bindLinear
 
 class SubjectDetailFragment :
     BaseFragment<SubjectDetailFragment.Views, SubjectDetailFragmentBinding, SubjectDetailViewModel, SubjectDetailHandler>() {

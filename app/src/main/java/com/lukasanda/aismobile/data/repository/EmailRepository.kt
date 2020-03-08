@@ -22,11 +22,11 @@ import com.lukasanda.aismobile.data.remote.HTTPException
 import com.lukasanda.aismobile.data.remote.api.AISApi
 import com.lukasanda.aismobile.util.authenticatedOrThrow
 import com.lukasanda.aismobile.util.getSuggestionRequestString
+import com.lukasanda.dataprovider.Parser
+import com.lukasanda.dataprovider.data.Suggestion
 import okhttp3.MediaType
 import okhttp3.RequestBody
 import org.joda.time.DateTime
-import sk.lukasanda.dataprovider.Parser
-import sk.lukasanda.dataprovider.data.Suggestion
 
 class EmailRepository(
     private val emailDao: EmailDao,

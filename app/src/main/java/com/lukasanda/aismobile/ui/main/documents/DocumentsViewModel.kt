@@ -16,9 +16,9 @@ package com.lukasanda.aismobile.ui.main.documents
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.lukasanda.aismobile.data.repository.DocumentRepository
+import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
-import sk.lukasanda.base.ui.viewmodel.BaseViewModel
 
 private const val FOLDER = "FOLDER"
 

@@ -23,12 +23,12 @@ import com.lukasanda.aismobile.core.State
 import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.cache.SafePrefs
 import com.lukasanda.aismobile.data.remote.api.AISApi
+import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
 import com.lukasanda.aismobile.util.getSessionId
 import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 import org.joda.time.DateTime
 import retrofit2.Response
-import sk.lukasanda.base.ui.viewmodel.BaseViewModel
 
 class LoginViewModel(
     private val service: AISApi,

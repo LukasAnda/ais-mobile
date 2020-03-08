@@ -55,6 +55,12 @@
     <color name="color_on_surface">#000000</color>
     <color name="color_on_error">#ffffff</color>
 
+    <color name="color_documents">#03A9F4</color>
+    <color name="color_pdf">#F44336</color>
+    <color name="color_folders">#BFBFBF</color>
+    <color name="color_archives">#FF9800</color>
+    <color name="color_unknown_file">#4CAF50</color>
+
     <!-- Presence colors -->
     <color name="color_presence">#4caf50</color>
     <color name="color_absence">#f44336</color>

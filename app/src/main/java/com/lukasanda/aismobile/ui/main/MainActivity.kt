@@ -42,6 +42,9 @@ import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.data.db.entity.Teacher
 import com.lukasanda.aismobile.databinding.ActivityMainBinding
 import com.lukasanda.aismobile.databinding.DrawerHeaderViewBinding
+import com.lukasanda.aismobile.helpers.navigateSafe
+import com.lukasanda.aismobile.ui.activity.BaseActivityViews
+import com.lukasanda.aismobile.ui.activity.BaseUIActivity
 import com.lukasanda.aismobile.ui.login.LoginActivity
 import com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailHandler
 import com.lukasanda.aismobile.ui.main.documents.DocumentsFragmentDirections
@@ -63,9 +66,6 @@ import com.lukasanda.aismobile.util.startWorker
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import sk.lukasanda.base.helpers.navigateSafe
-import sk.lukasanda.base.ui.activity.BaseActivityViews
-import sk.lukasanda.base.ui.activity.BaseUIActivity
 
 
 class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityMainBinding>(),
@@ -210,6 +210,10 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
         } else {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), PERMISSION_REQUEST_CODE)
         }
+    }
+
+    override fun navigateToParent() {
+        navController?.popBackStack()
     }
 
     companion object {

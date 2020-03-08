@@ -14,38 +14,55 @@
 package com.lukasanda.aismobile.ui.main.documents
 
 import android.view.ViewGroup
-import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.db.entity.Document
 import com.lukasanda.aismobile.databinding.DocumentItemBinding
+import com.lukasanda.aismobile.ui.recyclerview.BaseAdapter
+import com.lukasanda.aismobile.ui.recyclerview.BaseBindingViewHolder
+import com.lukasanda.aismobile.ui.recyclerview.create
+import com.lukasanda.aismobile.util.getMimeColor
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
-import sk.lukasanda.base.ui.recyclerview.BaseAdapter
-import sk.lukasanda.base.ui.recyclerview.BindingViewHolder
-import sk.lukasanda.base.ui.recyclerview.create
 import java.util.*
 
-class DocumentsAdapter(onClick: (Document) -> Unit) : BaseAdapter<Document, Document, DocumentItemHolder>(onClick) {
+sealed class Either<out A, out B> {
+    class Left<A>(val value: A) : Either<A, Nothing>()
+    class Right<B>(val value: B) : Either<Nothing, B>()
+}
+
+class DocumentsAdapter(onClick: (Document?) -> Unit) : BaseAdapter<Either<Unit, Document>, Document?, DocumentItemHolder>(onClick) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = parent.create(::DocumentItemHolder, DocumentItemBinding::inflate)
 }
 
-class DocumentItemHolder(binding: DocumentItemBinding) : BindingViewHolder<Document, DocumentItemBinding>(binding) {
-    override fun bind(item: Document, onClick: (Document) -> Unit) {
-        if (item.openable) {
-            binding.icon.hide()
-            binding.iconText.show()
-            binding.iconText.text = item.mimeType.substringAfter("-").toUpperCase(Locale.getDefault())
-        } else {
-            binding.iconText.hide()
-            binding.icon.show()
-            binding.icon.setImageResource(R.drawable.ic_folder)
-        }
-        binding.iconBackground.setBackgroundColor(ColorGenerator.MATERIAL.getColor(item.mimeType))
-        binding.name.text = item.name
+class DocumentItemHolder(binding: DocumentItemBinding) : BaseBindingViewHolder<Either<Unit, Document>, Document?, DocumentItemBinding>(binding) {
+    override fun bind(item: Either<Unit, Document>, onClick: (Document?) -> Unit) {
+        when (item) {
+            is Either.Left -> {
+                binding.name.text = "Back"
+                binding.icon.setImageResource(R.drawable.ic_back)
+                binding.iconBackground.setBackgroundColor(binding.iconBackground.context.getMimeColor(""))
+                binding.iconText.hide()
+                binding.root.setOnClickListener {
+                    onClick(null)
+                }
+            }
+            is Either.Right -> {
+                if (item.value.openable) {
+                    binding.icon.hide()
+                    binding.iconText.show()
+                    binding.iconText.text = item.value.mimeType.substringAfter("-").takeUnless { it == "unknown" }?.toUpperCase(Locale.getDefault()) ?: "?"
+                } else {
+                    binding.iconText.hide()
+                    binding.icon.show()
+                    binding.icon.setImageResource(R.drawable.ic_folder)
+                }
+                binding.iconBackground.setBackgroundColor(binding.iconBackground.context.getMimeColor(item.value.mimeType))
+                binding.name.text = item.value.name
 
-        binding.root.setOnClickListener {
-            onClick(item)
+                binding.root.setOnClickListener {
+                    onClick(item.value)
+                }
+            }
         }
     }
-
 }

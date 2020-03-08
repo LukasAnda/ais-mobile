@@ -47,4 +47,7 @@
     <string name="action__send">Send</string>
     <string name="course_presence">Course presence:</string>
     <string name="seminar_presence">Seminar presence:</string>
+    <string name="settings">Settings</string>
+    <string name="people_at_stu">People at STU</string>
+    <string name="logout">Logout</string>
 </resources>

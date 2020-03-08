@@ -13,9 +13,9 @@
 
 package com.lukasanda.aismobile.di
 
+//import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import com.google.gson.GsonBuilder
 import com.lukasanda.aismobile.BuildConfig
-import com.lukasanda.aismobile.core.TLSSocketFactoryCompat
 import com.lukasanda.aismobile.util.AuthInterceptor
 import com.lukasanda.aismobile.util.EncodingInterceptor
 import okhttp3.Cache
@@ -26,7 +26,6 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidApplication
 import org.koin.dsl.module
 import retrofit2.Retrofit
-//import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
@@ -42,16 +41,14 @@ val networkModule = module {
     single {
         OkHttpClient.Builder().apply {
             cache(get())
-            sslSocketFactory(TLSSocketFactoryCompat())
+            //sslSocketFactory(TLSSocketFactoryCompat())
             connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
             writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
             readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
             connectionSpecs(
                 listOf(
                     ConnectionSpec.CLEARTEXT,
-                    ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
-                        .allEnabledTlsVersions()
-                        .allEnabledCipherSuites()
+                    ConnectionSpec.Builder(ConnectionSpec.COMPATIBLE_TLS).allEnabledTlsVersions().allEnabledCipherSuites()
                         .build()
                 )
             )
@@ -81,14 +78,8 @@ val networkModule = module {
     single {
         Interceptor { chain ->
             chain.proceed(chain.request().newBuilder().apply {
-                addHeader(
-                    "User-Agent",
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-                )
-                addHeader(
-                    "Accept",
-                    "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3"
-                )
+                addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36")
+                addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3")
                 addHeader("Accept-Encoding", "gzip, deflate, br")
                 addHeader("Accept-Language", "sk-SK,sk;q=0.9,cs;q=0.8,en-US;q=0.7,en;q=0.6")
                 addHeader("Cache-Control", "max-age=0")

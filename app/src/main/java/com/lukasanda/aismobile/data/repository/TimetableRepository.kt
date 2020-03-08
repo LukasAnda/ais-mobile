@@ -24,9 +24,9 @@ import com.lukasanda.aismobile.data.remote.AuthException
 import com.lukasanda.aismobile.data.remote.HTTPException
 import com.lukasanda.aismobile.data.remote.api.AISApi
 import com.lukasanda.aismobile.util.authenticatedOrThrow
+import com.lukasanda.dataprovider.Parser
 import com.snakydesign.livedataextensions.map
 import org.joda.time.DateTime
-import sk.lukasanda.dataprovider.Parser
 
 class TimetableRepository(
     private val aisApi: AISApi,

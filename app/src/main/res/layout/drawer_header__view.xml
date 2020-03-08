@@ -102,4 +102,12 @@
         app:layout_constraintStart_toEndOf="@id/usernameTitle"
         app:layout_constraintTop_toTopOf="@id/passwordTitle" />
 
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="#e8e8e8"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

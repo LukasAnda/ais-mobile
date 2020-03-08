@@ -18,18 +18,22 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
 import com.lukasanda.aismobile.data.db.entity.Document
 import com.lukasanda.aismobile.databinding.DocumentsFragmentBinding
+import com.lukasanda.aismobile.ui.activity.BaseViews
+import com.lukasanda.aismobile.ui.fragment.BaseFragment
+import com.lukasanda.aismobile.ui.recyclerview.bindLinear
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import sk.lukasanda.base.ui.activity.BaseViews
-import sk.lukasanda.base.ui.fragment.BaseFragment
-import sk.lukasanda.base.ui.recyclerview.bindLinear
 
 class DocumentsFragment : BaseFragment<DocumentsFragment.Views, DocumentsFragmentBinding, DocumentsViewModel, DocumentsHandler>() {
     private val adapter = DocumentsAdapter {
-        if (it.openable) {
-            handler.openDocument(it)
-        } else {
-            handler.openFolder(it)
+        it?.let {
+            if (it.openable) {
+                handler.openDocument(it)
+            } else {
+                handler.openFolder(it)
+            }
+        } ?: run {
+            handler.navigateToParent()
         }
     }
 
@@ -43,7 +47,13 @@ class DocumentsFragment : BaseFragment<DocumentsFragment.Views, DocumentsFragmen
 
             binding?.documentsRecycler?.bindLinear(adapter)
             viewModel.getDocuments().observe(viewLifecycleOwner, Observer {
-                adapter.swapData(it.filterNot { it.id.isEmpty() })
+                if (folder == "") {
+                    adapter.swapData(it.filterNot { it.id.isEmpty() }.map { Either.Right(it) })
+                } else {
+                    val list: MutableList<Either<Unit, Document>> = it.filterNot { it.id.isEmpty() }.map { Either.Right(it) }.toMutableList()
+                    list.add(0, Either.Left(Unit))
+                    adapter.swapData(list)
+                }
             })
         }
 
@@ -61,4 +71,5 @@ class DocumentsFragment : BaseFragment<DocumentsFragment.Views, DocumentsFragmen
 interface DocumentsHandler {
     fun openFolder(document: Document)
     fun openDocument(document: Document)
+    fun navigateToParent()
 }

@@ -25,12 +25,12 @@ import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.databinding.EmailDetailFragmentBinding
+import com.lukasanda.aismobile.ui.activity.BaseViews
+import com.lukasanda.aismobile.ui.fragment.BaseFragment
 import com.lukasanda.aismobile.util.getInitialsFromName
 import com.lukasanda.aismobile.util.getNameFromSender
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import sk.lukasanda.base.ui.activity.BaseViews
-import sk.lukasanda.base.ui.fragment.BaseFragment
 
 class EmailDetailFragment :
     BaseFragment<EmailDetailFragment.Views, EmailDetailFragmentBinding, EmailDetailViewModel, EmailDetailHandler>() {

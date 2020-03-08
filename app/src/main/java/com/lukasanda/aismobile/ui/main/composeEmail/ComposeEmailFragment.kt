@@ -32,16 +32,16 @@ import com.google.android.material.chip.Chip
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.databinding.ComposeEmailFragmentBinding
+import com.lukasanda.aismobile.ui.activity.BaseViews
+import com.lukasanda.aismobile.ui.fragment.BaseFragment
 import com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailViewModel.EmailSendState.Fail
 import com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailViewModel.EmailSendState.Success
+import com.lukasanda.aismobile.ui.recyclerview.bindLinear
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
+import com.lukasanda.dataprovider.data.Suggestion
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import sk.lukasanda.base.ui.activity.BaseViews
-import sk.lukasanda.base.ui.fragment.BaseFragment
-import sk.lukasanda.base.ui.recyclerview.bindLinear
-import sk.lukasanda.dataprovider.data.Suggestion
 
 class ComposeEmailFragment :
     BaseFragment<ComposeEmailFragment.Views, ComposeEmailFragmentBinding, ComposeEmailViewModel, ComposeEmailHandler>() {

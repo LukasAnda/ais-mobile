@@ -36,7 +36,6 @@ import android.media.RingtoneManager.getDefaultUri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.O
 import android.view.View
-import android.webkit.MimeTypeMap
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.DEFAULT_ALL
 import androidx.core.app.NotificationCompat.PRIORITY_MAX
@@ -174,15 +173,6 @@ fun String.getNameFromSender(): String {
 fun String.getInitialsFromName() = if (this.isEmpty()) "" else this.split(" ").filterNot { it.isEmpty() }.map {
     it.first().toUpperCase()
 }.joinToString("")
-
-fun getMimeType(path: String): String {
-    var type = "image/jpeg" // Default Value
-    val extension = MimeTypeMap.getFileExtensionFromUrl(path);
-    if (extension != null) {
-        type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: type
-    }
-    return type
-}
 
 fun getTextDrawable(text: String, seed: String, size: Int) =
     TextDrawable.builder().beginConfig().textColor(Color.WHITE).fontSize(size).bold()

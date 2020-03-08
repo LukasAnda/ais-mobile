@@ -88,7 +88,7 @@
     <fragment
         android:id="@+id/documentsFragment"
         android:name="com.lukasanda.aismobile.ui.main.documents.DocumentsFragment"
-        android:label="DocumentsFragment">
+        android:label="Dokumenty">
         <action
             android:id="@+id/action_documentsFragment_self"
             app:destination="@id/documentsFragment" />

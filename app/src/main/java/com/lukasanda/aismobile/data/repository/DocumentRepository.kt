@@ -18,7 +18,7 @@ import com.lukasanda.aismobile.data.db.dao.DocumentDao
 import com.lukasanda.aismobile.data.db.entity.Document
 import com.lukasanda.aismobile.data.remote.api.AISApi
 import com.lukasanda.aismobile.util.authenticatedOrThrow
-import sk.lukasanda.dataprovider.Parser
+import com.lukasanda.dataprovider.Parser
 
 class DocumentRepository(private val prefs: Prefs, private val documentDao: DocumentDao, private val aisApi: AISApi) {
 

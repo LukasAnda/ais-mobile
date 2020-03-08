@@ -25,11 +25,11 @@ import com.lukasanda.aismobile.data.db.dao.ProfileDao
 import com.lukasanda.aismobile.data.db.entity.Document
 import com.lukasanda.aismobile.data.db.entity.Profile
 import com.lukasanda.aismobile.data.remote.api.AISApi
+import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
 import com.tonyodev.fetch2.*
 import com.tonyodev.fetch2core.Func
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
-import sk.lukasanda.base.ui.viewmodel.BaseViewModel
 import java.io.File
 
 class MainViewModel(

@@ -19,12 +19,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.data.repository.EmailRepository
+import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
+import com.lukasanda.dataprovider.data.Suggestion
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import sk.lukasanda.base.ui.viewmodel.BaseViewModel
-import sk.lukasanda.dataprovider.data.Suggestion
 
 class ComposeEmailViewModel(
     private val emailRepository: EmailRepository,

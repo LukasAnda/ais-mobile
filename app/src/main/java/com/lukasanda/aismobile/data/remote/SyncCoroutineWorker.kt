@@ -27,14 +27,14 @@ import com.lukasanda.aismobile.data.repository.EmailRepository
 import com.lukasanda.aismobile.data.repository.TimetableRepository
 import com.lukasanda.aismobile.util.authenticatedOrThrow
 import com.lukasanda.aismobile.util.getSessionId
+import com.lukasanda.dataprovider.Parser
+import com.lukasanda.dataprovider.data.SuggestionResult
 import kotlinx.coroutines.delay
 import okhttp3.ResponseBody
 import org.joda.time.DateTime
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import retrofit2.Response
-import sk.lukasanda.dataprovider.Parser
-import sk.lukasanda.dataprovider.data.SuggestionResult
 
 class SyncCoroutineWorker(
     context: Context,

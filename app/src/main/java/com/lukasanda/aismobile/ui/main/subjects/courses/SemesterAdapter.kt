@@ -17,12 +17,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.lukasanda.aismobile.data.db.entity.FullCourse
 import com.lukasanda.aismobile.databinding.SemesterItemBinding
+import com.lukasanda.aismobile.ui.recyclerview.BaseAdapter
+import com.lukasanda.aismobile.ui.recyclerview.BaseBindingViewHolder
+import com.lukasanda.aismobile.ui.recyclerview.bindLinear
+import com.lukasanda.aismobile.ui.recyclerview.create
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
-import sk.lukasanda.base.ui.recyclerview.BaseAdapter
-import sk.lukasanda.base.ui.recyclerview.BaseBindingViewHolder
-import sk.lukasanda.base.ui.recyclerview.bindLinear
-import sk.lukasanda.base.ui.recyclerview.create
 
 class SemesterAdapter(private val listener: (FullCourse) -> Unit) :
     BaseAdapter<List<FullCourse>, FullCourse, SemesterItemHolder>(listener) {

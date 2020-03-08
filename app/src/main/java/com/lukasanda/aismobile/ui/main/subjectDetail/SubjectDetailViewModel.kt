@@ -15,7 +15,7 @@ package com.lukasanda.aismobile.ui.main.subjectDetail
 
 import androidx.lifecycle.SavedStateHandle
 import com.lukasanda.aismobile.data.repository.CourseRepository
-import sk.lukasanda.base.ui.viewmodel.BaseViewModel
+import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
 
 class SubjectDetailViewModel(
     private val courseRepository: CourseRepository,

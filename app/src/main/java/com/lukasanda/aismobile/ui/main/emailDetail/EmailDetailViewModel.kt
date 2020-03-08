@@ -19,9 +19,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.data.repository.EmailRepository
+import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
-import sk.lukasanda.base.ui.viewmodel.BaseViewModel
 
 class EmailDetailViewModel(
     private val emailRepository: EmailRepository,

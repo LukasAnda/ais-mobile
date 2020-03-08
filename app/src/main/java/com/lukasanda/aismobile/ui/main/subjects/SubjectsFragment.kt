@@ -18,16 +18,16 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.lukasanda.aismobile.databinding.FragmentSubjectsBinding
+import com.lukasanda.aismobile.ui.activity.BaseViews
+import com.lukasanda.aismobile.ui.fragment.BaseFragment
 import com.lukasanda.aismobile.ui.main.subjects.courses.SemesterAdapter
+import com.lukasanda.aismobile.ui.recyclerview.replaceWith
 import com.lukasanda.aismobile.util.dec
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.inc
 import com.lukasanda.aismobile.util.show
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import sk.lukasanda.base.ui.activity.BaseViews
-import sk.lukasanda.base.ui.fragment.BaseFragment
-import sk.lukasanda.base.ui.recyclerview.replaceWith
 
 class SubjectsFragment :
     BaseFragment<SubjectsFragment.Views, FragmentSubjectsBinding, SubjectsViewModel, SubjectsFragmentHandler>() {
