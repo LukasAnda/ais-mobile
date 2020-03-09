@@ -21,7 +21,9 @@ import com.lukasanda.aismobile.ui.activity.BaseViews
 import com.lukasanda.aismobile.ui.fragment.BaseFragment
 import com.lukasanda.aismobile.ui.main.timetable.timetable.WeekAdapter
 import com.lukasanda.aismobile.util.dec
+import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.inc
+import com.lukasanda.aismobile.util.show
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -74,9 +76,18 @@ class TimetableFragment :
             }
 
             viewModel.timetable().observe(this@TimetableFragment, Observer {
+                if (it == null) return@Observer
                 binding?.progress?.hide()
-                weekAdapter.swapData(it)
-                handler.lowerToolbar()
+                if (it.isEmpty()) {
+                    binding?.empty?.show()
+                    binding?.pager?.hide()
+                } else {
+                    binding?.pager?.show()
+                    binding?.empty?.hide()
+
+                    weekAdapter.swapData(it)
+                    handler.lowerToolbar()
+                }
             })
 
             viewModel.days().observe(this@TimetableFragment, Observer {

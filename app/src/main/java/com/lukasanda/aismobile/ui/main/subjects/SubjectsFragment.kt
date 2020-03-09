@@ -80,7 +80,10 @@ class SubjectsFragment :
             viewModel.courses().observe(viewLifecycleOwner, Observer {
                 if (it == null) return@Observer
                 startPostponedEnterTransition()
+                binding?.progress?.hide()
                 if (it.isEmpty()) {
+                    binding?.pager?.hide()
+                    binding?.empty?.show()
                     binding?.toolbar?.hide()
                 } else {
                     semesterAdapter.swapData(it)
@@ -88,7 +91,9 @@ class SubjectsFragment :
 
 
                     binding?.toolbar?.show()
-                    binding?.progress?.hide()
+                    binding?.empty?.hide()
+                    binding?.pager?.show()
+
                     binding?.pager?.setCurrentItem(viewModel.getPage(), false)
                     updateToolbar(viewModel.getPage())
                     binding?.pager?.registerOnPageChangeCallback(pageChangeCallback)

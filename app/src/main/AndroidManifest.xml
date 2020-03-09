@@ -36,6 +36,10 @@
         <activity
             android:name=".ui.login.LoginActivity"
             android:configChanges="uiMode" />
+
+        <activity
+            android:name=".ui.loading.LoadingActivity"
+            android:configChanges="uiMode" />
         <activity
             android:name=".ui.main.MainActivity"
             android:windowSoftInputMode="adjustPan"

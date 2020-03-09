@@ -31,6 +31,7 @@
     <string name="network_error">Network error, please try again later</string>
     <string name="next_lesson">Nasledujúca hodina</string>
     <string name="no_classes">Na tento deň nie je\nžiadna rozvrhová akcia</string>
+    <string name="no_course">Nie sú dostupné žiadne dáta o predmetoch</string>
     <string-array name="days">
         <item>Pondelok</item>
         <item>Utorok</item>

@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.lukasanda.aismobile.ui.main.loading
+package com.lukasanda.aismobile.ui.loading
 
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle

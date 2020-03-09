@@ -14,13 +14,13 @@
 package com.lukasanda.aismobile.di
 
 import androidx.lifecycle.SavedStateHandle
+import com.lukasanda.aismobile.ui.loading.LoadingViewModel
 import com.lukasanda.aismobile.ui.login.LoginViewModel
 import com.lukasanda.aismobile.ui.main.MainViewModel
 import com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailViewModel
 import com.lukasanda.aismobile.ui.main.documents.DocumentsViewModel
 import com.lukasanda.aismobile.ui.main.email.EmailViewModel
 import com.lukasanda.aismobile.ui.main.emailDetail.EmailDetailViewModel
-import com.lukasanda.aismobile.ui.main.loading.LoadingViewModel
 import com.lukasanda.aismobile.ui.main.subjectDetail.SubjectDetailViewModel
 import com.lukasanda.aismobile.ui.main.subjects.SubjectsViewModel
 import com.lukasanda.aismobile.ui.main.timetable.TimetableViewModel
