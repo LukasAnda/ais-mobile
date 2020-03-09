@@ -14,9 +14,12 @@
 package com.lukasanda.aismobile.data.remote
 
 import android.content.Context
+import androidx.annotation.StringRes
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.google.gson.Gson
+import androidx.work.workDataOf
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.cache.SafePrefs
 import com.lukasanda.aismobile.data.db.dao.ProfileDao
@@ -25,10 +28,11 @@ import com.lukasanda.aismobile.data.remote.api.AISApi
 import com.lukasanda.aismobile.data.repository.CourseRepository
 import com.lukasanda.aismobile.data.repository.EmailRepository
 import com.lukasanda.aismobile.data.repository.TimetableRepository
-import com.lukasanda.aismobile.util.authenticatedOrThrow
+import com.lukasanda.aismobile.util.ResponseResult
+import com.lukasanda.aismobile.util.authenticatedOrReturn
 import com.lukasanda.aismobile.util.getSessionId
+import com.lukasanda.aismobile.util.throwOnAuthError
 import com.lukasanda.dataprovider.Parser
-import com.lukasanda.dataprovider.data.SuggestionResult
 import kotlinx.coroutines.delay
 import okhttp3.ResponseBody
 import org.joda.time.DateTime
@@ -52,41 +56,77 @@ class SyncCoroutineWorker(
 
 
     override suspend fun doWork(): Result {
-        return try {
-            if (runAttemptCount > 3) {
-                return Result.failure()
-            }
-
-            timetableRepository.update()
-            delay(1000)
-
-            val educationResponse = service.educationInfo().authenticatedOrThrow()
-            delay(1000)
-            val wifiResponse = service.wifiInfo().authenticatedOrThrow()
-            saveProfile(educationResponse, wifiResponse)
-
-            emailRepository.update()
-            courseRepository.update()
-
-            Result.success()
-        } catch (e: Exception) {
-            if (e is AuthException) {
-                val response = service.login(login = safePrefs.email, password = safePrefs.password)
-                saveCookie(safePrefs.email, safePrefs.password, response)
-            }
-
-            println(e.message)
-            println(e.toString())
-            e.printStackTrace()
-
-            Result.retry()
+        if (runAttemptCount > 3) {
+            return Result.failure()
         }
+
+        setProgress(workDataOf(PROGRESS to 0, PROGRESS_MESSAGE to R.string.downloading_timetable))
+        runCatching { timetableRepository.update().throwOnAuthError() }.getOrElse {
+            if (it is AuthException) {
+                reLogin()
+                return Result.retry()
+            } else {
+                FirebaseCrashlytics.getInstance().recordException(it)
+                it.printStackTrace()
+                ResponseResult.NetworkError
+            }
+        }
+        delay(1000)
+
+        setProgress(workDataOf(PROGRESS to 25, PROGRESS_MESSAGE to R.string.downloading_profile))
+        runCatching {
+            service.educationInfo().authenticatedOrReturn { educationResponse ->
+                delay(1000)
+                return@authenticatedOrReturn service.wifiInfo().authenticatedOrReturn { wifiResponse ->
+                    saveProfile(educationResponse, wifiResponse)
+                    ResponseResult.Authenticated
+                }
+            }.throwOnAuthError()
+        }.getOrElse {
+            if (it is AuthException) {
+                reLogin()
+                return Result.retry()
+            } else {
+                FirebaseCrashlytics.getInstance().recordException(it)
+                it.printStackTrace()
+                ResponseResult.NetworkError
+            }
+        }
+
+        setProgress(workDataOf(PROGRESS to 50, PROGRESS_MESSAGE to R.string.downloading_emails))
+        runCatching { emailRepository.update().throwOnAuthError() }.getOrElse {
+            if (it is AuthException) {
+                reLogin()
+                return Result.retry()
+            } else {
+                FirebaseCrashlytics.getInstance().recordException(it)
+                it.printStackTrace()
+                ResponseResult.NetworkError
+            }
+        }
+
+        setProgress(workDataOf(PROGRESS to 75, PROGRESS_MESSAGE to R.string.downloading_courses))
+        runCatching { courseRepository.update().throwOnAuthError() }.getOrElse {
+            if (it is AuthException) {
+                reLogin()
+                return Result.retry()
+            } else {
+                FirebaseCrashlytics.getInstance().recordException(it)
+                it.printStackTrace()
+                ResponseResult.NetworkError
+            }
+        }
+
+        setProgress(workDataOf(PROGRESS to 100, PROGRESS_MESSAGE to R.string.downloading_complete))
+
+        delay(2000)
+
+        return Result.success()
     }
 
-    fun doStuff(response: String) {
-        val suggestion = Gson().fromJson<SuggestionResult>(response, SuggestionResult::class.java)
-            .toSuggestions()
-        println(suggestion.joinToString("\n"))
+    private suspend fun reLogin() {
+        val response = service.login(login = safePrefs.email, password = safePrefs.password)
+        saveCookie(safePrefs.email, safePrefs.password, response)
     }
 
     private fun saveCookie(
@@ -115,7 +155,14 @@ class SyncCoroutineWorker(
         profileDao.update(Profile(aisId, wifiInfo.username, wifiInfo.password))
     }
 
+    companion object {
+        const val PROGRESS = "Progress"
+        const val PROGRESS_MESSAGE = "Progress Message"
+    }
+
 }
+
+data class Progress(val value: Int, @StringRes val text: Int)
 
 class AuthException : Exception()
 class HTTPException : Exception()

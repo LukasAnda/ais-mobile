@@ -66,15 +66,15 @@ class EmailFragment :
                     underlayButtons?.add(
                         UnderlayButton(
                             "", AppCompatDrawableManager.get().getDrawable(requireContext(), R.drawable.ic_delete), Color.parseColor("#E57373"),
-                        object : UnderlayButtonClickListener {
-                            override fun onClick(pos: Int) {
-                                logEvent(ACTION_EMAIL_DELETE)
-                                val email = adapter.getEmailAt(pos)
-                                viewModel.deleteEmail(email)
-                                Log.d("TAG", "Delete clicked")
+                            object : UnderlayButtonClickListener {
+                                override fun onClick(pos: Int) {
+                                    logEvent(ACTION_EMAIL_DELETE)
+                                    val email = adapter.getEmailAt(pos)
+                                    viewModel.deleteEmail(email)
+                                    Log.d("TAG", "Delete clicked")
+                                }
                             }
-                        }
-                    ))
+                        ))
                     underlayButtons?.add(UnderlayButton("",
                         AppCompatDrawableManager.get().getDrawable(requireContext(), R.drawable.ic_reply),
                         ContextCompat.getColor(requireContext(), R.color.color_primary_variant),
@@ -92,7 +92,7 @@ class EmailFragment :
             swipeHelper.attachToRecyclerView(binding?.recycler!!)
 
             binding?.pullToRefresh?.setOnRefreshListener {
-                binding?.pullToRefresh?.isRefreshing = true
+                binding?.pullToRefresh?.isRefreshing = false
                 viewModel.update()
             }
 

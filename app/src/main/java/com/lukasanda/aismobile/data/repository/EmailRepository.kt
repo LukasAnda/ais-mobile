@@ -20,8 +20,7 @@ import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.data.remote.AuthException
 import com.lukasanda.aismobile.data.remote.HTTPException
 import com.lukasanda.aismobile.data.remote.api.AISApi
-import com.lukasanda.aismobile.util.authenticatedOrThrow
-import com.lukasanda.aismobile.util.getSuggestionRequestString
+import com.lukasanda.aismobile.util.*
 import com.lukasanda.dataprovider.Parser
 import com.lukasanda.dataprovider.data.Suggestion
 import okhttp3.MediaType
@@ -34,39 +33,55 @@ class EmailRepository(
     private val service: AISApi
 ) {
 
+    suspend fun update(updateType: UpdateType = UpdateType.Lazy): ResponseResult {
 
-    @Throws(AuthException::class, HTTPException::class)
-    suspend fun update(updateType: UpdateType = UpdateType.Lazy) {
-        val emailsCountResponse = service.emails().authenticatedOrThrow()
-        val emailsInfo = Parser.getEmailInfo(emailsCountResponse)
+        var emailCount = 0
 
-        val emailsCount = emailsInfo.emailPages
-        prefs.sentDirectoryId = emailsInfo.saveDirectoryId
-        prefs.newEmailCount = emailsInfo.newEmailCount
+        val result = service.emails().authenticatedOrReturn { emailCountResponse ->
+            val emailInfo = Parser.getEmailInfo(emailCountResponse)
 
-        println(emailsInfo)
+            emailCount = emailInfo.emailPages
+            prefs.sentDirectoryId = emailInfo.saveDirectoryId
+            prefs.newEmailCount = emailInfo.newEmailCount
+
+            ResponseResult.Authenticated
+        }.logOnNetworkError()
+
+        Log.d("TAG", "Email count: $emailCount")
+
+        if (result == ResponseResult.AuthError) return result
 
         if (updateType == UpdateType.Lazy) {
             if (prefs.emailExpiration.isAfterNow)
-                return
+                return ResponseResult.Authenticated
         }
 
-        for (i in 0 until emailsCount) {
-            val emailPageResponse = service.emailPage(i.toString()).authenticatedOrThrow()
-            val emailsList = Parser.getEmails(emailPageResponse) ?: emptyList()
-            emailDao.insertEmails(emailsList.map {
-                Email(
-                    it.eid.substringAfter("="),
-                    it.fid.substringAfter("="),
-                    it.senderId,
-                    it.sender,
-                    it.subject,
-                    it.date,
-                    it.opened
-                )
-            })
+        val responses = (0 until emailCount).map { i ->
+            service.emailPage(i.toString()).authenticatedOrReturn { response ->
+                val emailsList = Parser.getEmails(response) ?: emptyList()
+                emailDao.insertEmails(emailsList.map {
+                    Email(
+                        it.eid.substringAfter("="),
+                        it.fid.substringAfter("="),
+                        it.senderId,
+                        it.sender,
+                        it.subject,
+                        it.date,
+                        it.opened
+                    )
+                })
+                ResponseResult.Authenticated
+            }
         }
+
         prefs.emailExpiration = DateTime.now().plusMinutes(10)
+        return if (responses.all { it == ResponseResult.Authenticated }) {
+            ResponseResult.Authenticated
+        } else if (responses.contains(ResponseResult.AuthError)) {
+            ResponseResult.AuthError
+        } else {
+            ResponseResult.NetworkError
+        }
     }
 
     @Throws(AuthException::class, HTTPException::class)

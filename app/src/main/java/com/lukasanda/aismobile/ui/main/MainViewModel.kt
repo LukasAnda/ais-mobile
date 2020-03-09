@@ -106,6 +106,7 @@ class MainViewModel(
             prefs.newEmailCount = 0
             prefs.emailExpiration = DateTime.now().minusWeeks(2)
             prefs.sentDirectoryId = ""
+            prefs.didShowLoading = false
 
             _logoutLiveData.postValue(true)
         }

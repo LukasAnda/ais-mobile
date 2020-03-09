@@ -11,31 +11,18 @@
  * limitations under the License.
  */
 
-package com.lukasanda.aismobile.ui.main.email
+package com.lukasanda.aismobile.ui.main.loading
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
+import androidx.work.WorkManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.lukasanda.aismobile.data.db.entity.Email
-import com.lukasanda.aismobile.data.repository.EmailRepository
 import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
-import kotlinx.coroutines.launch
 
-class EmailViewModel(
-    private val emailRepository: EmailRepository,
-    private val handle: SavedStateHandle
-) :
-    BaseViewModel(handle) {
-
+class LoadingViewModel(handle: SavedStateHandle, private val context: Context) : BaseViewModel(handle) {
     override fun logToCrashlytics(e: Throwable) {
         FirebaseCrashlytics.getInstance().recordException(e)
     }
 
-    fun emails() = emailRepository.getEmails()
-
-    fun deleteEmail(email: Email) = viewModelScope.launch(coroutineExceptionHandler) { emailRepository.delete(email) }
-
-    fun update() = viewModelScope.launch(coroutineExceptionHandler) {
-        emailRepository.update(updateType = EmailRepository.UpdateType.Purge)
-    }
+    fun getWorkLiveData() = WorkManager.getInstance(context).getWorkInfosForUniqueWorkLiveData("Sync")
 }

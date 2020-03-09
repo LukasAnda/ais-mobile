@@ -20,10 +20,9 @@ import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.db.dao.TimetableDao
 import com.lukasanda.aismobile.data.db.entity.TimetableItem
-import com.lukasanda.aismobile.data.remote.AuthException
-import com.lukasanda.aismobile.data.remote.HTTPException
 import com.lukasanda.aismobile.data.remote.api.AISApi
-import com.lukasanda.aismobile.util.authenticatedOrThrow
+import com.lukasanda.aismobile.util.ResponseResult
+import com.lukasanda.aismobile.util.authenticatedOrReturn
 import com.lukasanda.dataprovider.Parser
 import com.snakydesign.livedataextensions.map
 import org.joda.time.DateTime
@@ -54,12 +53,11 @@ class TimetableRepository(
 
     fun get() = timetableDao.getAll().map { mapCourses(it) }
 
-    @Throws(AuthException::class, HTTPException::class)
-    suspend fun update() {
-        val scheduleResponse =
-            aisApi.schedule("1?zobraz=1;format=json;rozvrh_student=${prefs.id}")
-                .authenticatedOrThrow()
-        saveCourses(scheduleResponse)
+    suspend fun update(): ResponseResult {
+        return aisApi.schedule("1?zobraz=1;format=json;rozvrh_student=${prefs.id}").authenticatedOrReturn { scheduleResponse ->
+            saveCourses(scheduleResponse)
+            ResponseResult.Authenticated
+        }
     }
 
     suspend fun deleteAll() = timetableDao.deleteAll()

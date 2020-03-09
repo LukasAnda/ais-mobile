@@ -23,6 +23,7 @@ class Prefs(context: Context) {
     val PREFS_FILENAME = "${BuildConfig.APPLICATION_ID}.prefs"
     val SESSION_EXPIRATION = "session_expiration_date"
     val AISID = "aisid"
+    val DID_SHOW_LOADING = "did_show_loading"
     val SENT_DIRECTORY_ID = "sent_directory_id"
     val NEW_EMAIL_COUNT = "new_email_count"
     val EMAIL_CACHE_EXPIRATION = "email_cache_expiration"
@@ -82,6 +83,10 @@ class Prefs(context: Context) {
     var id: Int
         get() = prefs.getInt(AISID, 0)
         set(value) = prefs.edit().putInt(AISID, value).apply()
+
+    var didShowLoading: Boolean
+        get() = prefs.getBoolean(DID_SHOW_LOADING, false)
+        set(value) = prefs.edit().putBoolean(DID_SHOW_LOADING, value).apply()
 
     var sentDirectoryId: String
         get() = prefs.getString(SENT_DIRECTORY_ID, "") ?: ""

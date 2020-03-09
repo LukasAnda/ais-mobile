@@ -56,6 +56,7 @@ import com.lukasanda.aismobile.ui.main.email.EmailFragmentDirections
 import com.lukasanda.aismobile.ui.main.email.EmailFragmentHandler
 import com.lukasanda.aismobile.ui.main.emailDetail.EmailDetailFragmentDirections
 import com.lukasanda.aismobile.ui.main.emailDetail.EmailDetailHandler
+import com.lukasanda.aismobile.ui.main.loading.LoadingHandler
 import com.lukasanda.aismobile.ui.main.logout.LogoutHandler
 import com.lukasanda.aismobile.ui.main.subjectDetail.SubjectDetailFragmentDirections
 import com.lukasanda.aismobile.ui.main.subjectDetail.SubjectDetailHandler
@@ -63,10 +64,7 @@ import com.lukasanda.aismobile.ui.main.subjects.SubjectsFragmentDirections
 import com.lukasanda.aismobile.ui.main.subjects.SubjectsFragmentHandler
 import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentDirections
 import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentHandler
-import com.lukasanda.aismobile.util.createLiveData
-import com.lukasanda.aismobile.util.getMimeType
-import com.lukasanda.aismobile.util.show
-import com.lukasanda.aismobile.util.startWorker
+import com.lukasanda.aismobile.util.*
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -74,7 +72,7 @@ import org.koin.core.parameter.parametersOf
 
 class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityMainBinding>(),
     TimetableFragmentHandler, SubjectsFragmentHandler, EmailFragmentHandler, EmailDetailHandler,
-    ComposeEmailHandler, SubjectDetailHandler, DocumentsHandler, LogoutHandler, AnalyticsTrait {
+    ComposeEmailHandler, SubjectDetailHandler, DocumentsHandler, LogoutHandler, LoadingHandler, AnalyticsTrait {
 
     private lateinit var toggle: ActionBarDrawerToggle
 
@@ -97,6 +95,10 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
                 startActivity(Intent(this@MainActivity, LoginActivity::class.java))
             } else {
                 startWorker(applicationContext)
+            }
+
+            if (!prefs.didShowLoading) {
+                navController?.navigateSafe(TimetableFragmentDirections.actionScheduleFragmentToLoadingFragment())
             }
 
             viewModel.profile().observe(this@MainActivity, Observer {
@@ -246,5 +248,18 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
     override fun logout() {
         logEvent(ACTION_LOGOUT)
         viewModel.logout()
+    }
+
+    override fun startLoading() {
+        binding.toolbar.hide()
+        binding.bottomMenu.hide()
+    }
+
+    override fun loadingComplete() {
+        navController?.popBackStack()
+        binding.toolbar.show()
+        binding.bottomMenu.show()
+
+        prefs.didShowLoading = true
     }
 }

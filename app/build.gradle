@@ -150,6 +150,9 @@ dependencies {
     //date time
     implementation 'joda-time:joda-time:2.10.5'
 
+    //Loading
+    implementation 'com.github.LukasAnda:Wavee:1.1'
+
     //images
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     kapt 'com.github.bumptech.glide:compiler:4.11.0'

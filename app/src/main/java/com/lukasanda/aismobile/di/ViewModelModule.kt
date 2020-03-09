@@ -20,6 +20,7 @@ import com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailViewModel
 import com.lukasanda.aismobile.ui.main.documents.DocumentsViewModel
 import com.lukasanda.aismobile.ui.main.email.EmailViewModel
 import com.lukasanda.aismobile.ui.main.emailDetail.EmailDetailViewModel
+import com.lukasanda.aismobile.ui.main.loading.LoadingViewModel
 import com.lukasanda.aismobile.ui.main.subjectDetail.SubjectDetailViewModel
 import com.lukasanda.aismobile.ui.main.subjects.SubjectsViewModel
 import com.lukasanda.aismobile.ui.main.timetable.TimetableViewModel
@@ -36,4 +37,5 @@ val viewModelModule = module {
     viewModel { (handle: SavedStateHandle) -> ComposeEmailViewModel(get(), handle) }
     viewModel { (handle: SavedStateHandle) -> SubjectDetailViewModel(get(), handle) }
     viewModel { (handle: SavedStateHandle) -> DocumentsViewModel(get(), handle) }
+    viewModel { (handle: SavedStateHandle) -> LoadingViewModel(handle, get()) }
 }

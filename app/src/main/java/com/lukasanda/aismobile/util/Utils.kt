@@ -44,6 +44,7 @@ import androidx.viewpager2.widget.ViewPager2
 import androidx.work.*
 import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.remote.AuthException
 import com.lukasanda.aismobile.data.remote.HTTPException
@@ -92,6 +93,7 @@ fun startWorker(applicationContext: Context) {
         15,
         TimeUnit.MINUTES
     ).setConstraints(constraints.build())
+        .addTag("Sync")
         .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
         .build()
     WorkManager.getInstance(applicationContext)
@@ -109,6 +111,30 @@ fun Response<ResponseBody>.authenticatedOrThrow(): String =
         this.code() == 403 -> throw AuthException()
         else -> throw HTTPException()
     }
+
+suspend fun Response<ResponseBody>.authenticatedOrReturn(func: suspend (String) -> ResponseResult): ResponseResult {
+    return when {
+        this.isSuccessful -> this.body()?.string()?.let {
+            func(it)
+        } ?: ResponseResult.NetworkError
+        this.code() == 403 -> ResponseResult.AuthError
+        else -> ResponseResult.NetworkError
+    }
+}
+
+enum class ResponseResult {
+    Authenticated, AuthError, NetworkError
+}
+
+fun ResponseResult.throwOnAuthError(): ResponseResult {
+    if (this == ResponseResult.AuthError) throw AuthException()
+    return this
+}
+
+fun ResponseResult.logOnNetworkError(): ResponseResult {
+    if (this == ResponseResult.NetworkError) FirebaseCrashlytics.getInstance().recordException(AuthException())
+    return this
+}
 
 fun sendNotification(applicationContext: Context) {
     val intent = Intent(applicationContext, MainActivity::class.java)

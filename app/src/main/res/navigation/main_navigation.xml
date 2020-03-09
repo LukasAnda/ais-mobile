@@ -25,6 +25,9 @@
         <action
             android:id="@+id/action_scheduleFragment_to_subjectDetailFragment"
             app:destination="@id/subjectDetailFragment" />
+        <action
+            android:id="@+id/action_scheduleFragment_to_loadingFragment"
+            app:destination="@id/loadingFragment" />
     </fragment>
     <fragment
         android:id="@+id/subjectsFragment"
@@ -102,4 +105,8 @@
         android:id="@+id/logoutFragment"
         android:name="com.lukasanda.aismobile.ui.main.logout.LogoutFragment"
         android:label="LogoutFragment" />
+    <fragment
+        android:id="@+id/loadingFragment"
+        android:name="com.lukasanda.aismobile.ui.main.loading.LoadingFragment"
+        android:label="LoadingFragment" />
 </navigation>
