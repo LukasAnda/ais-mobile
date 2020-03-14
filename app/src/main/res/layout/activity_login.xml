@@ -48,7 +48,7 @@
             android:id="@+id/emailEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Meno"
+            android:hint="@string/name"
             android:imeOptions="actionNext"
             android:singleLine="true"
             android:textSize="16sp" />
@@ -71,7 +71,7 @@
             android:id="@+id/passwordEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Heslo"
+            android:hint="@string/password"
             android:imeOptions="actionDone"
             android:inputType="textPassword"
             android:singleLine="true"

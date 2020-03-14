@@ -105,8 +105,27 @@ class SyncCoroutineWorker(
             }
         }
 
-        setProgress(workDataOf(PROGRESS to 75, PROGRESS_MESSAGE to R.string.downloading_courses))
-        runCatching { courseRepository.update().throwOnAuthError() }.getOrElse {
+        //setProgress(workDataOf(PROGRESS to 75, PROGRESS_MESSAGE to R.string.downloading_courses))
+        runCatching {
+            var actualSemesters = 0
+            courseRepository.update(object : CourseRepository.CourseUpdateHandler {
+                override suspend fun onSemesterCount(semesterCount: Int) {
+                    actualSemesters = semesterCount
+                }
+
+                override suspend fun onSemesterStartDownloading(semesterIndex: Int, semesterName: String) {
+                    if (actualSemesters > 0) {
+                        setProgress(
+                            workDataOf(
+                                PROGRESS to 75 + semesterIndex * (25 / actualSemesters),
+                                PROGRESS_SPECIAL_MESSAGE to "Sťahujem dokumenty a údaje o predmetoch pre semester: $semesterName "
+                            )
+                        )
+                    }
+                }
+
+            }).throwOnAuthError()
+        }.getOrElse {
             if (it is AuthException) {
                 reLogin()
                 return Result.retry()
@@ -158,6 +177,7 @@ class SyncCoroutineWorker(
     companion object {
         const val PROGRESS = "Progress"
         const val PROGRESS_MESSAGE = "Progress Message"
+        const val PROGRESS_SPECIAL_MESSAGE = "Progress Special Message"
     }
 
 }

@@ -63,7 +63,7 @@ class TimetableCourseViewHolder(binding: ScheduleItemBinding) :
             }
 
             binding.root.setOnClickListener {
-                onClick?.invoke(item)
+                onClick.invoke(item)
             }
         }
     }

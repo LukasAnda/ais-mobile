@@ -14,21 +14,8 @@
 <resources>
     <string name="app_name">AIS Mobile</string>
     <string name="login">Prihlásiť sa</string>
-    <string name="title_activity_main2">Main2Activity</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
-    <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
 
-    <string name="menu_home">Home</string>
-    <string name="menu_gallery">Gallery</string>
-    <string name="menu_slideshow">Slideshow</string>
-    <string name="menu_tools">Tools</string>
-    <string name="menu_share">Share</string>
-    <string name="menu_send">Send</string>
-    <string name="network_error">Network error, please try again later</string>
+    <string name="network_error">Chyba, prosím skontrolujte pripojenie na internet a skúste zopakovať akciu neskôr</string>
     <string name="next_lesson">Nasledujúca hodina</string>
     <string name="no_classes">Na tento deň nie je\nžiadna rozvrhová akcia</string>
     <string name="no_course">Nie sú dostupné žiadne dáta o predmetoch</string>
@@ -45,16 +32,30 @@
     <string name="notification_title">AIS Aktualizácia</string>
     <string name="notification_subtitle">Prebieha aktualizácia</string>
     <string name="no_subjects">Žiadne predmety pre zvolený semester</string>
-    <string name="action__send">Send</string>
-    <string name="course_presence">Course presence:</string>
-    <string name="seminar_presence">Seminar presence:</string>
-    <string name="settings">Settings</string>
-    <string name="people_at_stu">People at STU</string>
-    <string name="logout">Logout</string>
+    <string name="action__send">Odoslať</string>
+    <string name="course_presence">Prítomnosť na prednáške:</string>
+    <string name="seminar_presence">Prítomnosť na cvičení:</string>
+    <string name="settings">Nastavenia</string>
+    <string name="people_at_stu">Ľudia na STU</string>
+    <string name="logout">Odhlásiť sa</string>
 
     <string name="downloading_timetable">Sťahujem rozvrh…</string>
     <string name="downloading_emails">Sťahujem e-maily…</string>
     <string name="downloading_profile">Sťahujem profil…</string>
     <string name="downloading_courses">Sťahujem informácie o predmetoch a dokumentoch…</string>
     <string name="downloading_complete">Hotovo!</string>
+    <string name="wifi_username">Wifi meno:</string>
+    <string name="no_data">-</string>
+    <string name="wifi_password">Wifi heslo:</string>
+    <string name="name">Meno</string>
+    <string name="password">Heslo</string>
+    <string name="logout_title">Naozaj sa chcete odhlásiť?</string>
+    <string name="logout_description">Po odhlásení sa zo zariadenia odstránia všetky stiahnuté údaje a bude umožnené sa prihlásiť na iný účet.</string>
+    <string name="_cancel">Zrušiť</string>
+    <string name="new_document">Bol stiahnutý nový dokument</string>
+    <string name="new_document_description">Tento doukument nájdete na nasledujúcej ceste: %s kde ho môžete neskôr otvoriť pomocou systémovej aplikácie.\nŽeláte si tento dokument otvoriť teraz?</string>
+    <string name="open_document">Otvoriť dokument</string>
+    <string name="document_failed">Nepodarilo sa stiahnuť dokument.</string>
+    <string name="document_failed_description">Nastal pravdepodobne problém so sieťou. Skúste to prosím znova neskôr.</string>
+    <string name="_ok">OK</string>
 </resources>

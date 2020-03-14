@@ -38,8 +38,9 @@ class DocumentItemHolder(binding: DocumentItemBinding) : BaseBindingViewHolder<E
     override fun bind(item: Either<Unit, Document>, onClick: (Document?) -> Unit) {
         when (item) {
             is Either.Left -> {
-                binding.name.text = "Back"
+                binding.name.text = ".."
                 binding.icon.setImageResource(R.drawable.ic_back)
+                binding.icon.show()
                 binding.iconBackground.setBackgroundColor(binding.iconBackground.context.getMimeColor(""))
                 binding.iconText.hide()
                 binding.root.setOnClickListener {

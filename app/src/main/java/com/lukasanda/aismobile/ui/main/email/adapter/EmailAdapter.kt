@@ -56,7 +56,7 @@ class EmailItemHolder(binding: EmailItemBinding) :
         }
 
         binding.root.setOnClickListener {
-            onClick?.invoke(item)
+            onClick.invoke(item)
         }
     }
 }

@@ -44,11 +44,11 @@ class TimetableRepository(
 
 
     fun getCurrentDay(): Int {
-        var pageToSelect = Int.MAX_VALUE / 2
-        while (pageToSelect % dayNames.size != actualDay) {
-            pageToSelect++
-        }
-        return pageToSelect
+//        var pageToSelect = Int.MAX_VALUE / 2
+//        while (pageToSelect % dayNames.size != actualDay) {
+//            pageToSelect++
+//        }
+        return actualDay + 1
     }
 
     fun get() = timetableDao.getAll().map { mapCourses(it) }
@@ -85,8 +85,13 @@ class TimetableRepository(
     }
 
     fun setDay(position: Int) {
-        actualDay = position % dayNames.size
-        dayNamesLiveData.postValue(dayNames[actualDay])
+        //actualDay = position % dayNames.size
+        val realPosition = if (position % 7 == 0) {
+            dayNames.size - 1
+        } else {
+            (position % 7) - 1
+        }
+        dayNamesLiveData.postValue(dayNames[realPosition])
     }
 
     private fun mapCourses(

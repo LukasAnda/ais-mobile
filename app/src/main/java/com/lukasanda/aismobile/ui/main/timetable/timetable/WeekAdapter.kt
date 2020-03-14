@@ -24,8 +24,7 @@ import com.lukasanda.aismobile.ui.recyclerview.create
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
 
-class WeekAdapter(private val listener: (TimetableItem) -> Unit) :
-    BaseAdapter<List<TimetableItem>, TimetableItem, WeekItemHolder>(listener) {
+class WeekAdapter(private val listener: (TimetableItem) -> Unit) : BaseAdapter<List<TimetableItem>, TimetableItem, WeekItemHolder>(listener) {
     private val pool = RecyclerView.RecycledViewPool()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         parent.create(::WeekItemHolder, WeekItemBinding::inflate).apply {
@@ -37,11 +36,18 @@ class WeekAdapter(private val listener: (TimetableItem) -> Unit) :
         holder.binding.recycler.adapter = null
     }
 
-    override fun getItemCount() = Int.MAX_VALUE
+    private fun getItemRealPosition(position: Int) = when {
+        position == 0 -> itemCount - 1 - 2
+        position > itemCount - 2 -> 0
+        else -> position - 1
+    }
+
+    override fun getItemCount() = items.size + 2
+
 
     override fun onBindViewHolder(holder: WeekItemHolder, position: Int) {
         if (items.isNotEmpty()) {
-            holder.bind(items[position % items.size], listener)
+            holder.bind(items[getItemRealPosition(position)], listener)
         }
     }
 }

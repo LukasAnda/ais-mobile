@@ -20,10 +20,9 @@ import com.lukasanda.aismobile.databinding.FragmentScheduleBinding
 import com.lukasanda.aismobile.ui.activity.BaseViews
 import com.lukasanda.aismobile.ui.fragment.BaseFragment
 import com.lukasanda.aismobile.ui.main.timetable.timetable.WeekAdapter
-import com.lukasanda.aismobile.util.dec
 import com.lukasanda.aismobile.util.hide
-import com.lukasanda.aismobile.util.inc
 import com.lukasanda.aismobile.util.show
+import org.joda.time.DateTime
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -44,6 +43,16 @@ class TimetableFragment :
             super.onPageSelected(position)
             viewModel.setDay(position)
         }
+
+        override fun onPageScrollStateChanged(state: Int) {
+            if (state == ViewPager2.SCROLL_STATE_IDLE) {
+                if (binding?.pager?.currentItem == 0) {
+                    binding?.pager?.setCurrentItem(weekAdapter.itemCount - 2, false)
+                } else if (binding?.pager?.currentItem == weekAdapter.itemCount - 1) {
+                    binding?.pager?.setCurrentItem(1, false)
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {
@@ -58,20 +67,10 @@ class TimetableFragment :
 
     inner class Views : BaseViews {
         override fun modifyViews() {
-            binding?.buttonBack?.setOnClickListener {
-                binding?.pager?.dec()
-            }
-
-            binding?.buttonForward?.setOnClickListener {
-                binding?.pager?.inc()
-            }
-
             binding?.pager?.apply {
                 offscreenPageLimit = 1
                 adapter = weekAdapter
                 orientation = ViewPager2.ORIENTATION_HORIZONTAL
-                binding?.pager?.setCurrentItem(viewModel.getCurrentDay(), false)
-
                 binding?.pager?.registerOnPageChangeCallback(pageChangeCallback)
             }
 
@@ -79,28 +78,29 @@ class TimetableFragment :
                 if (it == null) return@Observer
                 binding?.progress?.hide()
                 if (it.isEmpty()) {
-                    binding?.empty?.show()
                     binding?.pager?.hide()
+                    binding?.indicatorLayout?.hide()
                 } else {
                     binding?.pager?.show()
-                    binding?.empty?.hide()
+                    binding?.indicatorLayout?.show()
 
                     weekAdapter.swapData(it)
-                    handler.lowerToolbar()
+                    binding?.indicator?.attachToPager(binding?.pager!!)
+                    binding?.pager?.setCurrentItem(DateTime.now().dayOfWeek, false)
+
                 }
             })
 
             viewModel.days().observe(this@TimetableFragment, Observer {
-                binding?.day?.text = it
+                handler.setDayText(it)
             })
-
-            viewModel.setDay(viewModel.getActualDay())
         }
 
     }
 }
 
 interface TimetableFragmentHandler {
-    fun lowerToolbar()
+    //    fun lowerToolbar()
+    fun setDayText(text: String)
     fun showDetailFromTimetable(courseId: String)
 }

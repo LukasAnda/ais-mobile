@@ -604,8 +604,7 @@ public class HtmlCleaner {
             return false;
         String ns = cleanTimeValues.namespace.peek();
         if (ns == null) return false;
-        if (ns.equals("http://www.w3.org/1999/xhtml")) return false;
-        return true;
+        return !ns.equals("http://www.w3.org/1999/xhtml");
     }
 
     /**
@@ -905,7 +904,7 @@ public class HtmlCleaner {
                     //since tag is closed earlier due to incorrect child tag, we store this info
                     //to reopen it later, on the child close.
                     getChildBreaks(cleanTimeValues).addBreak(lastTagPos, new TagPos(nodeIterator.previousIndex(), tag.getName()));
-                    boolean certainty = startTagToken.hasAttribute("id") ? false : true;
+                    boolean certainty = !startTagToken.hasAttribute("id");
                     properties.fireHtmlError(certainty, (TagNode) nodeList.get(lastTagPos.position), ErrorType.UnpermittedChild);
                     List closed = closeSnippet(nodeList, lastTagPos, startTagToken, cleanTimeValues);
                     int closedCount = closed.size();

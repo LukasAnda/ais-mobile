@@ -323,7 +323,7 @@ public class TagNode extends TagToken implements HtmlNode {
      */
     public TagNode[] getChildTags() {
         List<TagNode> childTagList = getChildTagList();
-        TagNode childrenArray[] = new TagNode[childTagList.size()];
+        TagNode[] childrenArray = new TagNode[childTagList.size()];
         for (int i = 0; i < childTagList.size(); i++) {
             childrenArray[i] = (TagNode) childTagList.get(i);
         }
@@ -522,7 +522,7 @@ public class TagNode extends TagToken implements HtmlNode {
      */
     private TagNode[] getElements(ITagNodeCondition condition, boolean isRecursive) {
         final List<TagNode> list = findMatchingTagNodes(condition, isRecursive);
-        TagNode array[];
+        TagNode[] array;
         if (list == null) {
             array = new TagNode[0];
         } else {
@@ -609,7 +609,7 @@ public class TagNode extends TagToken implements HtmlNode {
      * @return True if element is removed (if it is not root node).
      */
     public boolean removeFromTree() {
-        return parent != null ? parent.removeChild(this) : false;
+        return parent != null && parent.removeChild(this);
     }
 
     /**

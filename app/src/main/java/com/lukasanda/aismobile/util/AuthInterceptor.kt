@@ -27,7 +27,7 @@ class AuthInterceptor(val prefs: SafePrefs) : Interceptor {
     }
 }
 
-class EncodingInterceptor(): Interceptor{
+class EncodingInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val url = chain.request().url().toString().replace("%3D", "=")
         return chain.proceed(chain.request().newBuilder().apply {

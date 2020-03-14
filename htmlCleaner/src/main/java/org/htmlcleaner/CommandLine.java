@@ -94,7 +94,7 @@ public class CommandLine {
                 System.err.println("Usage: java -jar htmlcleanerXX.jar src=<url | file> [htmlver=4] [incharset=<charset>] " +
                         "[dest=<file>] [outcharset=<charset>] [taginfofile=<file>] [options...]");
                 System.err.println("Alternative: java -jar htmlcleanerXX.jar (reads the input from console)");
-                System.err.println("");
+                System.err.println();
                 System.err.println("where options include:");
                 System.err.println("    outputtype=simple* | compact | browser-compact | pretty");
                 System.err.println("    advancedxmlescape=true* | false");

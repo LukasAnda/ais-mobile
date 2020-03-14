@@ -26,16 +26,20 @@ import com.lukasanda.aismobile.data.cache.SafePrefs
 import com.lukasanda.aismobile.data.db.dao.ProfileDao
 import com.lukasanda.aismobile.data.db.entity.Document
 import com.lukasanda.aismobile.data.db.entity.Profile
+import com.lukasanda.aismobile.data.remote.AuthException
 import com.lukasanda.aismobile.data.remote.api.AISApi
 import com.lukasanda.aismobile.data.repository.CourseRepository
 import com.lukasanda.aismobile.data.repository.DocumentRepository
 import com.lukasanda.aismobile.data.repository.EmailRepository
 import com.lukasanda.aismobile.data.repository.TimetableRepository
 import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
+import com.lukasanda.aismobile.util.getSessionId
 import com.tonyodev.fetch2.*
 import com.tonyodev.fetch2core.Func
 import kotlinx.coroutines.launch
+import okhttp3.ResponseBody
 import org.joda.time.DateTime
+import retrofit2.Response
 import java.io.File
 
 class MainViewModel(
@@ -53,11 +57,38 @@ class MainViewModel(
     BaseViewModel(handle) {
 
     override fun logToCrashlytics(e: Throwable) {
-        FirebaseCrashlytics.getInstance().recordException(e)
+        if (e is AuthException) {
+            viewModelScope.launch(coroutineExceptionHandler) {
+                reLogin()
+            }
+        } else {
+            FirebaseCrashlytics.getInstance().recordException(e)
+        }
     }
 
-    private val _fileHandle = MutableLiveData<Pair<File, String>>()
-    fun fileHandle(): LiveData<Pair<File, String>> = _fileHandle
+    private suspend fun reLogin() {
+        val response = service.login(login = safePrefs.email, password = safePrefs.password)
+        saveCookie(safePrefs.email, safePrefs.password, response)
+    }
+
+    private fun saveCookie(
+        name: String,
+        password: String,
+        response: Response<ResponseBody>
+    ): Boolean {
+        val cookies = response.headers().get("Set-Cookie") ?: return false
+
+        safePrefs.sessionCookie = getSessionId(cookies)
+        prefs.expiration = DateTime.now().plusDays(1)
+
+        safePrefs.email = name
+        safePrefs.password = password
+
+        return true
+    }
+
+    private val _fileHandle: MutableLiveData<Result<Pair<File, String>>> = MutableLiveData<Result<Pair<File, String>>>()
+    fun fileHandle(): LiveData<Result<Pair<File, String>>> = _fileHandle
 
     private val _logoutLiveData = MutableLiveData<Boolean>()
     fun logoutData(): LiveData<Boolean> = _logoutLiveData
@@ -80,12 +111,13 @@ class MainViewModel(
                 addHeader("Cookie", safePrefs.sessionCookie)
             }
             fetch.enqueue(request, func = Func {
-                _fileHandle.postValue(Pair(File(it.file), document.mimeType))
-                println(it)
+                _fileHandle.postValue(Result.success(Pair(File(it.file), document.mimeType)))
+//                _fileHandle.postValue(Pair(File(it.file), document.mimeType))
             }, func2 = Func {
-                println(it)
-                it.throwable?.printStackTrace()
-
+                it.throwable?.let { error ->
+                    _fileHandle.postValue(Result.failure(error))
+                    error.printStackTrace()
+                }
             })
         }
     }

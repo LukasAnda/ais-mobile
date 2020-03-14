@@ -43,7 +43,7 @@ class CourseRepository(
 
     fun get(courseId: String) = courseDao.getCourse(courseId)
 
-    suspend fun update(): ResponseResult {
+    suspend fun update(handler: CourseUpdateHandler? = null): ResponseResult {
 
         if (prefs.courseExpiration.plusHours(1).isAfterNow) return ResponseResult.Authenticated
 
@@ -55,13 +55,16 @@ class CourseRepository(
 
         if (updateType == NEWEST) semesters = semesters?.takeLast(1)
 
+        handler?.onSemesterCount(semesters?.size ?: 0)
+
         delay(1000)
 
         val dbCourses = mutableListOf<Course>()
         val dbSheets = mutableListOf<Sheet>()
         val dbTeachers = mutableListOf<Teacher>()
 
-        val responses = semesters?.map { semester ->
+        val responses = semesters?.mapIndexed { index, semester ->
+            handler?.onSemesterStartDownloading(index, semester.name)
             aisApi.subjects(semester.studiesId, semester.id).authenticatedOrReturn { coursesResponse ->
                 val coursesServer = Parser.getCourses(coursesResponse) ?: mutableListOf()
                 val courses = coursesServer.map { courseToDb(it, semester) }
@@ -161,5 +164,10 @@ class CourseRepository(
 
     enum class UpdateType {
         FETCH, NEWEST
+    }
+
+    interface CourseUpdateHandler {
+        suspend fun onSemesterCount(semesterCount: Int)
+        suspend fun onSemesterStartDownloading(semesterIndex: Int, semesterName: String)
     }
 }

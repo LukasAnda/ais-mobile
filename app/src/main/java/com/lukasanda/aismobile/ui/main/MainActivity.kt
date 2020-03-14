@@ -29,6 +29,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupWithNavController
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.bottomsheets.BottomSheet
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -137,22 +138,38 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
                 }
             })
 
-            viewModel.fileHandle().observe(this@MainActivity, Observer {
+            viewModel.fileHandle().observe(this@MainActivity, Observer { result ->
+                if (result.isSuccess) {
+                    val pair = result.getOrNull() ?: return@Observer
+                    MaterialDialog(this@MainActivity, BottomSheet()).show {
+                        title(R.string.new_document)
+                        message(text = getString(R.string.new_document_description, pair.first.path))
+                        positiveButton(R.string.open_document) {
+                            logEvent(ACTION_OPEN_DOCUMENT)
 
-                logEvent(ACTION_OPEN_DOCUMENT)
+                            val (file, _) = pair
+                            val intent = Intent(Intent.ACTION_VIEW)
+                            val uri = FileProvider.getUriForFile(this@MainActivity, this@MainActivity.applicationContext.packageName + ".provider", file)
+                            intent.setDataAndType(uri, getMimeType(file.path))
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
-                val (file, _) = it
-                val intent = Intent(Intent.ACTION_VIEW)
-                val uri = FileProvider.getUriForFile(this@MainActivity, this@MainActivity.applicationContext.packageName + ".provider", file)
-                intent.setDataAndType(uri, getMimeType(file.path))
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-
-                try {
-                    startActivity(intent)
-                } catch (e: ActivityNotFoundException) {
-                    e.printStackTrace()
+                            try {
+                                startActivity(intent)
+                            } catch (e: ActivityNotFoundException) {
+                                e.printStackTrace()
+                            }
+                        }
+                        negativeButton(R.string._cancel)
+                    }
+                } else if (result.isFailure) {
+                    MaterialDialog(this@MainActivity, BottomSheet()).show {
+                        title(R.string.document_failed)
+                        message(R.string.document_failed_description)
+                        positiveButton(R.string._ok)
+                    }
                 }
+
             })
 
             viewModel.logoutData().observe(this@MainActivity, Observer {
@@ -189,6 +206,10 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
     override fun showDetailFromSubjects(courseId: String) {
         logEvent(ACTION_SHOW_COURSE_DETAIL)
         navController?.navigateSafe(SubjectsFragmentDirections.actionSubjectsFragmentToSubjectDetailFragment(courseId))
+    }
+
+    override fun setDayText(text: String) {
+        binding.windowTitle.text = text
     }
 
     override fun showDetailFromTimetable(courseId: String) {
@@ -255,13 +276,14 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
     override fun logout() {
         navController?.popBackStack()
 
-        MaterialDialog(this).show {
-            title(text = "Do you want to logout?")
-            positiveButton {
+        MaterialDialog(this, BottomSheet()).show {
+            title(R.string.logout_title)
+            message(R.string.logout_description)
+            positiveButton(R.string.logout) {
                 logEvent(ACTION_LOGOUT)
                 viewModel.logout()
             }
-            negativeButton {
+            negativeButton(R.string._cancel) {
             }
         }
     }

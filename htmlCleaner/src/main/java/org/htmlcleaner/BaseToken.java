@@ -23,26 +23,26 @@ import java.io.Writer;
  */
 public interface BaseToken {
 
-    public void serialize(Serializer serializer, Writer writer) throws IOException;
+    void serialize(Serializer serializer, Writer writer) throws IOException;
 
     /**
      * @return row in source html where the token was found
      */
-    public int getRow();
+    int getRow();
 
     /**
      * @param row
      */
-    public void setRow(int row);
+    void setRow(int row);
 
     /**
      * @return col in source html where the token was found
      */
-    public int getCol();
+    int getCol();
 
     /**
      * @param col
      */
-    public void setCol(int col);
+    void setCol(int col);
 
 }

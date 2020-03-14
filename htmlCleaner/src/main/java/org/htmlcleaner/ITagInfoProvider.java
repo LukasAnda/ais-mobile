@@ -23,6 +23,6 @@ package org.htmlcleaner;
  */
 public interface ITagInfoProvider {
 
-    public TagInfo getTagInfo(String tagName);
+    TagInfo getTagInfo(String tagName);
 
 }

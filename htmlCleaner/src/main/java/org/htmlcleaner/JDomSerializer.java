@@ -204,7 +204,7 @@ public class JDomSerializer {
 
                 if (item instanceof CommentNode) {
                     CommentNode commentNode = (CommentNode) item;
-                    Comment comment = factory.comment(commentNode.getContent().toString());
+                    Comment comment = factory.comment(commentNode.getContent());
                     element.addContent(comment);
 
                 } else if (item instanceof ContentNode) {

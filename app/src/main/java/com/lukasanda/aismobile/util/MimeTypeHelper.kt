@@ -20,7 +20,7 @@ import com.lukasanda.aismobile.R
 
 fun getMimeType(path: String): String {
     var type = "image/jpeg" // Default Value
-    val extension = MimeTypeMap.getFileExtensionFromUrl(path);
+    val extension = MimeTypeMap.getFileExtensionFromUrl(path)
     if (extension != null) {
         type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: type
     }

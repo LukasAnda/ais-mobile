@@ -22,7 +22,7 @@ public enum BelongsTo {
     BODY("body");
     private final String dbCode;
 
-    private BelongsTo(String dbCode) {
+    BelongsTo(String dbCode) {
         this.dbCode = dbCode;
     }
 

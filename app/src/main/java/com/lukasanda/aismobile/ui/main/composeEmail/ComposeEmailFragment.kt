@@ -254,7 +254,7 @@ class ComposeEmailFragment :
 
     sealed class SendType {
         class Reply(val email: Email) : SendType()
-        class Send() : SendType()
+        class Send : SendType()
     }
 
 }

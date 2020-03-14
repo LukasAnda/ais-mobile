@@ -40,8 +40,9 @@ class LoadingActivity : BaseUIActivity<LoadingViewModel, LoadingActivity.Views, 
                     val progress = it.progress.getInt(SyncCoroutineWorker.PROGRESS, -1)
                     if (progress == -1) return@let
                     val progressMessage = it.progress.getInt(SyncCoroutineWorker.PROGRESS_MESSAGE, 0).takeIf { it != 0 }
+                    val specialProgressMessage = it.progress.getString(SyncCoroutineWorker.PROGRESS_SPECIAL_MESSAGE)
 
-                    val actualProgress = binding.loadingIndicator.mProgressValue ?: 0
+                    val actualProgress = binding.loadingIndicator.mProgressValue
 
                     animator?.end()
                     animator = ValueAnimator.ofInt(actualProgress, progress).apply {
@@ -62,6 +63,9 @@ class LoadingActivity : BaseUIActivity<LoadingViewModel, LoadingActivity.Views, 
 
                     if (progressMessage != null) {
                         binding.status.setText(progressMessage)
+                    }
+                    if (specialProgressMessage != null) {
+                        binding.status.setText(specialProgressMessage)
                     }
                 }
             })

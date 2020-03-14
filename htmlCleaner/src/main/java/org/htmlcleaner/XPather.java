@@ -48,7 +48,7 @@ public class XPather {
     private static final int CS = ' ';
 
     // array of basic tokens of which XPath expression is made
-    private String tokenArray[];
+    private String[] tokenArray;
 
     /**
      * Constructor - creates XPather instance with specified XPath expression.
