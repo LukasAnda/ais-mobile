@@ -32,11 +32,17 @@ class SemesterAdapter(private val listener: (FullCourse) -> Unit) :
             binding.recycler.setRecycledViewPool(pool)
         }
 
-    override fun getItemCount() = items.size
+    override fun getItemCount() = items.size + 2
+
+    private fun getItemRealPosition(position: Int) = when {
+        position == 0 -> itemCount - 1 - 2
+        position > itemCount - 2 -> 0
+        else -> position - 1
+    }
 
     override fun onBindViewHolder(holder: SemesterItemHolder, position: Int) {
         if (items.isNotEmpty()) {
-            holder.bind(items[position % items.size], listener)
+            holder.bind(items[getItemRealPosition(position)], listener)
         }
     }
 }

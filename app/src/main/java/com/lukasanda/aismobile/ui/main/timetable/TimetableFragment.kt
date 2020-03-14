@@ -16,7 +16,7 @@ package com.lukasanda.aismobile.ui.main.timetable
 import android.os.Bundle
 import androidx.lifecycle.Observer
 import androidx.viewpager2.widget.ViewPager2
-import com.lukasanda.aismobile.databinding.FragmentScheduleBinding
+import com.lukasanda.aismobile.databinding.TimetableFragmentBinding
 import com.lukasanda.aismobile.ui.activity.BaseViews
 import com.lukasanda.aismobile.ui.fragment.BaseFragment
 import com.lukasanda.aismobile.ui.main.timetable.timetable.WeekAdapter
@@ -27,7 +27,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
 class TimetableFragment :
-    BaseFragment<TimetableFragment.Views, FragmentScheduleBinding, TimetableViewModel, TimetableFragmentHandler>() {
+    BaseFragment<TimetableFragment.Views, TimetableFragmentBinding, TimetableViewModel, TimetableFragmentHandler>() {
 
     override lateinit var handler: TimetableFragmentHandler
     override val viewModel: TimetableViewModel by viewModel { parametersOf(Bundle()) }
@@ -60,8 +60,8 @@ class TimetableFragment :
         super.onDestroyView()
     }
 
-    override fun setBinding(): FragmentScheduleBinding =
-        FragmentScheduleBinding.inflate(layoutInflater)
+    override fun setBinding(): TimetableFragmentBinding =
+        TimetableFragmentBinding.inflate(layoutInflater)
 
     override fun createViews() = Views()
 
@@ -100,7 +100,6 @@ class TimetableFragment :
 }
 
 interface TimetableFragmentHandler {
-    //    fun lowerToolbar()
     fun setDayText(text: String)
     fun showDetailFromTimetable(courseId: String)
 }

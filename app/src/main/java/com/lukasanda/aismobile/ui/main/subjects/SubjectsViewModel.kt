@@ -32,8 +32,14 @@ class SubjectsViewModel(
 
     val semesters = mutableListOf<String>()
 
-    fun getSemesterName(position: Int) =
-        if (semesters.isNotEmpty()) semesters[position % semesters.size] else ""
+    fun getSemesterName(position: Int): String {
+        val realPosition = if (position % 7 == 0) {
+            semesters.size - 1
+        } else {
+            (position % 7) - 1
+        }
+        return if (semesters.isNotEmpty()) semesters[realPosition] else ""
+    }
 
     fun setPage(position: Int) {
         handle.set(PAGE, position)

@@ -199,8 +199,8 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
 
     override fun setAppBarConfig() = AppBarConfiguration.Builder(R.id.scheduleFragment, R.id.subjectsFragment, R.id.emailFragment, R.id.documentsFragment).setDrawerLayout(binding.drawer).build()
 
-    override fun lowerToolbar() {
-        binding.appbar.outlineProvider = null
+    override fun setSemesterText(text: String) {
+        binding.windowTitle.text = text
     }
 
     override fun showDetailFromSubjects(courseId: String) {
