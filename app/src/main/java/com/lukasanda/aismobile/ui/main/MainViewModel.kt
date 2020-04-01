@@ -87,8 +87,12 @@ class MainViewModel(
         return true
     }
 
-    private val _fileHandle: MutableLiveData<Result<Pair<File, String>>> = MutableLiveData<Result<Pair<File, String>>>()
-    fun fileHandle(): LiveData<Result<Pair<File, String>>> = _fileHandle
+    private val _fileHandle: MutableLiveData<Result<Pair<File, String>>?> = MutableLiveData<Result<Pair<File, String>>?>()
+    fun fileHandle(): LiveData<Result<Pair<File, String>>?> = _fileHandle
+
+    fun clearFileHandle() {
+        _fileHandle.postValue(null)
+    }
 
     private val _logoutLiveData = MutableLiveData<Boolean>()
     fun logoutData(): LiveData<Boolean> = _logoutLiveData
@@ -133,12 +137,7 @@ class MainViewModel(
             safePrefs.password = ""
             safePrefs.sessionCookie = ""
 
-            prefs.courseExpiration = DateTime.now().minusWeeks(2)
-            prefs.fullCourseExpiration = DateTime.now().minusWeeks(2)
-            prefs.newEmailCount = 0
-            prefs.emailExpiration = DateTime.now().minusWeeks(2)
-            prefs.sentDirectoryId = ""
-            prefs.didShowLoading = false
+            prefs.nukeAll()
 
             _logoutLiveData.postValue(true)
         }

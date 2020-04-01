@@ -20,12 +20,12 @@ apply plugin: "androidx.navigation.safeargs.kotlin"
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.2"
+    buildToolsVersion "29.0.3"
 
     defaultConfig {
         applicationId "com.lukasanda.aismobile"
-        versionCode 2
-        versionName "1.0.0-beta2"
+        versionCode 3
+        versionName "1.0.0-beta3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         minSdkVersion 21

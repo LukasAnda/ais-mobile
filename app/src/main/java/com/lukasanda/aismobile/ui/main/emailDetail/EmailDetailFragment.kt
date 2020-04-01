@@ -27,6 +27,7 @@ import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.databinding.EmailDetailFragmentBinding
 import com.lukasanda.aismobile.ui.activity.BaseViews
 import com.lukasanda.aismobile.ui.fragment.BaseFragment
+import com.lukasanda.aismobile.ui.main.BaseFragmentHandler
 import com.lukasanda.aismobile.util.getInitialsFromName
 import com.lukasanda.aismobile.util.getNameFromSender
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -37,6 +38,7 @@ class EmailDetailFragment :
     inner class Views : BaseViews {
         override fun modifyViews() {
             setHasOptionsMenu(true)
+            handler.setTitle(" ")
             val args by navArgs<EmailDetailFragmentArgs>()
 
             binding?.sender?.text = args.email.sender
@@ -92,6 +94,6 @@ class EmailDetailFragment :
     override lateinit var handler: EmailDetailHandler
 }
 
-interface EmailDetailHandler {
+interface EmailDetailHandler : BaseFragmentHandler {
     fun reply(email: Email)
 }

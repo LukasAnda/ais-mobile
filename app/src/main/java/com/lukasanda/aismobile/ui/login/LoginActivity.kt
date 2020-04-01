@@ -28,7 +28,7 @@ import com.lukasanda.aismobile.ui.activity.BaseActivityViews
 import com.lukasanda.aismobile.ui.activity.BaseUIActivity
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
-import com.lukasanda.aismobile.util.startWorker
+import com.lukasanda.aismobile.util.startSingleWorker
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -66,7 +66,7 @@ class LoginActivity : BaseUIActivity<LoginViewModel, LoginActivity.Views, Activi
                     is State.Success -> {
                         logEvent(ACTION_LOGIN)
                         hideProgress()
-                        startWorker(applicationContext)
+                        startSingleWorker(applicationContext)
                         finish()
                     }
                     is State.Failure -> {

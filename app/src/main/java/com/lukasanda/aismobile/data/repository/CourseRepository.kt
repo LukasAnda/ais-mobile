@@ -65,9 +65,11 @@ class CourseRepository(
 
         val responses = semesters?.mapIndexed { index, semester ->
             handler?.onSemesterStartDownloading(index, semester.name)
-            aisApi.subjects(semester.studiesId, semester.id).authenticatedOrReturn { coursesResponse ->
+            aisApi.subjects("${semester.studiesId};obdobi=${semester.id}").authenticatedOrReturn { coursesResponse ->
                 val coursesServer = Parser.getCourses(coursesResponse) ?: mutableListOf()
                 val courses = coursesServer.map { courseToDb(it, semester) }
+
+                println(courses)
 
                 dbCourses.addAll(courses)
 

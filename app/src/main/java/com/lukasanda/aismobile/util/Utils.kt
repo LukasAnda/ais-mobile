@@ -52,6 +52,7 @@ import com.lukasanda.aismobile.data.remote.SyncCoroutineWorker
 import com.lukasanda.aismobile.ui.main.MainActivity
 import okhttp3.ResponseBody
 import retrofit2.Response
+import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
@@ -84,6 +85,43 @@ operator fun ViewPager2.dec(): ViewPager2 {
     return this
 }
 
+fun startSingleWorker(applicationContext: Context) {
+    val constraints =
+        Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED)
+
+    val request = OneTimeWorkRequest.Builder(
+        SyncCoroutineWorker::class.java
+    ).setConstraints(constraints.build())
+        .addTag("Sync")
+//        .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
+        .build()
+    WorkManager.getInstance(applicationContext)
+        .enqueueUniqueWork(
+            "Sync" + UUID.randomUUID().toString(),
+            ExistingWorkPolicy.REPLACE,
+            request
+        )
+}
+
+fun startSingleWorkerWithDelay(applicationContext: Context) {
+    val constraints =
+        Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED)
+
+    val request = OneTimeWorkRequest.Builder(
+        SyncCoroutineWorker::class.java
+    ).setConstraints(constraints.build())
+        .addTag("Sync")
+        .setInitialDelay(5, TimeUnit.MINUTES)
+//        .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
+        .build()
+    WorkManager.getInstance(applicationContext)
+        .enqueueUniqueWork(
+            "Sync" + UUID.randomUUID().toString(),
+            ExistingWorkPolicy.REPLACE,
+            request
+        )
+}
+
 fun startWorker(applicationContext: Context) {
     val constraints =
         Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED)
@@ -93,7 +131,7 @@ fun startWorker(applicationContext: Context) {
         15,
         TimeUnit.MINUTES
     ).setConstraints(constraints.build())
-        .addTag("Sync")
+        .addTag("Sync2")
         .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
         .build()
     WorkManager.getInstance(applicationContext)
@@ -122,8 +160,11 @@ suspend fun Response<ResponseBody>.authenticatedOrReturn(func: suspend (String) 
     }
 }
 
-enum class ResponseResult {
-    Authenticated, AuthError, NetworkError
+sealed class ResponseResult {
+    class AuthenticatedWithResult<T>(result: T) : ResponseResult()
+    object Authenticated : ResponseResult()
+    object AuthError : ResponseResult()
+    object NetworkError : ResponseResult()
 }
 
 fun ResponseResult.throwOnAuthError(): ResponseResult {
@@ -136,7 +177,7 @@ fun ResponseResult.logOnNetworkError(): ResponseResult {
     return this
 }
 
-fun sendNotification(applicationContext: Context) {
+fun sendNotification(applicationContext: Context, text: String, id: Int) {
     val intent = Intent(applicationContext, MainActivity::class.java)
     intent.flags = FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_CLEAR_TASK
 
@@ -145,7 +186,7 @@ fun sendNotification(applicationContext: Context) {
 
     val bitmap = applicationContext.vectorToBitmap(R.drawable.ic_subjects)
     val titleNotification = applicationContext.getString(R.string.notification_title)
-    val subtitleNotification = applicationContext.getString(R.string.notification_subtitle)
+    val subtitleNotification = text
     val pendingIntent = getActivity(applicationContext, 0, intent, 0)
     val notification = NotificationCompat.Builder(applicationContext, NOTIFICATION_CHANNEL)
         .setLargeIcon(bitmap).setSmallIcon(R.drawable.ic_subjects)
@@ -172,7 +213,7 @@ fun sendNotification(applicationContext: Context) {
         notificationManager.createNotificationChannel(channel)
     }
 
-    notificationManager.notify(12345, notification.build())
+    notificationManager.notify(id, notification.build())
 }
 
 fun Context.vectorToBitmap(drawableId: Int): Bitmap? {

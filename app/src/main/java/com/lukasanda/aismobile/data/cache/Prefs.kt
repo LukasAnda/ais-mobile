@@ -95,4 +95,9 @@ class Prefs(context: Context) {
     var newEmailCount: Int
         get() = prefs.getInt(NEW_EMAIL_COUNT, 0)
         set(value) = prefs.edit().putInt(NEW_EMAIL_COUNT, value).apply()
+
+    fun nukeAll() {
+        prefs.edit().remove(SESSION_EXPIRATION).remove(AISID).remove(DID_SHOW_LOADING).remove(SENT_DIRECTORY_ID).remove(NEW_EMAIL_COUNT).remove(EMAIL_CACHE_EXPIRATION)
+            .remove(FULL_COURSE_CACHE_EXPIRATION).remove(COURSE_CACHE_EXPIRATION).apply()
+    }
 }

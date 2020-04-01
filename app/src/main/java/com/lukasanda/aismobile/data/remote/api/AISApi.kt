@@ -52,13 +52,13 @@ interface AISApi {
     @GET("/auth/student/list.pl")
     suspend fun semesters(): Response<ResponseBody>
 
-    @FormUrlEncoded
-    @POST("/auth/student/list.pl")
+    @GET("/auth/student/list.pl")
     suspend fun subjects(
-        @Field("studium", encoded = true) study: String, @Field(
-            "obdobi",
-            encoded = true
-        ) semester: String
+        @Query("studium", encoded = true) studium: String
+//        @Field("studium", encoded = true) study: String, @Field(
+//            "obdobi",
+//            encoded = true
+//        ) semester: String
     ): Response<ResponseBody>
 
     @FormUrlEncoded

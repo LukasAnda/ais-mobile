@@ -58,7 +58,7 @@ class DocumentItemHolder(binding: DocumentItemBinding) : BaseBindingViewHolder<E
                     binding.icon.setImageResource(R.drawable.ic_folder)
                 }
                 binding.iconBackground.setBackgroundColor(binding.iconBackground.context.getMimeColor(item.value.mimeType))
-                binding.name.text = item.value.name
+                binding.name.text = item.value.name.replace("&nbsp;", " ")
 
                 binding.root.setOnClickListener {
                     onClick(item.value)

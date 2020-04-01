@@ -20,7 +20,6 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.view.ViewOutlineProvider
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
@@ -69,7 +68,7 @@ import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentHandler
 import com.lukasanda.aismobile.util.createLiveData
 import com.lukasanda.aismobile.util.getMimeType
 import com.lukasanda.aismobile.util.show
-import com.lukasanda.aismobile.util.startWorker
+import com.lukasanda.aismobile.util.startSingleWorker
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -99,7 +98,7 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
             if (safePrefs.sessionCookie.isEmpty()) {
                 startActivity(Intent(this@MainActivity, LoginActivity::class.java))
             } else {
-                startWorker(applicationContext)
+                startSingleWorker(applicationContext)
             }
 
             viewModel.profile().observe(this@MainActivity, Observer {
@@ -124,9 +123,9 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
                 drawerHeaderBinding.password.text = it.password
             })
 
-            navController?.addOnDestinationChangedListener { controller, destination, arguments ->
-                binding.windowTitle.text = destination.label
-            }
+//            navController?.addOnDestinationChangedListener { controller, destination, arguments ->
+//                binding.windowTitle.text = destination.label
+//            }
 
             createLiveData<Int>(prefs.prefs, prefs.NEW_EMAIL_COUNT).observe(this@MainActivity, Observer {
                 if (it > 0) {
@@ -135,10 +134,13 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
                         this.number = it
                         backgroundColor = Color.RED
                     }
+                } else {
+                    binding.bottomMenu.removeBadge(R.id.emailFragment)
                 }
             })
 
             viewModel.fileHandle().observe(this@MainActivity, Observer { result ->
+                if (result == null) return@Observer
                 if (result.isSuccess) {
                     val pair = result.getOrNull() ?: return@Observer
                     MaterialDialog(this@MainActivity, BottomSheet()).show {
@@ -169,6 +171,7 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
                         positiveButton(R.string._ok)
                     }
                 }
+                viewModel.clearFileHandle()
 
             })
 
@@ -199,17 +202,9 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
 
     override fun setAppBarConfig() = AppBarConfiguration.Builder(R.id.scheduleFragment, R.id.subjectsFragment, R.id.emailFragment, R.id.documentsFragment).setDrawerLayout(binding.drawer).build()
 
-    override fun setSemesterText(text: String) {
-        binding.windowTitle.text = text
-    }
-
     override fun showDetailFromSubjects(courseId: String) {
         logEvent(ACTION_SHOW_COURSE_DETAIL)
         navController?.navigateSafe(SubjectsFragmentDirections.actionSubjectsFragmentToSubjectDetailFragment(courseId))
-    }
-
-    override fun setDayText(text: String) {
-        binding.windowTitle.text = text
     }
 
     override fun showDetailFromTimetable(courseId: String) {
@@ -217,8 +212,8 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
         navController?.navigateSafe(TimetableFragmentDirections.actionScheduleFragmentToSubjectDetailFragment(courseId))
     }
 
-    override fun riseToolbar() {
-        binding.appbar.outlineProvider = ViewOutlineProvider.BOUNDS
+    override fun setTitle(text: String) {
+        binding.windowTitle.text = text
     }
 
     override fun showEmailDetail(email: Email) {
@@ -287,4 +282,8 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
             }
         }
     }
+}
+
+interface BaseFragmentHandler {
+    fun setTitle(text: String)
 }

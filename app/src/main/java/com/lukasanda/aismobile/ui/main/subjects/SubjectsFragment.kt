@@ -20,6 +20,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.lukasanda.aismobile.databinding.SubjectsFragmentBinding
 import com.lukasanda.aismobile.ui.activity.BaseViews
 import com.lukasanda.aismobile.ui.fragment.BaseFragment
+import com.lukasanda.aismobile.ui.main.BaseFragmentHandler
 import com.lukasanda.aismobile.ui.main.subjects.courses.SemesterAdapter
 import com.lukasanda.aismobile.ui.recyclerview.replaceWith
 import com.lukasanda.aismobile.util.hide
@@ -110,11 +111,10 @@ class SubjectsFragment :
     }
 
     private fun updateToolbar(position: Int) {
-        handler.setSemesterText(viewModel.getSemesterName(position))
+        handler.setTitle(viewModel.getSemesterName(position))
     }
 }
 
-interface SubjectsFragmentHandler {
-    fun setSemesterText(text: String)
+interface SubjectsFragmentHandler : BaseFragmentHandler {
     fun showDetailFromSubjects(courseId: String)
 }

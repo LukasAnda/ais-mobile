@@ -102,19 +102,19 @@ object Parser {
                     it.getAttributeByName("value"),
                     it.content()
                 )
-            }
+            }.sortedBy { it.id }
 
             val studiesList = if (hasStudiesSelector) studies.childTagList.map {
                 Study(
                     it.getAttributeByName("value"),
                     it.content().getSemesterCount()
                 )
-            } else return semesterList
+            }.sortedBy { it.id } else return semesterList
 
             var studyIndex = 0
             var nextIndex = studiesList[studyIndex].semesterCount
 
-            semesterList.mapIndexed { index, semester ->
+            val newList = semesterList.mapIndexed { index, semester ->
                 if (index + 1 > nextIndex) {
                     studyIndex++
                     nextIndex += studiesList[studyIndex].semesterCount
@@ -123,7 +123,7 @@ object Parser {
                 semester.copy(studiesId = studiesList[studyIndex].id)
             }
 
-            semesterList
+            newList
         } catch (e: Exception) {
             null
         }

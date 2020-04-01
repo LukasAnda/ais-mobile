@@ -29,7 +29,7 @@
         <item>Nedeľa</item>
     </string-array>
     <string name="press_twice_exit">Stlačte tlačidlo späť ešte raz na ukončenie</string>
-    <string name="notification_title">AIS Aktualizácia</string>
+    <string name="notification_title">AIS mobile</string>
     <string name="notification_subtitle">Prebieha aktualizácia</string>
     <string name="no_subjects">Žiadne predmety pre zvolený semester</string>
     <string name="action__send">Odoslať</string>
@@ -58,4 +58,13 @@
     <string name="document_failed">Nepodarilo sa stiahnuť dokument.</string>
     <string name="document_failed_description">Nastal pravdepodobne problém so sieťou. Skúste to prosím znova neskôr.</string>
     <string name="_ok">OK</string>
+    <string name="emails">Emaily</string>
+    <string name="documents">Dokumenty</string>
+    <plurals name="new_emails_notficiation">
+        <item quantity="zero">V schránke máte %d neprečítaných emailov</item>
+        <item quantity="one">V schránke máte %d neprečítaný email</item>
+        <item quantity="two">V schránke máte %d neprečítané emaily</item>
+        <item quantity="few">V schránke máte %d neprečítané emaily</item>
+        <item quantity="other">V schránke máte %d neprečítaných emailov</item>
+    </plurals>
 </resources>

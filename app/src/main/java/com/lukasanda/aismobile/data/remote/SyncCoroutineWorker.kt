@@ -14,11 +14,13 @@
 package com.lukasanda.aismobile.data.remote
 
 import android.content.Context
+import android.util.Log
 import androidx.annotation.StringRes
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.lukasanda.aismobile.BuildConfig
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.cache.SafePrefs
@@ -28,10 +30,7 @@ import com.lukasanda.aismobile.data.remote.api.AISApi
 import com.lukasanda.aismobile.data.repository.CourseRepository
 import com.lukasanda.aismobile.data.repository.EmailRepository
 import com.lukasanda.aismobile.data.repository.TimetableRepository
-import com.lukasanda.aismobile.util.ResponseResult
-import com.lukasanda.aismobile.util.authenticatedOrReturn
-import com.lukasanda.aismobile.util.getSessionId
-import com.lukasanda.aismobile.util.throwOnAuthError
+import com.lukasanda.aismobile.util.*
 import com.lukasanda.dataprovider.Parser
 import kotlinx.coroutines.delay
 import okhttp3.ResponseBody
@@ -60,6 +59,14 @@ class SyncCoroutineWorker(
             return Result.failure()
         }
 
+        Log.d("TAG", "Starting worker")
+
+        if (BuildConfig.DEBUG) {
+            sendNotification(applicationContext, "Zapinam workera", 1)
+        }
+
+        startSingleWorkerWithDelay(applicationContext)
+
         setProgress(workDataOf(PROGRESS to 0, PROGRESS_MESSAGE to R.string.downloading_timetable))
         runCatching { timetableRepository.update().throwOnAuthError() }.getOrElse {
             if (it is AuthException) {
@@ -71,6 +78,7 @@ class SyncCoroutineWorker(
                 ResponseResult.NetworkError
             }
         }
+        Log.d("TAG", "Timetable downloaded")
         delay(1000)
 
         setProgress(workDataOf(PROGRESS to 25, PROGRESS_MESSAGE to R.string.downloading_profile))
@@ -93,6 +101,7 @@ class SyncCoroutineWorker(
             }
         }
 
+        val previousEmailCount = prefs.newEmailCount
         setProgress(workDataOf(PROGRESS to 50, PROGRESS_MESSAGE to R.string.downloading_emails))
         runCatching { emailRepository.update().throwOnAuthError() }.getOrElse {
             if (it is AuthException) {
@@ -103,6 +112,13 @@ class SyncCoroutineWorker(
                 it.printStackTrace()
                 ResponseResult.NetworkError
             }
+        }
+
+        val newEmailCount = prefs.newEmailCount
+
+        if (newEmailCount != previousEmailCount) {
+            val text = applicationContext.resources.getQuantityString(R.plurals.new_emails_notficiation, newEmailCount, newEmailCount)
+            sendNotification(applicationContext, text, 0)
         }
 
         //setProgress(workDataOf(PROGRESS to 75, PROGRESS_MESSAGE to R.string.downloading_courses))

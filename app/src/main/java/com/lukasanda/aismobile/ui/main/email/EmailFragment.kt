@@ -30,6 +30,7 @@ import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.databinding.EmailFragmentBinding
 import com.lukasanda.aismobile.ui.activity.BaseViews
 import com.lukasanda.aismobile.ui.fragment.BaseFragment
+import com.lukasanda.aismobile.ui.main.BaseFragmentHandler
 import com.lukasanda.aismobile.ui.main.email.adapter.EmailAdapter
 import com.lukasanda.aismobile.ui.recyclerview.bindLinear
 import org.joda.time.DateTime
@@ -58,6 +59,7 @@ class EmailFragment :
     inner class Views : BaseViews {
         override fun modifyViews() {
             postponeEnterTransition()
+            handler.setTitle(getString(R.string.emails))
             binding?.recycler?.bindLinear(adapter)
 
             val swipeHelper: SwipeHelper = object : SwipeHelper() {
@@ -104,7 +106,6 @@ class EmailFragment :
                         DateTimeFormat.forPattern("dd. MM. yyyy HH:mm")
                     )
                 })
-                handler.riseToolbar()
                 startPostponedEnterTransition()
             })
             binding?.compose?.setOnClickListener {
@@ -115,8 +116,7 @@ class EmailFragment :
     }
 }
 
-interface EmailFragmentHandler {
-    fun riseToolbar()
+interface EmailFragmentHandler : BaseFragmentHandler {
     fun showEmailDetail(email: Email)
     fun replyToEmail(email: Email)
     fun composeEmail()

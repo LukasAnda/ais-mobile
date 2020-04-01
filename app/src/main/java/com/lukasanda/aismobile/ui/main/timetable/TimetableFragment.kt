@@ -19,6 +19,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.lukasanda.aismobile.databinding.TimetableFragmentBinding
 import com.lukasanda.aismobile.ui.activity.BaseViews
 import com.lukasanda.aismobile.ui.fragment.BaseFragment
+import com.lukasanda.aismobile.ui.main.BaseFragmentHandler
 import com.lukasanda.aismobile.ui.main.timetable.timetable.WeekAdapter
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
@@ -74,7 +75,7 @@ class TimetableFragment :
                 binding?.pager?.registerOnPageChangeCallback(pageChangeCallback)
             }
 
-            viewModel.timetable().observe(this@TimetableFragment, Observer {
+            viewModel.timetable().observe(viewLifecycleOwner, Observer {
                 if (it == null) return@Observer
                 binding?.progress?.hide()
                 if (it.isEmpty()) {
@@ -91,15 +92,14 @@ class TimetableFragment :
                 }
             })
 
-            viewModel.days().observe(this@TimetableFragment, Observer {
-                handler.setDayText(it)
+            viewModel.days().observe(viewLifecycleOwner, Observer {
+                handler.setTitle(it)
             })
         }
 
     }
 }
 
-interface TimetableFragmentHandler {
-    fun setDayText(text: String)
+interface TimetableFragmentHandler : BaseFragmentHandler {
     fun showDetailFromTimetable(courseId: String)
 }

@@ -19,6 +19,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.lukasanda.aismobile.ui.main.BaseFragmentHandler
 
 class LogoutFragment : Fragment() {
     lateinit var handler: LogoutHandler
@@ -31,11 +32,12 @@ class LogoutFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        handler.setTitle(" ")
         handler.logout()
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 }
 
-interface LogoutHandler {
+interface LogoutHandler : BaseFragmentHandler {
     fun logout()
 }

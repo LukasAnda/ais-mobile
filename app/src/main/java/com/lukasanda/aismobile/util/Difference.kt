@@ -11,18 +11,5 @@
  * limitations under the License.
  */
 
-package com.lukasanda.aismobile.ui.loading
+package com.lukasanda.aismobile.util
 
-import android.content.Context
-import androidx.lifecycle.SavedStateHandle
-import androidx.work.WorkManager
-import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
-
-class LoadingViewModel(handle: SavedStateHandle, private val context: Context) : BaseViewModel(handle) {
-    override fun logToCrashlytics(e: Throwable) {
-        FirebaseCrashlytics.getInstance().recordException(e)
-    }
-
-    fun getWorkLiveData() = WorkManager.getInstance(context).getWorkInfosByTagLiveData("Sync")
-}
