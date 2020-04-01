@@ -52,7 +52,6 @@ import com.lukasanda.aismobile.data.remote.SyncCoroutineWorker
 import com.lukasanda.aismobile.ui.main.MainActivity
 import okhttp3.ResponseBody
 import retrofit2.Response
-import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
@@ -97,7 +96,7 @@ fun startSingleWorker(applicationContext: Context) {
         .build()
     WorkManager.getInstance(applicationContext)
         .enqueueUniqueWork(
-            "Sync" + UUID.randomUUID().toString(),
+            "Sync",
             ExistingWorkPolicy.REPLACE,
             request
         )
@@ -116,7 +115,7 @@ fun startSingleWorkerWithDelay(applicationContext: Context) {
         .build()
     WorkManager.getInstance(applicationContext)
         .enqueueUniqueWork(
-            "Sync" + UUID.randomUUID().toString(),
+            "Sync",
             ExistingWorkPolicy.REPLACE,
             request
         )

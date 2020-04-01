@@ -56,6 +56,7 @@ class SyncCoroutineWorker(
 
     override suspend fun doWork(): Result {
         if (runAttemptCount > 3) {
+            startSingleWorkerWithDelay(applicationContext)
             return Result.failure()
         }
 
@@ -64,8 +65,6 @@ class SyncCoroutineWorker(
         if (BuildConfig.DEBUG) {
             sendNotification(applicationContext, "Zapinam workera", 1)
         }
-
-        startSingleWorkerWithDelay(applicationContext)
 
         setProgress(workDataOf(PROGRESS to 0, PROGRESS_MESSAGE to R.string.downloading_timetable))
         runCatching { timetableRepository.update().throwOnAuthError() }.getOrElse {
@@ -156,6 +155,7 @@ class SyncCoroutineWorker(
 
         delay(2000)
 
+        startSingleWorkerWithDelay(applicationContext)
         return Result.success()
     }
 
