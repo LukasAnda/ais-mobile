@@ -33,10 +33,11 @@ class SubjectsViewModel(
     val semesters = mutableListOf<String>()
 
     fun getSemesterName(position: Int): String {
-        val realPosition = if (position % 7 == 0) {
+        if (semesters.isEmpty()) return ""
+        val realPosition = if (position % semesters.size == 0) {
             semesters.size - 1
         } else {
-            (position % 7) - 1
+            (position % semesters.size) - 1
         }
         return if (semesters.isNotEmpty()) semesters[realPosition] else ""
     }

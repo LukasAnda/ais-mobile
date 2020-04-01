@@ -21,9 +21,11 @@ import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.db.dao.TimetableDao
 import com.lukasanda.aismobile.data.db.entity.TimetableItem
 import com.lukasanda.aismobile.data.remote.api.AISApi
+import com.lukasanda.aismobile.util.Difference
 import com.lukasanda.aismobile.util.ResponseResult
 import com.lukasanda.aismobile.util.authenticatedOrReturn
 import com.lukasanda.dataprovider.Parser
+import com.lukasanda.dataprovider.data.Schedule
 import com.snakydesign.livedataextensions.map
 import org.joda.time.DateTime
 
@@ -55,34 +57,46 @@ class TimetableRepository(
 
     suspend fun update(): ResponseResult {
         return aisApi.schedule("1?zobraz=1;format=json;rozvrh_student=${prefs.id}").authenticatedOrReturn { scheduleResponse ->
-            saveCourses(scheduleResponse)
-            ResponseResult.Authenticated
+
+            val schedule = parseResponse(scheduleResponse)
+            val courses = parseCourses(schedule)
+
+            val originalCourses = timetableDao.getAllSuspend().map { it.courseId }
+
+            updateInDb(courses)
+
+            return@authenticatedOrReturn if (originalCourses.isEmpty() || originalCourses.containsAll(courses.map { it.courseId })) {
+                ResponseResult.Authenticated
+            } else {
+                ResponseResult.AuthenticatedWithResult(TimetableDifference(context.getString(R.string.new_timetable)))
+            }
         }
+    }
+
+    class TimetableDifference(private val message: String) : Difference {
+        override fun parseMessage(): String = message
     }
 
     suspend fun deleteAll() = timetableDao.deleteAll()
 
-    private suspend fun saveCourses(response: String) {
-        val schedule =
-            Parser.getSchedule(response) ?: return
+    private fun parseResponse(response: String) = Parser.getSchedule(response) ?: Schedule(emptyList())
 
-        val courses = schedule.periodicLessons?.map {
-            TimetableItem(
-                0,
-                it.courseId,
-                it.courseName,
-                it.room,
-                it.teachers?.first()?.fullName ?: "",
-                it.courseCode,
-                it.dayOfWeek.toInt(),
-                it.startTime,
-                it.endTime,
-                it.isSeminar.toBoolean()
-            )
-        }
+    private fun parseCourses(courses: Schedule) = courses.periodicLessons?.map {
+        TimetableItem(
+            0,
+            it.courseId,
+            it.courseName,
+            it.room,
+            it.teachers?.first()?.fullName ?: "",
+            it.courseCode,
+            it.dayOfWeek.toInt(),
+            it.startTime,
+            it.endTime,
+            it.isSeminar.toBoolean()
+        )
+    } ?: emptyList()
 
-        courses?.let { timetableDao.update(it) }
-    }
+    private suspend fun updateInDb(courses: List<TimetableItem>) = timetableDao.update(courses)
 
     fun setDay(position: Int) {
         //actualDay = position % dayNames.size

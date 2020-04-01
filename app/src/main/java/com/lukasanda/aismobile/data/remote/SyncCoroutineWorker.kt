@@ -39,6 +39,10 @@ import org.koin.core.KoinComponent
 import org.koin.core.inject
 import retrofit2.Response
 
+private const val NOTIFICATION_DEBUG = 0
+private const val NOTIFICATION_TIMETABLE = 1
+private const val NOTIFICATION_EMAIL = 2
+
 class SyncCoroutineWorker(
     context: Context,
     workerParameters: WorkerParameters
@@ -63,11 +67,16 @@ class SyncCoroutineWorker(
         Log.d("TAG", "Starting worker")
 
         if (BuildConfig.DEBUG) {
-            sendNotification(applicationContext, "Zapinam workera", 1)
+            sendNotification(applicationContext, "Zapinam workera", NOTIFICATION_DEBUG)
         }
 
         setProgress(workDataOf(PROGRESS to 0, PROGRESS_MESSAGE to R.string.downloading_timetable))
-        runCatching { timetableRepository.update().throwOnAuthError() }.getOrElse {
+        runCatching {
+            val result = timetableRepository.update().throwOnAuthError()
+            if (result is ResponseResult.AuthenticatedWithResult<*>) {
+                sendNotification(applicationContext, result.result.parseMessage(), NOTIFICATION_TIMETABLE)
+            }
+        }.getOrElse {
             if (it is AuthException) {
                 reLogin()
                 return Result.retry()
@@ -117,7 +126,7 @@ class SyncCoroutineWorker(
 
         if (newEmailCount != previousEmailCount) {
             val text = applicationContext.resources.getQuantityString(R.plurals.new_emails_notficiation, newEmailCount, newEmailCount)
-            sendNotification(applicationContext, text, 0)
+            sendNotification(applicationContext, text, NOTIFICATION_EMAIL)
         }
 
         //setProgress(workDataOf(PROGRESS to 75, PROGRESS_MESSAGE to R.string.downloading_courses))

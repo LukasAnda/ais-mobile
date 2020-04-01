@@ -34,4 +34,18 @@ data class TimetableItem(
     var isNext: Boolean = false
 
     fun next() = this.copy().apply { isNext = true }
+
+    override fun hashCode(): Int {
+        var result = courseId.hashCode()
+        result = 31 * result + name.hashCode()
+        result = 31 * result + place.hashCode()
+        result = 31 * result + teacher.hashCode()
+        result = 31 * result + acronym.hashCode()
+        result = 31 * result + dayOfWeek
+        result = 31 * result + startTime.hashCode()
+        result = 31 * result + endTime.hashCode()
+        result = 31 * result + isSeminar.hashCode()
+        result = 31 * result + isNext.hashCode()
+        return result
+    }
 }

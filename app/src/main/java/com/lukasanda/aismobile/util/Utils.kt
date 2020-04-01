@@ -159,8 +159,12 @@ suspend fun Response<ResponseBody>.authenticatedOrReturn(func: suspend (String) 
     }
 }
 
+interface Difference {
+    fun parseMessage(): String
+}
+
 sealed class ResponseResult {
-    class AuthenticatedWithResult<T>(result: T) : ResponseResult()
+    class AuthenticatedWithResult<T : Difference>(val result: T) : ResponseResult()
     object Authenticated : ResponseResult()
     object AuthError : ResponseResult()
     object NetworkError : ResponseResult()
