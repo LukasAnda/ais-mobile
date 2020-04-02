@@ -22,3 +22,8 @@ data class Email(
     val date: String,
     val opened: Boolean
 )
+
+data class EmailDetail(
+    val message: String = "",
+    val files: List<Pair<String, String>> = emptyList()
+)

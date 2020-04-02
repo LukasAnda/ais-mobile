@@ -36,7 +36,7 @@ class DocumentsViewModel(private val documentRepository: DocumentRepository, pri
     fun getDocuments() = documentRepository.getDocuments(getFolder())
 
     fun fetchDocuments() = viewModelScope.launch(coroutineExceptionHandler) {
-        if (getFolder().isNotEmpty()) {
+        if (getFolder().isNotEmpty() && !getFolder().startsWith("__")) {
             documentRepository.fetchDocument(getFolder())
         }
     }

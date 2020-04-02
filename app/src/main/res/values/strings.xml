@@ -68,4 +68,5 @@
         <item quantity="other">V schránke je %d neprečítaných emailov</item>
     </plurals>
     <string name="new_timetable">K dispozícii je nový rozvrh</string>
+    <string name="attachments">Prílohy</string>
 </resources>

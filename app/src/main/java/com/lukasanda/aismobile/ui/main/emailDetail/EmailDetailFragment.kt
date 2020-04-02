@@ -20,6 +20,9 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.bottomsheets.BottomSheet
+import com.afollestad.materialdialogs.list.listItems
 import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.lukasanda.aismobile.R
@@ -54,12 +57,27 @@ class EmailDetailFragment :
             binding?.icon?.setImageDrawable(drawable)
 
             viewModel.emailDetail().observe(viewLifecycleOwner, Observer {
-                it?.let {
+                it?.let { detail ->
                     binding?.progress?.hide()
-                    binding?.content?.text = it
+                    binding?.content?.text = detail.message
+
+                    if (detail.files.isNotEmpty()) {
+                        binding?.showDocuments?.show()
+                    } else {
+                        binding?.showDocuments?.hide()
+                    }
+                    binding?.showDocuments?.setOnClickListener {
+                        MaterialDialog(this@EmailDetailFragment.requireContext(), BottomSheet()).show {
+                            title(R.string.attachments)
+                            listItems(items = detail.files.map { it.second })
+                        }
+                    }
                 } ?: kotlin.run {
                     binding?.content?.text = ""
                     binding?.progress?.show()
+                    binding?.showDocuments?.setOnClickListener {
+
+                    }
                 }
             })
 

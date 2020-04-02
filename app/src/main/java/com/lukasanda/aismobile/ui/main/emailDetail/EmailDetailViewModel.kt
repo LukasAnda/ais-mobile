@@ -21,6 +21,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.data.repository.EmailRepository
 import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
+import com.lukasanda.dataprovider.data.EmailDetail
 import kotlinx.coroutines.launch
 
 class EmailDetailViewModel(
@@ -28,8 +29,8 @@ class EmailDetailViewModel(
     private val handle: SavedStateHandle
 ) : BaseViewModel(handle) {
 
-    private val _emailDetail = MutableLiveData<String?>()
-    fun emailDetail(): LiveData<String?> = _emailDetail
+    private val _emailDetail = MutableLiveData<EmailDetail?>()
+    fun emailDetail(): LiveData<EmailDetail?> = _emailDetail
 
     fun setEmail(email: Email) {
         handle[EMAIL] = email

@@ -405,8 +405,8 @@ object Parser {
         }
     }
 
-    fun getEmailDetail(webResponse: String): String {
-        if (webResponse.isEmpty()) return ""
+    fun getEmailDetail(webResponse: String): EmailDetail {
+        if (webResponse.isEmpty()) return EmailDetail()
 
         val cleaner = HtmlCleaner()
         return try {
@@ -415,15 +415,31 @@ object Parser {
             val table = form.findElementByName("tbody", true).findElementByName("tbody", true)
             val message = table.childTagList.last().findElementByName("small", true)
                 .allChildren.map {
-                if (it is ContentNode) it.content else if (it is TagNode && it.hasAttribute(
-                        "href"
-                    )
-                ) it.content() else "\n"
-            }.joinToString("")
+                    if (it is ContentNode) it.content else if (it is TagNode && it.hasAttribute(
+                            "href"
+                        )
+                    ) it.content() else "\n"
+                }.joinToString("")
                 .replace("&nbsp;", " ")
-            message
+
+            //Second table
+            val documentsTable = form.getElementListByName("table", false)[1].findElementByName("tbody", true)
+            val documentsList = mutableListOf<Pair<String, String>>()
+
+            if (documentsTable.childTagList.size > 1) {
+                documentsTable.childTagList.minus(documentsTable.childTagList.first()).forEach {
+                    val linkTag = it.findElementByName("a", true)
+
+                    val link = linkTag.getAttributeByName("href").substringAfter("email.pl?")
+                    val filename = linkTag.content().substringBefore("[").trim()
+
+                    documentsList.add(Pair(link, filename))
+                }
+            }
+
+            EmailDetail(message, documentsList)
         } catch (e: Exception) {
-            ""
+            EmailDetail()
         }
     }
 

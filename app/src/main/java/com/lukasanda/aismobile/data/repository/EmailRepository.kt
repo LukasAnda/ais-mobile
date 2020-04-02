@@ -22,6 +22,7 @@ import com.lukasanda.aismobile.data.remote.HTTPException
 import com.lukasanda.aismobile.data.remote.api.AISApi
 import com.lukasanda.aismobile.util.*
 import com.lukasanda.dataprovider.Parser
+import com.lukasanda.dataprovider.data.EmailDetail
 import com.lukasanda.dataprovider.data.Suggestion
 import okhttp3.MediaType
 import okhttp3.RequestBody
@@ -94,7 +95,7 @@ class EmailRepository(
         emailDao.deleteAll()
     }
 
-    suspend fun getEmailDetail(email: Email): String {
+    suspend fun getEmailDetail(email: Email): EmailDetail {
         val response = service.emailDetail("${email.eid};fid=${email.fid};on=0").authenticatedOrThrow()
         val message = Parser.getEmailDetail(response)
         if (!email.opened) {

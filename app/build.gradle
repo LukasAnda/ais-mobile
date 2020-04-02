@@ -24,8 +24,8 @@ android {
 
     defaultConfig {
         applicationId "com.lukasanda.aismobile"
-        versionCode 4
-        versionName "1.0.0-beta4"
+        versionCode 5
+        versionName "1.0.0-beta5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         minSdkVersion 21

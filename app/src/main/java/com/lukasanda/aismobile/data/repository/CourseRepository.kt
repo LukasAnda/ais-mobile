@@ -105,16 +105,38 @@ class CourseRepository(
             }
         } ?: listOf(ResponseResult.NetworkError)
 
-        val dbDocuments = dbCourses.map { Document(it.documentsId, it.courseName.substringAfter(" "), "", "", false) }.filterNot { it.id.isEmpty() }
+        val dbSemesterDocuments = dbCourses.map { Pair(it.semester, it.semesterId) }.toSet().map {
+            Document(
+                "__${it.second})",
+                it.first,
+                "",
+                "",
+                false
+            )
+        }
+
+        val dbDocuments = dbCourses.map {
+            Document(
+                it.documentsId,
+                it.courseName.substringAfter(" "),
+                "",
+                "__${it.semesterId})",
+                false
+            )
+        }.filterNot { it.id.isEmpty() }
 
 
         when (updateType) {
             FETCH -> {
-
-                documentDao.updateFolder("", dbDocuments)
+                documentDao.updateFolder("", dbSemesterDocuments)
+                dbDocuments.groupBy { it.parentFolderId }.forEach {
+                    documentDao.updateFolder(it.key, it.value)
+                }
+//                documentDao.updateFolder("", dbDocuments)
                 courseDao.update(dbCourses, dbSheets, dbTeachers)
             }
             NEWEST -> {
+                documentDao.insertDocuments(dbSemesterDocuments)
                 documentDao.insertDocuments(dbDocuments)
                 courseDao.updateSingle(dbCourses, dbSheets, dbTeachers)
             }
