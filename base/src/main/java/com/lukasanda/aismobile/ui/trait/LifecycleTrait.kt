@@ -13,6 +13,7 @@
 
 package com.lukasanda.aismobile.ui.trait
 
+import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
@@ -21,31 +22,37 @@ interface LifecycleTrait : LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun create() {
+        Log.d("TAG", "Create called")
         this.onCreated()
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     private fun start() {
+        Log.d("TAG", "START called")
         this.onStarted()
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     private fun resume() {
+        Log.d("TAG", "RESUME called")
         this.onResumed()
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     private fun pause() {
+        Log.d("TAG", "PAUSE called")
         this.onPaused()
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     private fun stop() {
+        Log.d("TAG", "STOP called")
         this.onStopped()
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     private fun destroy() {
+        Log.d("TAG", "DESTROY called")
         this.onDestroyed()
     }
 

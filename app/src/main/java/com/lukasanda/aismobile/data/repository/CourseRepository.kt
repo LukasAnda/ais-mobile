@@ -13,6 +13,7 @@
 
 package com.lukasanda.aismobile.data.repository
 
+import android.util.Log
 import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.db.dao.CourseDao
 import com.lukasanda.aismobile.data.db.dao.DocumentDao
@@ -45,9 +46,16 @@ class CourseRepository(
 
     suspend fun update(handler: CourseUpdateHandler? = null): ResponseResult {
 
-        if (prefs.courseExpiration.plusHours(1).isAfterNow) return ResponseResult.Authenticated
+        Log.d("TAG", "ACTUAL: ${prefs.courseExpiration.toString()}")
 
-        val updateType = if (prefs.fullCourseExpiration.plusWeeks(1).isAfterNow) NEWEST else FETCH
+        if (prefs.courseExpiration.isAfterNow) return ResponseResult.Authenticated
+
+        val updateType = if (prefs.fullCourseExpiration.isAfterNow) NEWEST else FETCH
+
+        prefs.courseExpiration = DateTime.now().plusHours(2)
+        prefs.fullCourseExpiration = DateTime.now().plusWeeks(1)
+
+        Log.d("TAG", "NEW: ${prefs.courseExpiration.toString()}")
 
         val semestersResponse = aisApi.semesters().authenticatedOrThrow()
 
@@ -132,7 +140,6 @@ class CourseRepository(
                 dbDocuments.groupBy { it.parentFolderId }.forEach {
                     documentDao.updateFolder(it.key, it.value)
                 }
-//                documentDao.updateFolder("", dbDocuments)
                 courseDao.update(dbCourses, dbSheets, dbTeachers)
             }
             NEWEST -> {
@@ -141,9 +148,6 @@ class CourseRepository(
                 courseDao.updateSingle(dbCourses, dbSheets, dbTeachers)
             }
         }
-
-        prefs.courseExpiration = DateTime.now()
-        prefs.fullCourseExpiration = DateTime.now()
 
         return if (responses.all { it == ResponseResult.Authenticated }) {
             ResponseResult.Authenticated

@@ -102,4 +102,8 @@
         android:id="@+id/logoutFragment"
         android:name="com.lukasanda.aismobile.ui.main.logout.LogoutFragment"
         android:label="&#160;" />
+    <activity
+        android:id="@+id/settingsActivity"
+        android:name="com.lukasanda.aismobile.ui.settings.SettingsActivity"
+        android:label="SettingsActivity" />
 </navigation>

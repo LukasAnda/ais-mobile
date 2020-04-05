@@ -15,11 +15,15 @@ package com.lukasanda.aismobile.ui.fragment
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.viewbinding.ViewBinding
 import com.lukasanda.aismobile.ui.activity.BaseViews
 import com.lukasanda.aismobile.ui.trait.HandlerTrait
@@ -35,6 +39,19 @@ abstract class BaseFragment<VIEWS : BaseViews, BINDING : ViewBinding, VIEWMODEL 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         attach(context)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        this.lifecycle.addObserver(this)
+        this.lifecycle.addObserver(object : LifecycleObserver {
+            @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+            fun createView() {
+                Log.d("TAG", "${this@BaseFragment.javaClass.simpleName} Current event: ${lifecycle.currentState.name}")
+                this@BaseFragment.views = this@BaseFragment.createViews()
+                this@BaseFragment.views.modifyViews()
+            }
+        })
     }
 
     override fun onCreateView(
@@ -61,8 +78,17 @@ abstract class BaseFragment<VIEWS : BaseViews, BINDING : ViewBinding, VIEWMODEL 
         }
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+//    override fun onActivityCreated(savedInstanceState: Bundle?) {
+//        super.onActivityCreated(savedInstanceState)
+//        if (!::views.isInitialized) {
+//            this.views = this.createViews()
+//            this.views.modifyViews()
+//        }
+//    }
+
+    override fun onCreated() {
+        super.onCreated()
+        Log.d("TAG", "On created called")
         this.views = this.createViews()
         this.views.modifyViews()
     }

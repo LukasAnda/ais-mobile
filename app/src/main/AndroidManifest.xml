@@ -50,6 +50,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.settings.SettingsActivity"
+            android:configChanges="uiMode" />
 
         <provider
             android:name=".core.GenericFileProvider"

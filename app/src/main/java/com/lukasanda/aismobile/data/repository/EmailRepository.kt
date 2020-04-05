@@ -57,6 +57,8 @@ class EmailRepository(
                 return ResponseResult.Authenticated
         }
 
+        prefs.emailExpiration = DateTime.now().plusMinutes(10)
+
         val responses = (0 until emailCount).map { i ->
             service.emailPage(i.toString()).authenticatedOrReturn { response ->
                 val emailsList = Parser.getEmails(response) ?: emptyList()
@@ -75,13 +77,16 @@ class EmailRepository(
             }
         }
 
-        prefs.emailExpiration = DateTime.now().plusMinutes(10)
-        return if (responses.all { it == ResponseResult.Authenticated }) {
-            ResponseResult.Authenticated
-        } else if (responses.contains(ResponseResult.AuthError)) {
-            ResponseResult.AuthError
-        } else {
-            ResponseResult.NetworkError
+        return when {
+            responses.all { it == ResponseResult.Authenticated } -> {
+                ResponseResult.Authenticated
+            }
+            responses.contains(ResponseResult.AuthError) -> {
+                ResponseResult.AuthError
+            }
+            else -> {
+                ResponseResult.NetworkError
+            }
         }
     }
 

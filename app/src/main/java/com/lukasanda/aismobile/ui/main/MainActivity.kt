@@ -17,9 +17,11 @@ import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
@@ -65,10 +67,7 @@ import com.lukasanda.aismobile.ui.main.subjects.SubjectsFragmentDirections
 import com.lukasanda.aismobile.ui.main.subjects.SubjectsFragmentHandler
 import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentDirections
 import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentHandler
-import com.lukasanda.aismobile.util.createLiveData
-import com.lukasanda.aismobile.util.getMimeType
-import com.lukasanda.aismobile.util.show
-import com.lukasanda.aismobile.util.startSingleWorker
+import com.lukasanda.aismobile.util.*
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -92,6 +91,10 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
             drawerHeaderBinding = DrawerHeaderViewBinding.bind(binding.navigationView.getHeaderView(0))
             this@MainActivity.navController?.let {
                 NavigationUI.setupWithNavController(binding.bottomMenu, it)
+            }
+
+            binding.bottomMenu.setOnNavigationItemReselectedListener {
+
             }
 
 
@@ -137,6 +140,12 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
                 } else {
                     binding.bottomMenu.removeBadge(R.id.emailFragment)
                 }
+            })
+
+            createLiveData<String>(prefs.prefs, prefs.THEME).observe(this@MainActivity, Observer {
+                Log.d("TAG", "Main activity Actual value: $it")
+                ThemeHelper.applyTheme(it.toInt())
+                delegate.localNightMode = ThemeHelper.getLocalTheme(it.toInt())
             })
 
             viewModel.fileHandle().observe(this@MainActivity, Observer { result ->
@@ -190,6 +199,11 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
         if (!prefs.didShowLoading && safePrefs.sessionCookie.isNotEmpty()) {
             startActivity(Intent(this, LoadingActivity::class.java))
         }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        recreate()
     }
 
     override fun setDrawer() = binding.drawer

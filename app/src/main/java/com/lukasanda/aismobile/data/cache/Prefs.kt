@@ -13,13 +13,14 @@
 
 package com.lukasanda.aismobile.data.cache
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.preference.PreferenceManager
 import com.lukasanda.aismobile.BuildConfig
 import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
 
-class Prefs(context: Context) {
+class Prefs(private val context: Context) {
     val PREFS_FILENAME = "${BuildConfig.APPLICATION_ID}.prefs"
     val SESSION_EXPIRATION = "session_expiration_date"
     val AISID = "aisid"
@@ -29,56 +30,53 @@ class Prefs(context: Context) {
     val EMAIL_CACHE_EXPIRATION = "email_cache_expiration"
     val FULL_COURSE_CACHE_EXPIRATION = "full_course_cache_expiration"
     val COURSE_CACHE_EXPIRATION = "course_cache_expiration"
+    val TIMETABLE_CACHE_EXPIRATION = "timetable_cache_expiration"
 
-    val prefs: SharedPreferences = context.getSharedPreferences(PREFS_FILENAME, 0)
+    //Settings prefs
+    val UPDATE_INTERVAL = "update_interval"
+    val THEME = "theme"
 
-    var expiration: DateTime
-        get() = DateTime.parse(
-            prefs.getString(
-                SESSION_EXPIRATION,
-                DateTime.now().minusDays(1).toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
-            ), DateTimeFormat.forPattern("dd.MM.yyyy hh:mm")
-        )
-        set(value) = prefs.edit().putString(
-            SESSION_EXPIRATION,
-            value.toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
-        ).apply()
+    val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
-    var emailExpiration: DateTime
-        get() = DateTime.parse(
-            prefs.getString(
-                EMAIL_CACHE_EXPIRATION,
-                DateTime.now().minusDays(1).toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
-            ), DateTimeFormat.forPattern("dd.MM.yyyy hh:mm")
-        )
-        set(value) = prefs.edit().putString(
-            EMAIL_CACHE_EXPIRATION,
-            value.toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
-        ).apply()
+    var expiration: DateTime = DateTime.now().minusWeeks(1)
+        get() = DateTime(prefs.getLong(SESSION_EXPIRATION, 0))
+        @SuppressLint("ApplySharedPref")
+        set(value) {
+            field = value
+            prefs.edit().putLong(COURSE_CACHE_EXPIRATION, value.millis).commit()
+        }
 
-    var courseExpiration: DateTime
-        get() = DateTime.parse(
-            prefs.getString(
-                COURSE_CACHE_EXPIRATION,
-                DateTime.now().minusHours(2).toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
-            ), DateTimeFormat.forPattern("dd.MM.yyyy hh:mm")
-        )
-        set(value) = prefs.edit().putString(
-            COURSE_CACHE_EXPIRATION,
-            value.toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
-        ).apply()
+    var timetableExpiration: DateTime = DateTime.now().minusWeeks(1)
+        get() = DateTime(prefs.getLong(TIMETABLE_CACHE_EXPIRATION, 0))
+        @SuppressLint("ApplySharedPref")
+        set(value) {
+            field = value
+            prefs.edit().putLong(TIMETABLE_CACHE_EXPIRATION, value.millis).commit()
+        }
 
-    var fullCourseExpiration: DateTime
-        get() = DateTime.parse(
-            prefs.getString(
-                FULL_COURSE_CACHE_EXPIRATION,
-                DateTime.now().minusWeeks(2).toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
-            ), DateTimeFormat.forPattern("dd.MM.yyyy hh:mm")
-        )
-        set(value) = prefs.edit().putString(
-            FULL_COURSE_CACHE_EXPIRATION,
-            value.toString(DateTimeFormat.forPattern("dd.MM.yyyy hh:mm"))
-        ).apply()
+    var emailExpiration: DateTime = DateTime.now().minusWeeks(1)
+        get() = DateTime(prefs.getLong(EMAIL_CACHE_EXPIRATION, 0))
+        @SuppressLint("ApplySharedPref")
+        set(value) {
+            field = value
+            prefs.edit().putLong(EMAIL_CACHE_EXPIRATION, value.millis).commit()
+        }
+
+    var courseExpiration: DateTime = DateTime.now().minusWeeks(1)
+        get() = DateTime(prefs.getLong(COURSE_CACHE_EXPIRATION, 0))
+        @SuppressLint("ApplySharedPref")
+        set(value) {
+            field = value
+            prefs.edit().putLong(COURSE_CACHE_EXPIRATION, value.millis).commit()
+        }
+
+    var fullCourseExpiration: DateTime = DateTime.now().minusWeeks(1)
+        get() = DateTime(prefs.getLong(FULL_COURSE_CACHE_EXPIRATION, 0))
+        @SuppressLint("ApplySharedPref")
+        set(value) {
+            field = value
+            prefs.edit().putLong(FULL_COURSE_CACHE_EXPIRATION, value.millis).commit()
+        }
 
     var id: Int
         get() = prefs.getInt(AISID, 0)
@@ -96,8 +94,20 @@ class Prefs(context: Context) {
         get() = prefs.getInt(NEW_EMAIL_COUNT, 0)
         set(value) = prefs.edit().putInt(NEW_EMAIL_COUNT, value).apply()
 
+    var theme: Int
+        get() {
+            val entry = prefs.getString(THEME, "2") ?: "2"
+
+            return entry.toInt()
+        }
+        set(value) = Unit
+
+    var updateInterval: Int
+        get() = prefs.getInt(UPDATE_INTERVAL, 1)
+        set(value) = Unit
+
     fun nukeAll() {
         prefs.edit().remove(SESSION_EXPIRATION).remove(AISID).remove(DID_SHOW_LOADING).remove(SENT_DIRECTORY_ID).remove(NEW_EMAIL_COUNT).remove(EMAIL_CACHE_EXPIRATION)
-            .remove(FULL_COURSE_CACHE_EXPIRATION).remove(COURSE_CACHE_EXPIRATION).apply()
+            .remove(FULL_COURSE_CACHE_EXPIRATION).remove(COURSE_CACHE_EXPIRATION).remove(TIMETABLE_CACHE_EXPIRATION).apply()
     }
 }

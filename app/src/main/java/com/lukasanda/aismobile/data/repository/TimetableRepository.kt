@@ -14,6 +14,7 @@
 package com.lukasanda.aismobile.data.repository
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.lukasanda.aismobile.R
@@ -56,6 +57,11 @@ class TimetableRepository(
     fun get() = timetableDao.getAll().map { mapCourses(it) }
 
     suspend fun update(): ResponseResult {
+        Log.d("TAG", prefs.timetableExpiration.toString())
+        if (prefs.timetableExpiration.isAfterNow) {
+            return ResponseResult.Authenticated
+        }
+        prefs.timetableExpiration = DateTime.now().plusWeeks(1)
         return aisApi.schedule("1?zobraz=1;format=json;rozvrh_student=${prefs.id}").authenticatedOrReturn { scheduleResponse ->
 
             val schedule = parseResponse(scheduleResponse)

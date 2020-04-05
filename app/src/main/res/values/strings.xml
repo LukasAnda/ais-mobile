@@ -69,4 +69,24 @@
     </plurals>
     <string name="new_timetable">K dispozícii je nový rozvrh</string>
     <string name="attachments">Prílohy</string>
+
+    <string name="settings_general">Všeobecné</string>
+    <string name="settings_theme">Téma</string>
+    <string name="settings_sync">Synchronizácia</string>
+    <string name="settings_update_time">Aktualizácia dát</string>
+    <string name="settings_update_time_hint">Čas (v minútach) medzi jednotlivými aktualizáciami, čím väčší, tým viac sa šetrí baterka</string>
+
+    <string-array name="theme_entries">
+        <item>Denná</item>
+        <item>Nočná</item>
+        <item>Automaticky podľa systému</item>
+        <item>Batéria</item>
+    </string-array>
+
+    <string-array name="theme_entry_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
 </resources>

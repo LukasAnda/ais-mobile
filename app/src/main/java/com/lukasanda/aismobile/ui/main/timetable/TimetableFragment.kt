@@ -14,6 +14,7 @@
 package com.lukasanda.aismobile.ui.main.timetable
 
 import android.os.Bundle
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.viewpager2.widget.ViewPager2
 import com.lukasanda.aismobile.databinding.TimetableFragmentBinding
@@ -93,7 +94,9 @@ class TimetableFragment :
             })
 
             viewModel.days().observe(viewLifecycleOwner, Observer {
-                handler.setTitle(it)
+                if (viewLifecycleOwner.lifecycle.currentState == Lifecycle.State.RESUMED) {
+                    handler.setTitle(it)
+                }
             })
         }
 

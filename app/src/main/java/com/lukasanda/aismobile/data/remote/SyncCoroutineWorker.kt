@@ -20,7 +20,6 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.lukasanda.aismobile.BuildConfig
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.cache.SafePrefs
@@ -60,15 +59,15 @@ class SyncCoroutineWorker(
 
     override suspend fun doWork(): Result {
         if (runAttemptCount > 3) {
-            startSingleWorkerWithDelay(applicationContext)
+            startSingleWorker(applicationContext)
             return Result.failure()
         }
 
         Log.d("TAG", "Starting worker")
 
-        if (BuildConfig.DEBUG) {
-            sendNotification(applicationContext, "Zapinam workera", NOTIFICATION_DEBUG)
-        }
+//        if (BuildConfig.DEBUG) {
+//            sendNotification(applicationContext, "Zapinam workera", NOTIFICATION_DEBUG)
+//        }
 
         setProgress(workDataOf(PROGRESS to 0, PROGRESS_MESSAGE to R.string.downloading_timetable))
         runCatching {
@@ -162,9 +161,9 @@ class SyncCoroutineWorker(
 
         setProgress(workDataOf(PROGRESS to 100, PROGRESS_MESSAGE to R.string.downloading_complete))
 
-        delay(2000)
+        delay(prefs.updateInterval.toLong() * 60 * 1000)
 
-        startSingleWorkerWithDelay(applicationContext)
+        startSingleWorker(applicationContext)
         return Result.success()
     }
 

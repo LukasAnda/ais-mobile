@@ -24,6 +24,11 @@
     <!--        app:showAsAction="ifRoom" />-->
 
     <item
+        android:id="@+id/settingsActivity"
+        android:title="@string/settings"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/logoutFragment"
         android:title="@string/logout"
         app:showAsAction="ifRoom" />
