@@ -15,6 +15,7 @@ package com.lukasanda.aismobile.data.db.entity
 
 import android.os.Parcelable
 import androidx.room.Entity
+import com.lukasanda.aismobile.ui.recyclerview.DiffUtilItem
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
@@ -27,7 +28,7 @@ data class Email(
     val subject: String,
     val date: String,
     var opened: Boolean
-) : Parcelable {
+) : Parcelable, DiffUtilItem {
     override fun equals(other: Any?): Boolean {
         return if (other is Email) {
             eid === other.eid && fid === other.fid
@@ -35,4 +36,6 @@ data class Email(
             return super.equals(other)
         }
     }
+
+    override fun getContentDescription() = "$eid $fid $senderId $sender $subject $date $opened"
 }

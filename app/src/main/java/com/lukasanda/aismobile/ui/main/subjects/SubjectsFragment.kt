@@ -17,6 +17,7 @@ import android.os.Bundle
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import com.lukasanda.aismobile.data.db.entity.Semester
 import com.lukasanda.aismobile.databinding.SubjectsFragmentBinding
 import com.lukasanda.aismobile.ui.activity.BaseViews
 import com.lukasanda.aismobile.ui.fragment.BaseFragment
@@ -94,7 +95,7 @@ class SubjectsFragment :
                     binding?.empty?.show()
                     binding?.indicatorLayout?.hide()
                 } else {
-                    semesterAdapter.swapData(it)
+                    semesterAdapter.swapData(it.map { Semester(it) })
                     viewModel.semesters.replaceWith(it.map { it.first().course.semester })
 
                     binding?.empty?.hide()

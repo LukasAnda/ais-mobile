@@ -17,6 +17,7 @@ import android.os.Bundle
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.viewpager2.widget.ViewPager2
+import com.lukasanda.aismobile.data.db.entity.WeekItem
 import com.lukasanda.aismobile.databinding.TimetableFragmentBinding
 import com.lukasanda.aismobile.ui.activity.BaseViews
 import com.lukasanda.aismobile.ui.fragment.BaseFragment
@@ -86,7 +87,7 @@ class TimetableFragment :
                     binding?.pager?.show()
                     binding?.indicatorLayout?.show()
 
-                    weekAdapter.swapData(it)
+                    weekAdapter.swapData(it.map { WeekItem(it) })
                     binding?.indicator?.attachToPager(binding?.pager!!)
                     binding?.pager?.setCurrentItem(DateTime.now().dayOfWeek, false)
 

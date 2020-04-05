@@ -13,18 +13,8 @@
 
 package com.lukasanda.aismobile.data.db.entity
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import com.lukasanda.aismobile.ui.recyclerview.DiffUtilItem
 
-@Entity(tableName = "document")
-data class Document(
-    @PrimaryKey(autoGenerate = false)
-    val id: String,
-    val name: String,
-    val mimeType: String,
-    val parentFolderId: String,
-    val openable: Boolean
-) : DiffUtilItem {
-    override fun getContentDescription() = "$id $name $mimeType $parentFolderId $openable"
+data class Suggestion(val name: String, val id: String, val study: String) : DiffUtilItem {
+    override fun getContentDescription() = "$name $id $study"
 }

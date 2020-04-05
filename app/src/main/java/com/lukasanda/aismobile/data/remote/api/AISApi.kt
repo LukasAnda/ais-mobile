@@ -155,5 +155,8 @@ interface AISApi {
     @GET("/auth/dok_server/slozka.pl")
     suspend fun getDocumentInfo(@Query("id", encoded = true) id: String): Response<ResponseBody>
 
+    @GET("/auth/lide/clovek.pl")
+    suspend fun getPersonInfo(@Query("id", encoded = true) id: String): Response<ResponseBody>
+
 
 }

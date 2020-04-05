@@ -61,6 +61,7 @@ import com.lukasanda.aismobile.ui.main.email.EmailFragmentHandler
 import com.lukasanda.aismobile.ui.main.emailDetail.EmailDetailFragmentDirections
 import com.lukasanda.aismobile.ui.main.emailDetail.EmailDetailHandler
 import com.lukasanda.aismobile.ui.main.logout.LogoutHandler
+import com.lukasanda.aismobile.ui.main.people.PeopleHandler
 import com.lukasanda.aismobile.ui.main.subjectDetail.SubjectDetailFragmentDirections
 import com.lukasanda.aismobile.ui.main.subjectDetail.SubjectDetailHandler
 import com.lukasanda.aismobile.ui.main.subjects.SubjectsFragmentDirections
@@ -75,7 +76,7 @@ import org.koin.core.parameter.parametersOf
 
 class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityMainBinding>(),
     TimetableFragmentHandler, SubjectsFragmentHandler, EmailFragmentHandler, EmailDetailHandler,
-    ComposeEmailHandler, SubjectDetailHandler, DocumentsHandler, LogoutHandler, AnalyticsTrait {
+    ComposeEmailHandler, SubjectDetailHandler, DocumentsHandler, LogoutHandler, PeopleHandler, AnalyticsTrait {
 
     private lateinit var toggle: ActionBarDrawerToggle
 
@@ -214,7 +215,8 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
 
     override fun setBinding(): ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
 
-    override fun setAppBarConfig() = AppBarConfiguration.Builder(R.id.scheduleFragment, R.id.subjectsFragment, R.id.emailFragment, R.id.documentsFragment).setDrawerLayout(binding.drawer).build()
+    override fun setAppBarConfig() =
+        AppBarConfiguration.Builder(R.id.scheduleFragment, R.id.subjectsFragment, R.id.emailFragment, R.id.documentsFragment, R.id.peopleFragment).setDrawerLayout(binding.drawer).build()
 
     override fun showDetailFromSubjects(courseId: String) {
         logEvent(ACTION_SHOW_COURSE_DETAIL)

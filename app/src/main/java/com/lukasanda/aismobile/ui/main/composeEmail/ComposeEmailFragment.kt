@@ -35,6 +35,7 @@ import com.lukasanda.aismobile.core.ACTION_SEND_COMPOSED
 import com.lukasanda.aismobile.core.ACTION_SEND_REPLY
 import com.lukasanda.aismobile.core.AnalyticsTrait
 import com.lukasanda.aismobile.data.db.entity.Email
+import com.lukasanda.aismobile.data.db.entity.Suggestion
 import com.lukasanda.aismobile.databinding.ComposeEmailFragmentBinding
 import com.lukasanda.aismobile.ui.activity.BaseViews
 import com.lukasanda.aismobile.ui.fragment.BaseFragment
@@ -43,7 +44,6 @@ import com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailViewModel.EmailS
 import com.lukasanda.aismobile.ui.recyclerview.bindLinear
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
-import com.lukasanda.dataprovider.data.Suggestion
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -156,7 +156,7 @@ class ComposeEmailFragment :
                 } else {
                     binding?.contactsRecycler?.show()
                 }
-                contactAdapter.swapData(it)
+                contactAdapter.swapData(it.map { Suggestion(it.name, it.id, it.study) })
             })
 
             viewModel.sentMailState().observe(viewLifecycleOwner, Observer { emailSendState ->

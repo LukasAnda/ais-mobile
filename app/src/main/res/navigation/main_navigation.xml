@@ -104,6 +104,12 @@
         android:label="&#160;" />
     <activity
         android:id="@+id/settingsActivity"
+        tools:layout="@layout/settings__activity"
         android:name="com.lukasanda.aismobile.ui.settings.SettingsActivity"
         android:label="SettingsActivity" />
+    <fragment
+        android:id="@+id/peopleFragment"
+        android:name="com.lukasanda.aismobile.ui.main.people.PeopleFragment"
+        android:label="Ľudia na STU"
+        tools:layout="@layout/people__fragment" />
 </navigation>

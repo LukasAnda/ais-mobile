@@ -16,6 +16,7 @@ package com.lukasanda.aismobile.ui.main.subjects.courses
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.lukasanda.aismobile.data.db.entity.FullCourse
+import com.lukasanda.aismobile.data.db.entity.Semester
 import com.lukasanda.aismobile.databinding.SemesterItemBinding
 import com.lukasanda.aismobile.ui.recyclerview.BaseAdapter
 import com.lukasanda.aismobile.ui.recyclerview.BaseBindingViewHolder
@@ -25,7 +26,7 @@ import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
 
 class SemesterAdapter(private val listener: (FullCourse) -> Unit) :
-    BaseAdapter<List<FullCourse>, FullCourse, SemesterItemHolder>(listener) {
+    BaseAdapter<Semester, FullCourse, SemesterItemHolder>(listener) {
     private val pool = RecyclerView.RecycledViewPool()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         parent.create(::SemesterItemHolder, SemesterItemBinding::inflate).apply {
@@ -48,13 +49,13 @@ class SemesterAdapter(private val listener: (FullCourse) -> Unit) :
 }
 
 class SemesterItemHolder(binding: SemesterItemBinding) :
-    BaseBindingViewHolder<List<FullCourse>, FullCourse, SemesterItemBinding>(binding) {
-    override fun bind(item: List<FullCourse>, onClick: (FullCourse) -> Unit) {
+    BaseBindingViewHolder<Semester, FullCourse, SemesterItemBinding>(binding) {
+    override fun bind(item: Semester, onClick: (FullCourse) -> Unit) {
         val adapter = CourseAdapter(onClick)
         binding.recycler.bindLinear(adapter)
-        adapter.swapData(item)
+        adapter.swapData(item.courses)
 
-        if (item.isEmpty()) {
+        if (item.courses.isEmpty()) {
             binding.empty.show()
             binding.recycler.hide()
         } else {

@@ -11,20 +11,5 @@
  * limitations under the License.
  */
 
-package com.lukasanda.aismobile.data.db.entity
+package com.lukasanda.aismobile.util
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import com.lukasanda.aismobile.ui.recyclerview.DiffUtilItem
-
-@Entity(tableName = "document")
-data class Document(
-    @PrimaryKey(autoGenerate = false)
-    val id: String,
-    val name: String,
-    val mimeType: String,
-    val parentFolderId: String,
-    val openable: Boolean
-) : DiffUtilItem {
-    override fun getContentDescription() = "$id $name $mimeType $parentFolderId $openable"
-}

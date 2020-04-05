@@ -60,8 +60,8 @@ class DocumentsFragment : BaseFragment<DocumentsFragment.Views, DocumentsFragmen
                 if (folder == "") {
                     adapter.swapData(it.filterNot { it.id.isEmpty() }.map { Either.Right(it) })
                 } else {
-                    val list: MutableList<Either<Unit, Document>> = it.filterNot { it.id.isEmpty() }.map { Either.Right(it) }.toMutableList()
-                    list.add(0, Either.Left(Unit))
+                    val list: MutableList<Either<Document, Document>> = it.filterNot { it.id.isEmpty() }.map { Either.Right(it) }.toMutableList()
+                    list.add(0, Either.Left(Document("", "", "", "", false)))
                     adapter.swapData(list)
                 }
             })

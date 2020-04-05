@@ -18,6 +18,7 @@ import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.Relation
+import com.lukasanda.aismobile.ui.recyclerview.DiffUtilItem
 import kotlinx.android.parcel.Parcelize
 
 @Entity(tableName = "course")
@@ -35,7 +36,7 @@ data class Course(
     val finalMark: String = "-"
 )
 
-class FullCourse {
+class FullCourse : DiffUtilItem {
     @Embedded
     var course: Course = Course()
 
@@ -53,6 +54,12 @@ class FullCourse {
             "\n"
         )
     }
+
+    override fun getContentDescription() = "$course ${sheets.joinToString(" ")} ${timetable.joinToString(" ")} ${teachers.joinToString(" ")}"
+}
+
+data class Semester(val courses: List<FullCourse>) : DiffUtilItem {
+    override fun getContentDescription() = courses.map { it.getContentDescription() }.joinToString(" ")
 }
 
 @Entity(tableName = "sheet")
@@ -63,7 +70,7 @@ data class Sheet(
     val comment: String = "",
     val headers: String = "", // headers sepatated by #
     val values: String = "" //values separated by #
-) {
+) : DiffUtilItem {
     private fun headers() = headers.split("#")
     private fun values() = values.split("#")
 
@@ -82,6 +89,8 @@ data class Sheet(
         ""
     }
 
+    override fun getContentDescription() = "$courseId $name ${comments()} $headers $values"
+
     override fun toString(): String {
         return "Name: $name \n Values: ${getColumnPairs()}\nComment: ${comments()}\n\n"
     }
@@ -93,6 +102,8 @@ data class Teacher(
     val id: String,
     val name: String,
     val courseId: String
-) : Parcelable {
+) : Parcelable, DiffUtilItem {
     fun isLector() = name.contains("prednášajúci")
+
+    override fun getContentDescription() = "$name $courseId"
 }

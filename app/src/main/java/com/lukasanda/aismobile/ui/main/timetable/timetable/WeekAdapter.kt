@@ -17,6 +17,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lukasanda.aismobile.data.db.entity.TimetableItem
+import com.lukasanda.aismobile.data.db.entity.WeekItem
 import com.lukasanda.aismobile.databinding.WeekItemBinding
 import com.lukasanda.aismobile.ui.recyclerview.BaseAdapter
 import com.lukasanda.aismobile.ui.recyclerview.BaseBindingViewHolder
@@ -24,7 +25,7 @@ import com.lukasanda.aismobile.ui.recyclerview.create
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
 
-class WeekAdapter(private val listener: (TimetableItem) -> Unit) : BaseAdapter<List<TimetableItem>, TimetableItem, WeekItemHolder>(listener) {
+class WeekAdapter(private val listener: (TimetableItem) -> Unit) : BaseAdapter<WeekItem, TimetableItem, WeekItemHolder>(listener) {
     private val pool = RecyclerView.RecycledViewPool()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         parent.create(::WeekItemHolder, WeekItemBinding::inflate).apply {
@@ -53,16 +54,16 @@ class WeekAdapter(private val listener: (TimetableItem) -> Unit) : BaseAdapter<L
 }
 
 class WeekItemHolder(binding: WeekItemBinding) :
-    BaseBindingViewHolder<List<TimetableItem>, TimetableItem, WeekItemBinding>(binding) {
-    override fun bind(item: List<TimetableItem>, onClick: (TimetableItem) -> Unit) {
+    BaseBindingViewHolder<WeekItem, TimetableItem, WeekItemBinding>(binding) {
+    override fun bind(item: WeekItem, onClick: (TimetableItem) -> Unit) {
         val adapter = TimetableAdapter(onClick)
         binding.recycler.apply {
             layoutManager = LinearLayoutManager(context)
             this.adapter = adapter
         }
-        adapter.swapData(item)
+        adapter.swapData(item.items)
 
-        if (item.isEmpty()) {
+        if (item.items.isEmpty()) {
             binding.empty.show()
             binding.recycler.hide()
         } else {

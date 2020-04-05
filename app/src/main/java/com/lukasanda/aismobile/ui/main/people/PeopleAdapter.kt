@@ -11,38 +11,25 @@
  * limitations under the License.
  */
 
-package com.lukasanda.aismobile.ui.main.composeEmail
+package com.lukasanda.aismobile.ui.main.people
 
-import android.graphics.Color
 import android.view.ViewGroup
-import com.amulyakhare.textdrawable.TextDrawable
-import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.lukasanda.aismobile.data.db.entity.Suggestion
-import com.lukasanda.aismobile.databinding.ContactItemBinding
+import com.lukasanda.aismobile.databinding.PeopleItemBinding
 import com.lukasanda.aismobile.ui.recyclerview.BaseAdapter
 import com.lukasanda.aismobile.ui.recyclerview.BindingViewHolder
 import com.lukasanda.aismobile.ui.recyclerview.create
 
-class ContactAdapter(private val listener: (Suggestion) -> Unit) :
-    BaseAdapter<Suggestion, Suggestion, ContactItemHolder>(listener) {
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-        parent.create(::ContactItemHolder, ContactItemBinding::inflate)
+class PeopleAdapter(onClick: (Suggestion) -> Unit) : BaseAdapter<Suggestion, Suggestion, PeopleItemHolder>(onClick) {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = parent.create(::PeopleItemHolder, PeopleItemBinding::inflate)
 }
 
-class ContactItemHolder(binding: ContactItemBinding) :
-    BindingViewHolder<Suggestion, ContactItemBinding>(binding) {
+class PeopleItemHolder(binding: PeopleItemBinding) : BindingViewHolder<Suggestion, PeopleItemBinding>(binding) {
     override fun bind(item: Suggestion, onClick: (Suggestion) -> Unit) {
         binding.name.text = item.name
-        val drawable =
-            TextDrawable.builder().beginConfig().textColor(Color.WHITE).bold().toUpperCase()
-                .endConfig().buildRound(
-                    item.name.first().toString(),
-                    ColorGenerator.MATERIAL.getColor(item.name)
-                )
-        binding.icon.setImageDrawable(drawable)
-
+        binding.study.text = item.study
         binding.root.setOnClickListener {
-            onClick.invoke(item)
+            onClick(item)
         }
     }
 

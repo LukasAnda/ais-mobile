@@ -22,17 +22,17 @@
         android:icon="@drawable/ic_evaluation"
         android:title="" />
     <item
-        android:id="@+id/notificationsFragment"
-        android:icon="@drawable/ic_notification"
-        android:visible="false"
-        android:title="" />
-    <item
         android:id="@+id/emailFragment"
         android:icon="@drawable/ic_email"
         android:title="" />
     <item
         android:id="@+id/documentsFragment"
         android:icon="@drawable/ic_document"
+        android:title="" />
+
+    <item
+        android:id="@+id/peopleFragment"
+        android:icon="@drawable/ic_people"
         android:title="" />
 
 </menu>

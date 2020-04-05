@@ -19,23 +19,29 @@ import com.lukasanda.aismobile.data.db.entity.Document
 import com.lukasanda.aismobile.databinding.DocumentItemBinding
 import com.lukasanda.aismobile.ui.recyclerview.BaseAdapter
 import com.lukasanda.aismobile.ui.recyclerview.BaseBindingViewHolder
+import com.lukasanda.aismobile.ui.recyclerview.DiffUtilItem
 import com.lukasanda.aismobile.ui.recyclerview.create
 import com.lukasanda.aismobile.util.getMimeColor
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
 import java.util.*
 
-sealed class Either<out A, out B> {
-    class Left<A>(val value: A) : Either<A, Nothing>()
-    class Right<B>(val value: B) : Either<Nothing, B>()
+sealed class Either<out A : DiffUtilItem, out B : DiffUtilItem> : DiffUtilItem {
+    class Left<A : DiffUtilItem>(val value: A) : Either<A, Nothing>() {
+        override fun getContentDescription() = value.getContentDescription()
+    }
+
+    class Right<B : DiffUtilItem>(val value: B) : Either<Nothing, B>() {
+        override fun getContentDescription() = value.getContentDescription()
+    }
 }
 
-class DocumentsAdapter(onClick: (Document?) -> Unit) : BaseAdapter<Either<Unit, Document>, Document?, DocumentItemHolder>(onClick) {
+class DocumentsAdapter(onClick: (Document?) -> Unit) : BaseAdapter<Either<Document, Document>, Document?, DocumentItemHolder>(onClick) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = parent.create(::DocumentItemHolder, DocumentItemBinding::inflate)
 }
 
-class DocumentItemHolder(binding: DocumentItemBinding) : BaseBindingViewHolder<Either<Unit, Document>, Document?, DocumentItemBinding>(binding) {
-    override fun bind(item: Either<Unit, Document>, onClick: (Document?) -> Unit) {
+class DocumentItemHolder(binding: DocumentItemBinding) : BaseBindingViewHolder<Either<Document, Document>, Document?, DocumentItemBinding>(binding) {
+    override fun bind(item: Either<Document, Document>, onClick: (Document?) -> Unit) {
         when (item) {
             is Either.Left -> {
                 binding.name.text = ".."

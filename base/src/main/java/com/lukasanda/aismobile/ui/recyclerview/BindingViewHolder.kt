@@ -29,7 +29,7 @@ abstract class BaseBindingViewHolder<ITEM, LISTENER_ITEM, BINDING : ViewBinding>
     abstract fun bind(item: ITEM, onClick: (LISTENER_ITEM) -> Unit)
 }
 
-abstract class BaseAdapter<ITEM : Any, LISTENER_ITEM : Any?, VIEW_HOLDER : BaseBindingViewHolder<ITEM, LISTENER_ITEM, *>>(
+abstract class BaseAdapter<ITEM : DiffUtilItem, LISTENER_ITEM : DiffUtilItem?, VIEW_HOLDER : BaseBindingViewHolder<ITEM, LISTENER_ITEM, *>>(
     val onClick: (LISTENER_ITEM) -> Unit
 ) : RecyclerView.Adapter<VIEW_HOLDER>() {
     protected val items = mutableListOf<ITEM>()
@@ -44,19 +44,23 @@ abstract class BaseAdapter<ITEM : Any, LISTENER_ITEM : Any?, VIEW_HOLDER : BaseB
         val result = DiffUtil.calculateDiff(callback)
 
         items.replaceWith(newItems)
-        notifyDataSetChanged()
-//        result.dispatchUpdatesTo(this)
+//        notifyDataSetChanged()
+        result.dispatchUpdatesTo(this)
     }
 
     inner class ItemDiffCallback(private val oldItems: List<ITEM>, private val newItems: List<ITEM>) : DiffUtil.Callback() {
-        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) = oldItems[oldItemPosition].equals(newItems[newItemPosition])
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) = oldItems[oldItemPosition] == newItems[newItemPosition]
 
         override fun getOldListSize() = oldItems.size
 
         override fun getNewListSize() = newItems.size
 
-        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) = oldItems[oldItemPosition].equals(newItems[newItemPosition])
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) = oldItems[oldItemPosition].getContentDescription() == newItems[newItemPosition].getContentDescription()
     }
+}
+
+interface DiffUtilItem {
+    fun getContentDescription(): String
 }
 
 
