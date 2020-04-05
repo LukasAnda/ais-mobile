@@ -60,6 +60,7 @@
             app:destination="@id/composeEmailFragment" />
     </fragment>
     <fragment
+        tools:layout="@layout/compose_email__fragment"
         android:id="@+id/composeEmailFragment"
         android:name="com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailFragment"
         android:label="Vytvor email">
@@ -69,12 +70,13 @@
             app:argType="com.lukasanda.aismobile.data.db.entity.Email"
             app:nullable="true" />
         <argument
-            android:name="teacher"
+            android:name="suggestion"
             android:defaultValue="@null"
-            app:argType="com.lukasanda.aismobile.data.db.entity.Teacher"
+            app:argType="com.lukasanda.aismobile.data.db.entity.Suggestion"
             app:nullable="true" />
     </fragment>
     <fragment
+        tools:layout="@layout/subject_detail__fragment"
         android:id="@+id/subjectDetailFragment"
         android:name="com.lukasanda.aismobile.ui.main.subjectDetail.SubjectDetailFragment"
         android:label="Detail predmetu">
@@ -86,6 +88,7 @@
             app:destination="@id/composeEmailFragment" />
     </fragment>
     <fragment
+        tools:layout="@layout/documents__fragment"
         android:id="@+id/documentsFragment"
         android:name="com.lukasanda.aismobile.ui.main.documents.DocumentsFragment"
         android:label="Dokumenty">
@@ -99,6 +102,7 @@
             app:nullable="true" />
     </fragment>
     <fragment
+
         android:id="@+id/logoutFragment"
         android:name="com.lukasanda.aismobile.ui.main.logout.LogoutFragment"
         android:label="&#160;" />
@@ -111,5 +115,21 @@
         android:id="@+id/peopleFragment"
         android:name="com.lukasanda.aismobile.ui.main.people.PeopleFragment"
         android:label="Ľudia na STU"
-        tools:layout="@layout/people__fragment" />
+        tools:layout="@layout/people__fragment">
+        <action
+            android:id="@+id/action_peopleFragment_to_peopleDetailFragment"
+            app:destination="@id/peopleDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/peopleDetailFragment"
+        android:name="com.lukasanda.aismobile.ui.main.peopleDetail.PeopleDetailFragment"
+        android:label="PeopleDetailFragment"
+        tools:layout="@layout/people_detail__fragment">
+        <argument
+            android:name="suggestion"
+            app:argType="com.lukasanda.aismobile.data.db.entity.Suggestion" />
+        <action
+            android:id="@+id/action_peopleDetailFragment_to_composeEmailFragment"
+            app:destination="@id/composeEmailFragment" />
+    </fragment>
 </navigation>

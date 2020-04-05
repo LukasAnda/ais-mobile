@@ -89,4 +89,8 @@
         <item>2</item>
         <item>3</item>
     </string-array>
+
+    <string name="profile_name">Meno:</string>
+    <string name="profile_id">AIS ID:</string>
+    <string name="profile_email">Email:</string>
 </resources>

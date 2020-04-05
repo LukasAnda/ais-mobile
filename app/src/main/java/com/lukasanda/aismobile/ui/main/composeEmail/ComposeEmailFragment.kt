@@ -90,10 +90,9 @@ class ComposeEmailFragment :
 
             val args by navArgs<ComposeEmailFragmentArgs>()
 
-            args.teacher?.let {
-                val suggestion = Suggestion(it.name, it.id, "")
-                selected.add(suggestion)
-                binding?.chipGroup?.addView(createChip(suggestion))
+            args.suggestion?.let {
+                selected.add(it)
+                binding?.chipGroup?.addView(createChip(it))
                 binding?.chipGroup?.show()
 
                 binding?.recipients?.hide()

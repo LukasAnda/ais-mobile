@@ -23,11 +23,13 @@ const val ACTION_SHOW_EMAIL_DETAIL = "action_email_detail"
 const val ACTION_COMPOSE_REPLY = "action_email_reply_compose"
 const val ACTION_COMPOSE_EMAIL = "action_email_compose"
 const val ACTION_COMPOSE_EMAIL_TO_TEACHER = "action_email_compose_teacher"
+const val ACTION_COMPOSE_EMAIL_FROM_DETAIL = "action_email_compose_from_detail"
 const val ACTION_SEND_REPLY = "action_email_send_reply"
 const val ACTION_SEND_COMPOSED = "action_email_send_composed"
 const val ACTION_EMAIL_DELETE = "actione_email_delete"
 const val ACTION_OPEN_FOLDER = "action_documents_folder_open"
 const val ACTION_OPEN_DOCUMENT = "action_documents_document_open"
+const val ACTION_PEOPLE_DETAIL = "action_ppl_detail"
 const val ACTION_LOGOUT = "action_logout"
 
 

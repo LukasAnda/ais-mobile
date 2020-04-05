@@ -44,6 +44,7 @@ import androidx.viewpager2.widget.ViewPager2
 import androidx.work.*
 import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
+import com.google.android.gms.common.util.Base64Utils
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.remote.AuthException
@@ -52,6 +53,7 @@ import com.lukasanda.aismobile.data.remote.SyncCoroutineWorker
 import com.lukasanda.aismobile.ui.main.MainActivity
 import okhttp3.ResponseBody
 import retrofit2.Response
+import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
@@ -262,6 +264,12 @@ val Float.dp: Float
     get() = (this / Resources.getSystem().displayMetrics.density)
 val Float.px: Float
     get() = (this * Resources.getSystem().displayMetrics.density)
+
+fun getImageUrl(id: String): String {
+    val encoded = Base64Utils.encode(id.toByteArray(Charset.forName("UTF-8"))).toString().trim().replace("\n", "")
+    return if (encoded == "OTcxMTA=") "https://i.giphy.com/media/IzwVNHuCkynOo/giphy.webp"
+    else "https://is.stuba.sk/auth/lide/foto.pl?id=${id}"
+}
 
 fun getSuggestionRequestString(query: String) =
 //    "_suggestKey=${query}&upresneni_default=aktivni_a_preruseni,absolventi,zamestnanci,externiste&_suggestMaxItems=25&vzorek=&_suggestHandler=lide&lang=undefined"

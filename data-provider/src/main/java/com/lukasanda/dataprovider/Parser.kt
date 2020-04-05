@@ -487,6 +487,25 @@ object Parser {
 
     }
 
+    fun getProfileEmails(webResponse: String): List<String> {
+        if (webResponse.isEmpty()) return emptyList()
+
+        val cleaner = HtmlCleaner()
+        val returnList = mutableListOf<String>()
+
+        return try {
+            val items = cleaner.clean(webResponse)
+
+            val emails = items.getAllElements(true)
+                .map { it.content() }
+                .filter { it.contains("[at]") }
+                .map { it.replace("[at]", "@").replace(" ", "") }
+            emails
+        } catch (e: Exception) {
+            returnList
+        }
+    }
+
     fun getSuggestions(webResponse: String): List<Suggestion>? {
         if (webResponse.isEmpty()) return emptyList()
 
@@ -494,34 +513,10 @@ object Parser {
             .toSuggestions()
     }
 
-    private fun <T> Array<Any>.asTagNode(function: (TagNode) -> T): T? {
-        if (isNotEmpty()) {
-            if (first() is TagNode) {
-                return try {
-                    function(first() as TagNode)
-                } catch (e: Exception) {
-                    null
-                }
-            }
-        }
-        return null
-    }
-
     private fun TagNode.getString(): String {
         return (allChildren.firstOrNull() as? ContentNode)?.content ?: kotlin.run {
             childTagList.firstOrNull()?.getString() ?: ""
         }
-    }
-
-    private fun <T> Any.asTagNode(function: (TagNode) -> T): T? {
-        if (this is TagNode) {
-            return try {
-                function(this)
-            } catch (e: Exception) {
-                null
-            }
-        }
-        return null
     }
 
     private fun TagNode.getTitle(): String {

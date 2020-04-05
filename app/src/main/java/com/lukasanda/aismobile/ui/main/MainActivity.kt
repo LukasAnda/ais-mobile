@@ -20,6 +20,7 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -45,6 +46,7 @@ import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.cache.SafePrefs
 import com.lukasanda.aismobile.data.db.entity.Document
 import com.lukasanda.aismobile.data.db.entity.Email
+import com.lukasanda.aismobile.data.db.entity.Suggestion
 import com.lukasanda.aismobile.data.db.entity.Teacher
 import com.lukasanda.aismobile.databinding.ActivityMainBinding
 import com.lukasanda.aismobile.databinding.DrawerHeaderViewBinding
@@ -61,7 +63,10 @@ import com.lukasanda.aismobile.ui.main.email.EmailFragmentHandler
 import com.lukasanda.aismobile.ui.main.emailDetail.EmailDetailFragmentDirections
 import com.lukasanda.aismobile.ui.main.emailDetail.EmailDetailHandler
 import com.lukasanda.aismobile.ui.main.logout.LogoutHandler
+import com.lukasanda.aismobile.ui.main.people.PeopleFragmentDirections
 import com.lukasanda.aismobile.ui.main.people.PeopleHandler
+import com.lukasanda.aismobile.ui.main.peopleDetail.PeopleDetailFragmentDirections
+import com.lukasanda.aismobile.ui.main.peopleDetail.PeopleDetailHandler
 import com.lukasanda.aismobile.ui.main.subjectDetail.SubjectDetailFragmentDirections
 import com.lukasanda.aismobile.ui.main.subjectDetail.SubjectDetailHandler
 import com.lukasanda.aismobile.ui.main.subjects.SubjectsFragmentDirections
@@ -76,7 +81,7 @@ import org.koin.core.parameter.parametersOf
 
 class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityMainBinding>(),
     TimetableFragmentHandler, SubjectsFragmentHandler, EmailFragmentHandler, EmailDetailHandler,
-    ComposeEmailHandler, SubjectDetailHandler, DocumentsHandler, LogoutHandler, PeopleHandler, AnalyticsTrait {
+    ComposeEmailHandler, SubjectDetailHandler, DocumentsHandler, LogoutHandler, PeopleHandler, PeopleDetailHandler, AnalyticsTrait {
 
     private lateinit var toggle: ActionBarDrawerToggle
 
@@ -110,7 +115,7 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
 
                 val builder = LazyHeaders.Builder().addHeader("Cookie", safePrefs.sessionCookie)
 
-                val url = GlideUrl("https://is.stuba.sk/auth/lide/foto.pl?id=${it.id}", builder.build())
+                val url = GlideUrl(getImageUrl(it.id.toString()), builder.build())
 
                 Glide.with(this@MainActivity).load(url).listener(object : RequestListener<Drawable> {
                     override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
@@ -122,6 +127,7 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
                     override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean) = false
 
                 }).into(drawerHeaderBinding.profile)
+
                 drawerHeaderBinding.aisId.text = it.id.toString()
                 drawerHeaderBinding.username.text = it.email
                 drawerHeaderBinding.password.text = it.password
@@ -228,6 +234,28 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
         navController?.navigateSafe(TimetableFragmentDirections.actionScheduleFragmentToSubjectDetailFragment(courseId))
     }
 
+    override fun showPeopleDetail(suggestion: Suggestion) {
+        logEvent(ACTION_PEOPLE_DETAIL)
+        navController?.navigateSafe(PeopleFragmentDirections.actionPeopleFragmentToPeopleDetailFragment(suggestion))
+    }
+
+    override fun sendMail(suggestion: Suggestion) {
+        logEvent(ACTION_COMPOSE_EMAIL_FROM_DETAIL)
+        navController?.navigateSafe(PeopleDetailFragmentDirections.actionPeopleDetailFragmentToComposeEmailFragment(suggestion = suggestion))
+    }
+
+    override fun sendMail(address: String) {
+        val mailto = "mailto:$address"
+
+        val emailIntent = Intent(Intent.ACTION_SENDTO)
+        emailIntent.data = Uri.parse(mailto)
+
+        try {
+            startActivity(emailIntent)
+        } catch (e: ActivityNotFoundException) {
+        }
+    }
+
     override fun setTitle(text: String) {
         binding.windowTitle.text = text
     }
@@ -258,7 +286,7 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
 
     override fun writeToTeacher(teacher: Teacher) {
         logEvent(ACTION_COMPOSE_EMAIL_TO_TEACHER)
-        navController?.navigateSafe(SubjectDetailFragmentDirections.actionSubjectDetailFragmentToComposeEmailFragment(teacher = teacher))
+        navController?.navigateSafe(SubjectDetailFragmentDirections.actionSubjectDetailFragmentToComposeEmailFragment(suggestion = Suggestion(teacher.name, teacher.id, "")))
     }
 
     override fun openFolder(document: Document) {

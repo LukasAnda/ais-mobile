@@ -13,11 +13,10 @@
 
 package com.lukasanda.aismobile.data.db.entity
 
-import android.os.Parcelable
 import com.lukasanda.aismobile.ui.recyclerview.DiffUtilItem
-import kotlinx.android.parcel.Parcelize
 
-@Parcelize
-data class Suggestion(val name: String, val id: String, val study: String) : Parcelable, DiffUtilItem {
-    override fun getContentDescription() = "$name $id $study"
+data class ProfileInfo(val id: String, val name: String, val info: List<ProfileInfoItem>)
+
+data class ProfileInfoItem(val info: Pair<Int, String>) : DiffUtilItem {
+    override fun getContentDescription() = info.second
 }

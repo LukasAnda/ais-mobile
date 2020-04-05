@@ -17,6 +17,7 @@ import android.os.Bundle
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
 import com.lukasanda.aismobile.R
+import com.lukasanda.aismobile.data.db.entity.Suggestion
 import com.lukasanda.aismobile.databinding.PeopleFragmentBinding
 import com.lukasanda.aismobile.ui.activity.BaseViews
 import com.lukasanda.aismobile.ui.fragment.BaseFragment
@@ -27,7 +28,7 @@ import org.koin.core.parameter.parametersOf
 
 class PeopleFragment : BaseFragment<PeopleFragment.Views, PeopleFragmentBinding, PeopleViewModel, PeopleHandler>() {
     private val peopleAdapter = PeopleAdapter {
-
+        handler.showPeopleDetail(it)
     }
 
     inner class Views : BaseViews {
@@ -62,5 +63,5 @@ class PeopleFragment : BaseFragment<PeopleFragment.Views, PeopleFragmentBinding,
 }
 
 interface PeopleHandler : BaseFragmentHandler {
-
+    fun showPeopleDetail(suggestion: Suggestion)
 }
