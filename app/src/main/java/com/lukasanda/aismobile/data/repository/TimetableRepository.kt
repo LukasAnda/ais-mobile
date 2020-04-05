@@ -127,13 +127,8 @@ class TimetableRepository(
         run days@{
             realWeek.forEach { day ->
                 day.forEachIndexed { index, item ->
-                    if (actualDay == 7) {
-                        //Special case for sunday
-                        day[index] = item.next()
-                        return@days
-                    }
-                    if (getTimeFromCourse(item).isAfterNow) {
-                        day[index] = item.next()
+                    if (getStartTimeFromCourse(item).isBeforeNow && getEndTimeFromCourse(item).isAfterNow) {
+                        day[index] = item.actual()
                         return@days
                     }
                 }
@@ -144,12 +139,20 @@ class TimetableRepository(
         return realWeek.toList()
     }
 
-    private fun getTimeFromCourse(item: TimetableItem): DateTime {
+    private fun getStartTimeFromCourse(item: TimetableItem): DateTime {
         return DateTime.now().withHourOfDay(
             item.startTime.substringBefore(
                 ":"
             ).toInt()
         ).withMinuteOfHour(item.startTime.substringAfter(":").toInt()).withDayOfWeek(item.dayOfWeek)
+    }
+
+    private fun getEndTimeFromCourse(item: TimetableItem): DateTime {
+        return DateTime.now().withHourOfDay(
+            item.endTime.substringBefore(
+                ":"
+            ).toInt()
+        ).withMinuteOfHour(item.endTime.substringAfter(":").toInt()).withDayOfWeek(item.dayOfWeek)
     }
 
 }

@@ -42,9 +42,8 @@ class SemesterAdapter(private val listener: (FullCourse) -> Unit) :
     }
 
     override fun onBindViewHolder(holder: SemesterItemHolder, position: Int) {
-        if (items.isNotEmpty()) {
-            holder.bind(items[getItemRealPosition(position)], listener)
-        }
+        if (items.isEmpty()) return
+        holder.bind(items[getItemRealPosition(position)], listener)
     }
 }
 
@@ -52,8 +51,12 @@ class SemesterItemHolder(binding: SemesterItemBinding) :
     BaseBindingViewHolder<Semester, FullCourse, SemesterItemBinding>(binding) {
     override fun bind(item: Semester, onClick: (FullCourse) -> Unit) {
         val adapter = CourseAdapter(onClick)
+
         binding.recycler.bindLinear(adapter)
+
         adapter.swapData(item.courses)
+
+        println(item.courses.size)
 
         if (item.courses.isEmpty()) {
             binding.empty.show()

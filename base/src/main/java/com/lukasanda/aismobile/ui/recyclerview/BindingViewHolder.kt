@@ -39,17 +39,21 @@ abstract class BaseAdapter<ITEM : DiffUtilItem, LISTENER_ITEM : DiffUtilItem?, V
     override fun onBindViewHolder(holder: VIEW_HOLDER, position: Int) =
         holder.bind(items[position], onClick)
 
-    fun swapData(newItems: List<ITEM>) {
+    fun swapData(newItems: List<ITEM>, useDiff: Boolean = true) {
         val callback = ItemDiffCallback(items, newItems)
         val result = DiffUtil.calculateDiff(callback)
 
         items.replaceWith(newItems)
-//        notifyDataSetChanged()
-        result.dispatchUpdatesTo(this)
+        if (useDiff) {
+            result.dispatchUpdatesTo(this)
+        } else {
+            notifyDataSetChanged()
+        }
     }
 
+
     inner class ItemDiffCallback(private val oldItems: List<ITEM>, private val newItems: List<ITEM>) : DiffUtil.Callback() {
-        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) = oldItems[oldItemPosition] == newItems[newItemPosition]
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) = oldItems[oldItemPosition] === newItems[newItemPosition]
 
         override fun getOldListSize() = oldItems.size
 

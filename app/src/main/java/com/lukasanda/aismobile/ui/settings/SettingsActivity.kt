@@ -23,6 +23,7 @@ import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.databinding.SettingsActivityBinding
 import com.lukasanda.aismobile.util.ThemeHelper
 import com.lukasanda.aismobile.util.createLiveData
+import com.lukasanda.aismobile.util.startSingleWorker
 import org.koin.android.ext.android.inject
 
 class SettingsActivity : AppCompatActivity() {
@@ -45,6 +46,11 @@ class SettingsActivity : AppCompatActivity() {
             Log.d("TAG", "Actual value: $it")
             ThemeHelper.applyTheme(it.toInt())
             delegate.localNightMode = ThemeHelper.getLocalTheme(it.toInt())
+        })
+
+        createLiveData<Int>(prefs.prefs, prefs.UPDATE_INTERVAL).observe(this, Observer {
+            println(" Actual value: $it")
+            startSingleWorker(applicationContext)
         })
     }
 

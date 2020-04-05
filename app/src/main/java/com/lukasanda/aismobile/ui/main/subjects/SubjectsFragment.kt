@@ -70,16 +70,9 @@ class SubjectsFragment :
     inner class Views : BaseViews {
         override fun modifyViews() {
             postponeEnterTransition()
-//            binding?.buttonBack?.setOnClickListener {
-//                binding?.pager?.dec()
-//            }
-//
-//            binding?.buttonForward?.setOnClickListener {
-//                binding?.pager?.inc()
-//            }
 
             binding?.pager?.apply {
-                offscreenPageLimit = 1
+                offscreenPageLimit = 3
                 adapter = semesterAdapter
                 orientation = ViewPager2.ORIENTATION_HORIZONTAL
                 (getChildAt(0) as? RecyclerView)?.overScrollMode = RecyclerView.OVER_SCROLL_NEVER
@@ -95,16 +88,18 @@ class SubjectsFragment :
                     binding?.empty?.show()
                     binding?.indicatorLayout?.hide()
                 } else {
-                    semesterAdapter.swapData(it.map { Semester(it) })
-                    viewModel.semesters.replaceWith(it.map { it.first().course.semester })
 
                     binding?.empty?.hide()
                     binding?.pager?.show()
                     binding?.indicatorLayout?.show()
 
+
+                    semesterAdapter.swapData(it.map { Semester(it) }, false)
+                    viewModel.semesters.replaceWith(it.map { it.first().course.semester })
+
                     binding?.indicator?.attachToPager(binding?.pager!!)
 
-                    binding?.pager?.setCurrentItem(viewModel.getPage(), false)
+                    binding?.pager?.setCurrentItem(viewModel.getPage(), true)
                     updateToolbar(viewModel.getPage())
                 }
             })

@@ -20,6 +20,7 @@ import androidx.room.PrimaryKey
 import androidx.room.Relation
 import com.lukasanda.aismobile.ui.recyclerview.DiffUtilItem
 import kotlinx.android.parcel.Parcelize
+import java.util.*
 
 @Entity(tableName = "course")
 data class Course(
@@ -59,7 +60,7 @@ class FullCourse : DiffUtilItem {
 }
 
 data class Semester(val courses: List<FullCourse>) : DiffUtilItem {
-    override fun getContentDescription() = courses.map { it.getContentDescription() }.joinToString(" ")
+    override fun getContentDescription() = UUID.randomUUID().toString()
 }
 
 @Entity(tableName = "sheet")

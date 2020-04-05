@@ -21,8 +21,7 @@ import com.lukasanda.aismobile.databinding.ScheduleItemBinding
 import com.lukasanda.aismobile.ui.recyclerview.BaseAdapter
 import com.lukasanda.aismobile.ui.recyclerview.BindingViewHolder
 import com.lukasanda.aismobile.ui.recyclerview.create
-import com.lukasanda.aismobile.util.hide
-import com.lukasanda.aismobile.util.show
+import com.lukasanda.aismobile.util.dp
 
 class TimetableAdapter(private val listener: (TimetableItem) -> Unit) :
     BaseAdapter<TimetableItem, TimetableItem, TimetableCourseViewHolder>(listener) {
@@ -56,10 +55,10 @@ class TimetableCourseViewHolder(binding: ScheduleItemBinding) :
                 )
             }
 
-            if (item.isNext) {
-                nextLesson.show()
+            if (item.actual) {
+                root.strokeWidth = 2.dp
             } else {
-                nextLesson.hide()
+                root.strokeWidth = 0
             }
 
             binding.root.setOnClickListener {

@@ -36,9 +36,9 @@ data class TimetableItem(
     }
 
     @Ignore
-    var isNext: Boolean = false
+    var actual: Boolean = false
 
-    fun next() = this.copy().apply { isNext = true }
+    fun actual() = this.copy().apply { actual = true }
 }
 
 data class WeekItem(val items: List<TimetableItem>) : DiffUtilItem {

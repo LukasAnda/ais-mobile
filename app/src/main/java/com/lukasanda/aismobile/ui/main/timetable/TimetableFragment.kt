@@ -71,7 +71,7 @@ class TimetableFragment :
     inner class Views : BaseViews {
         override fun modifyViews() {
             binding?.pager?.apply {
-                offscreenPageLimit = 1
+                offscreenPageLimit = 3
                 adapter = weekAdapter
                 orientation = ViewPager2.ORIENTATION_HORIZONTAL
                 binding?.pager?.registerOnPageChangeCallback(pageChangeCallback)
