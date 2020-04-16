@@ -52,6 +52,8 @@ class SubjectDetailFragment :
             binding?.tablesRecycler?.bindLinear(sheetsAdapter)
             binding?.teachersRecycler?.bindLinear(teachersAdapter)
 
+            viewModel.updateCourse(args.courseId)
+
             viewModel.getCourse(args.courseId).observe(viewLifecycleOwner, Observer {
                 if (it != null) {
                     sheetsAdapter.swapData(it.sheets)

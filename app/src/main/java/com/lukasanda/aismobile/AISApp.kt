@@ -25,6 +25,7 @@ import com.lukasanda.aismobile.util.ThemeHelper
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
+import java.security.KeyManagementException
 import java.security.NoSuchAlgorithmException
 import javax.net.ssl.SSLContext
 
@@ -60,16 +61,17 @@ class AISApp : Application() {
 
 fun initializeSSLContext(mContext: Context) {
     try {
-        SSLContext.getInstance("TLSv1.2")
-    } catch (e: NoSuchAlgorithmException) {
-        e.printStackTrace()
-    }
-
-    try {
-        ProviderInstaller.installIfNeeded(mContext.applicationContext)
+        ProviderInstaller.installIfNeeded(mContext)
+        val sslContext: SSLContext = SSLContext.getInstance("TLSv1.2")
+        sslContext.init(null, null, null)
+        sslContext.createSSLEngine()
     } catch (e: GooglePlayServicesRepairableException) {
         e.printStackTrace()
     } catch (e: GooglePlayServicesNotAvailableException) {
+        e.printStackTrace()
+    } catch (e: NoSuchAlgorithmException) {
+        e.printStackTrace()
+    } catch (e: KeyManagementException) {
         e.printStackTrace()
     }
 

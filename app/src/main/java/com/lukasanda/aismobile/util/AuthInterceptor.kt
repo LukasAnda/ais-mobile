@@ -20,7 +20,7 @@ import okhttp3.Response
 class AuthInterceptor(val prefs: SafePrefs) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         return chain.proceed(chain.request().newBuilder().apply {
-            if (!chain.request().url().uri().toString().contains("login.pl")) {
+            if (!chain.request().url.toUri().toString().contains("login.pl")) {
                 addHeader("Cookie", prefs.sessionCookie)
             }
         }.build())
@@ -29,7 +29,7 @@ class AuthInterceptor(val prefs: SafePrefs) : Interceptor {
 
 class EncodingInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val url = chain.request().url().toString().replace("%3D", "=")
+        val url = chain.request().url.toString().replace("%3D", "=")
         return chain.proceed(chain.request().newBuilder().apply {
             url(url)
         }.build())

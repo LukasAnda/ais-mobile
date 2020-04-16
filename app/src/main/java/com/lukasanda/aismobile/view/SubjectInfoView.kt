@@ -40,7 +40,7 @@ class SubjectInfoView @JvmOverloads constructor(
             )
 
             courseTeacher.text =
-                course.teachers.last().name
+                course.teachers.lastOrNull()?.name
 
             course.course.coursePresence.split("#").map { it.toPresenceType() }.takeIf { it.size > 1 }?.let {
                 coursePresenceGroup.show()

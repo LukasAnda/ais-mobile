@@ -24,7 +24,7 @@ import com.lukasanda.aismobile.data.db.entity.TimetableItem
 import com.lukasanda.aismobile.data.remote.api.AISApi
 import com.lukasanda.aismobile.util.Difference
 import com.lukasanda.aismobile.util.ResponseResult
-import com.lukasanda.aismobile.util.authenticatedOrReturn
+import com.lukasanda.aismobile.util.authenticatedOrReturn2
 import com.lukasanda.dataprovider.Parser
 import com.lukasanda.dataprovider.data.Schedule
 import com.snakydesign.livedataextensions.map
@@ -62,7 +62,7 @@ class TimetableRepository(
             return ResponseResult.Authenticated
         }
         prefs.timetableExpiration = DateTime.now().plusWeeks(1)
-        return aisApi.schedule("1?zobraz=1;format=json;rozvrh_student=${prefs.id}").authenticatedOrReturn { scheduleResponse ->
+        return aisApi.schedule("1?zobraz=1;format=json;rozvrh_student=${prefs.id}").authenticatedOrReturn2 { scheduleResponse ->
 
             val schedule = parseResponse(scheduleResponse)
             val courses = parseCourses(schedule)
@@ -71,7 +71,7 @@ class TimetableRepository(
 
             updateInDb(courses)
 
-            return@authenticatedOrReturn if (originalCourses.isEmpty() || originalCourses.containsAll(courses.map { it.courseId })) {
+            return@authenticatedOrReturn2 if (originalCourses.isEmpty() || originalCourses.containsAll(courses.map { it.courseId })) {
                 ResponseResult.Authenticated
             } else {
                 ResponseResult.AuthenticatedWithResult(TimetableDifference(context.getString(R.string.new_timetable)))

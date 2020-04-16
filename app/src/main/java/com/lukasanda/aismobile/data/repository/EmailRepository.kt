@@ -24,7 +24,7 @@ import com.lukasanda.aismobile.util.*
 import com.lukasanda.dataprovider.Parser
 import com.lukasanda.dataprovider.data.EmailDetail
 import com.lukasanda.dataprovider.data.Suggestion
-import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody
 import org.joda.time.DateTime
 
@@ -38,7 +38,7 @@ class EmailRepository(
 
         var emailCount = 0
 
-        val result = service.emails().authenticatedOrReturn { emailCountResponse ->
+        val result = service.emails().authenticatedOrReturn2 { emailCountResponse ->
             val emailInfo = Parser.getEmailInfo(emailCountResponse)
 
             emailCount = emailInfo.emailPages
@@ -60,7 +60,7 @@ class EmailRepository(
         prefs.emailExpiration = DateTime.now().plusMinutes(10)
 
         val responses = (0 until emailCount).map { i ->
-            service.emailPage(i.toString()).authenticatedOrReturn { response ->
+            service.emailPage(i.toString()).authenticatedOrReturn2 { response ->
                 val emailsList = Parser.getEmails(response) ?: emptyList()
                 emailDao.insertEmails(emailsList.map {
                     Email(
@@ -92,7 +92,7 @@ class EmailRepository(
 
     @Throws(AuthException::class, HTTPException::class)
     suspend fun delete(email: Email) {
-        service.deleteEmail("${email.fid};eid=${email.eid};on=0;menu_akce=vymazat").authenticatedOrThrow()
+        service.deleteEmail("${email.fid};eid=${email.eid};on=0;menu_akce=vymazat").authenticatedOrThrow2()
         emailDao.deleteSingle(email)
     }
 
@@ -101,7 +101,7 @@ class EmailRepository(
     }
 
     suspend fun getEmailDetail(email: Email): EmailDetail {
-        val response = service.emailDetail("${email.eid};fid=${email.fid};on=0").authenticatedOrThrow()
+        val response = service.emailDetail("${email.eid};fid=${email.fid};on=0").authenticatedOrThrow2()
         val message = Parser.getEmailDetail(response)
         if (!email.opened) {
             prefs.newEmailCount--
@@ -115,16 +115,16 @@ class EmailRepository(
     suspend fun getSuggestions(query: String): List<Suggestion> {
         val suggestionResponse = service.getSuggestions(
             RequestBody.create(
-                MediaType.parse("text/plain"),
+                "text/plain".toMediaType(),
                 getSuggestionRequestString(query)
             )
-        ).authenticatedOrThrow()
+        ).authenticatedOrThrow2()
 
         return Parser.getSuggestions(suggestionResponse) ?: emptyList()
     }
 
     suspend fun sendMail(to: String, subject: String, message: String): Boolean {
-        val newMailResponse = service.newMessagePage().authenticatedOrThrow()
+        val newMailResponse = service.newMessagePage().authenticatedOrThrow2()
         val token = Parser.getNewMessageToken(newMailResponse)
         if (token.isEmpty()) {
             Log.d("TAG", "Empty token, something went wrong")
@@ -150,7 +150,7 @@ class EmailRepository(
         message: String,
         originalEmail: Email
     ): Boolean {
-        val newMailResponse = service.newMessagePage().authenticatedOrThrow()
+        val newMailResponse = service.newMessagePage().authenticatedOrThrow2()
         val token = Parser.getNewMessageToken(newMailResponse)
         if (token.isEmpty()) {
             Log.d("TAG", "Empty token, something went wrong")

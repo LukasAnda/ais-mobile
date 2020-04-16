@@ -14,7 +14,6 @@
 package com.lukasanda.aismobile.data.remote.api
 
 import okhttp3.RequestBody
-import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -32,7 +31,7 @@ interface AISApi {
         @Field("credential_1", encoded = true) password: String,
         @Field("credential_k", encoded = true) k: String = "",
         @Field("credential_2", encoded = true) validSeconds: String = "86400"
-    ): Response<ResponseBody>
+    ): Response<String>
 
 
     @GET("auth/katalog/rozvrhy_view.pl")
@@ -41,16 +40,16 @@ interface AISApi {
             "rozvrh_student_obec",
             encoded = true
         ) params: String = "1?zobraz=1;format=json;rozvrh_student=91984"
-    ): Response<ResponseBody>
+    ): Response<String>
 
     @GET("auth/student/studium.pl")
-    suspend fun educationInfo(): Response<ResponseBody>
+    suspend fun educationInfo(): Response<String>
 
     @GET("auth/wifi/heslo_vpn_sit.pl")
-    suspend fun wifiInfo(): Response<ResponseBody>
+    suspend fun wifiInfo(): Response<String>
 
     @GET("/auth/student/list.pl")
-    suspend fun semesters(): Response<ResponseBody>
+    suspend fun semesters(): Response<String>
 
     @GET("/auth/student/list.pl")
     suspend fun subjects(
@@ -59,40 +58,33 @@ interface AISApi {
 //            "obdobi",
 //            encoded = true
 //        ) semester: String
-    ): Response<ResponseBody>
+    ): Response<String>
 
-//    @FormUrlEncoded
-@GET("/auth/student/list.pl")
-suspend fun subjectSheets(
-    @Query("studium", encoded = true) studium: String
-//        @Field("studium", encoded = true) study: String, @Field(
-//            "obdobi",
-//            encoded = true
-//        ) semester: String, @Field(
-//            "predmet",
-//            encoded = true
-//        ) predmet: String, @Field("zobraz_prubezne") zobrazPrubezne: String = "1"
-): Response<ResponseBody>
+    //    @FormUrlEncoded
+    @GET("/auth/student/list.pl")
+    suspend fun subjectSheets(
+        @Query("studium", encoded = true) studium: String
+    ): Response<String>
 
     @POST("/auth/posta/slozka.pl")
-    suspend fun emails(): Response<ResponseBody>
+    suspend fun emails(): Response<String>
 
     @FormUrlEncoded
     @POST("/auth/posta/slozka.pl")
-    suspend fun emailPage(@Field("on", encoded = true) page: String): Response<ResponseBody>
+    suspend fun emailPage(@Field("on", encoded = true) page: String): Response<String>
 
     @GET("/auth/posta/email.pl")
-    suspend fun emailDetail(@Query("eid", encoded = true) params: String = "8851469;fid=620955;on=0"): Response<ResponseBody>
+    suspend fun emailDetail(@Query("eid", encoded = true) params: String): Response<String>
 
     @GET("/auth/posta/slozka.pl")
-    suspend fun deleteEmail(@Query("fid", encoded = true) params: String): Response<ResponseBody>
+    suspend fun deleteEmail(@Query("fid", encoded = true) params: String): Response<String>
 
     @Headers("Content-Type: application/x-www-form-urlencoded;charset=UTF-8")
     @POST("/auth/system/uissuggest.pl")
-    suspend fun getSuggestions(@Body body: RequestBody): Response<ResponseBody>
+    suspend fun getSuggestions(@Body body: RequestBody): Response<String>
 
     @POST("/auth/posta/nova_zprava.pl")
-    suspend fun newMessagePage(): Response<ResponseBody>
+    suspend fun newMessagePage(): Response<String>
 
     @FormUrlEncoded
     @POST("/auth/posta/nova_zprava.pl")
@@ -116,7 +108,7 @@ suspend fun subjectSheets(
         @Field("send", encoded = true) sendMessage: String = "ODOSLAŤ SPRÁVU",
         @Field("akce", encoded = true) action: String = "schranka",
         @Field("serializace", encoded = true) serialisation: String
-    ): Response<ResponseBody>
+    ): Response<String>
 
     @FormUrlEncoded
     @POST("/auth/posta/nova_zprava.pl")
@@ -145,19 +137,19 @@ suspend fun subjectSheets(
         @Field("fid", encoded = true) fid: String,
         @Field("eid", encoded = true) eid: String,
         @Field("menu_akce", encoded = true) menu_action: String = "odpovedet"
-    ): Response<ResponseBody>
+    ): Response<String>
 
     @GET("/auth/katalog/syllabus.pl")
-    suspend fun getCourseDetail(@Query("predmet", encoded = true) predmet: String): Response<ResponseBody>
+    suspend fun getCourseDetail(@Query("predmet", encoded = true) predmet: String): Response<String>
 
     @GET("/auth/dok_server/slozka.pl")
-    suspend fun getDocumentsInFolder(@Query("ds", encoded = true) folder: String): Response<ResponseBody>
+    suspend fun getDocumentsInFolder(@Query("ds", encoded = true) folder: String): Response<String>
 
     @GET("/auth/dok_server/slozka.pl")
-    suspend fun getDocumentInfo(@Query("id", encoded = true) id: String): Response<ResponseBody>
+    suspend fun getDocumentInfo(@Query("id", encoded = true) id: String): Response<String>
 
     @GET("/auth/lide/clovek.pl")
-    suspend fun getPersonInfo(@Query("id", encoded = true) id: String): Response<ResponseBody>
+    suspend fun getPersonInfo(@Query("id", encoded = true) id: String): Response<String>
 
 
 }

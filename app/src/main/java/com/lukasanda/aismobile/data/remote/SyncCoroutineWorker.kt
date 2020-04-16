@@ -31,8 +31,9 @@ import com.lukasanda.aismobile.data.repository.EmailRepository
 import com.lukasanda.aismobile.data.repository.TimetableRepository
 import com.lukasanda.aismobile.util.*
 import com.lukasanda.dataprovider.Parser
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import okhttp3.ResponseBody
+import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -57,10 +58,10 @@ class SyncCoroutineWorker(
     private val emailRepository: EmailRepository by inject()
 
 
-    override suspend fun doWork(): Result {
+    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+
         if (runAttemptCount > 3) {
-            startSingleWorker(applicationContext)
-            return Result.failure()
+            return@withContext Result.success()
         }
 
         Log.d("TAG", "Starting worker")
@@ -78,7 +79,7 @@ class SyncCoroutineWorker(
         }.getOrElse {
             if (it is AuthException) {
                 reLogin()
-                return Result.retry()
+                return@withContext Result.success()
             } else {
                 FirebaseCrashlytics.getInstance().recordException(it)
                 it.printStackTrace()
@@ -86,13 +87,13 @@ class SyncCoroutineWorker(
             }
         }
         Log.d("TAG", "Timetable downloaded")
-        delay(1000)
+        delay(3000)
 
         setProgress(workDataOf(PROGRESS to 25, PROGRESS_MESSAGE to R.string.downloading_profile))
         runCatching {
-            service.educationInfo().authenticatedOrReturn { educationResponse ->
-                delay(1000)
-                return@authenticatedOrReturn service.wifiInfo().authenticatedOrReturn { wifiResponse ->
+            service.educationInfo().authenticatedOrReturn2 { educationResponse ->
+                delay(3000)
+                return@authenticatedOrReturn2 service.wifiInfo().authenticatedOrReturn2 { wifiResponse ->
                     saveProfile(educationResponse, wifiResponse)
                     ResponseResult.Authenticated
                 }
@@ -100,7 +101,7 @@ class SyncCoroutineWorker(
         }.getOrElse {
             if (it is AuthException) {
                 reLogin()
-                return Result.retry()
+                return@withContext Result.success()
             } else {
                 FirebaseCrashlytics.getInstance().recordException(it)
                 it.printStackTrace()
@@ -113,7 +114,7 @@ class SyncCoroutineWorker(
         runCatching { emailRepository.update().throwOnAuthError() }.getOrElse {
             if (it is AuthException) {
                 reLogin()
-                return Result.retry()
+                return@withContext Result.success()
             } else {
                 FirebaseCrashlytics.getInstance().recordException(it)
                 it.printStackTrace()
@@ -154,7 +155,7 @@ class SyncCoroutineWorker(
             it.printStackTrace()
             if (it is AuthException) {
                 reLogin()
-                return Result.retry()
+                return@withContext Result.success()
             } else {
                 FirebaseCrashlytics.getInstance().recordException(it)
                 it.printStackTrace()
@@ -167,9 +168,7 @@ class SyncCoroutineWorker(
         setProgress(workDataOf(PROGRESS to 100, PROGRESS_MESSAGE to R.string.downloading_complete))
 
         delay(prefs.updateInterval.toLong() * 60 * 1000)
-
-        startSingleWorker(applicationContext)
-        return Result.success()
+        return@withContext Result.success()
     }
 
     private suspend fun reLogin() {
@@ -180,7 +179,7 @@ class SyncCoroutineWorker(
     private fun saveCookie(
         name: String,
         password: String,
-        response: Response<ResponseBody>
+        response: Response<String>
     ): Boolean {
         val cookies = response.headers().get("Set-Cookie") ?: return false
 

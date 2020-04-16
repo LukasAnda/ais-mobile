@@ -24,7 +24,7 @@ import com.lukasanda.aismobile.data.db.entity.ProfileInfoItem
 import com.lukasanda.aismobile.data.db.entity.Suggestion
 import com.lukasanda.aismobile.data.remote.api.AISApi
 import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
-import com.lukasanda.aismobile.util.authenticatedOrThrow
+import com.lukasanda.aismobile.util.authenticatedOrThrow2
 import com.lukasanda.dataprovider.Parser
 import kotlinx.coroutines.launch
 
@@ -39,7 +39,7 @@ class PeopleDetailViewModel(private val handle: SavedStateHandle, private val ai
 
     fun getProfileInfo(suggestion: Suggestion) {
         viewModelScope.launch(coroutineExceptionHandler) {
-            val profileResponse = aisApi.getPersonInfo(suggestion.id).authenticatedOrThrow()
+            val profileResponse = aisApi.getPersonInfo(suggestion.id).authenticatedOrThrow2()
             val emails = Parser.getProfileEmails(profileResponse).toSet()
 
             val returnList = mutableListOf<Pair<Int, String>>()

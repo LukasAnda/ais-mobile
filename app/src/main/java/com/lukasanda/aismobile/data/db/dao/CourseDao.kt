@@ -59,20 +59,20 @@ interface CourseDao {
     fun getSemesters(): LiveData<List<String>>
 
     @Transaction
-    suspend fun update(courses: List<Course>, sheets: List<Sheet>, teachers: List<Teacher>) {
-        deleteSheets()
+    suspend fun update(courses: List<Course>) {
+//        deleteSheets()
         deleteCourses()
-        deleteTeachers()
+//        deleteTeachers()
         insertCourses(courses)
-        insertSheets(sheets)
-        insertTeachers(teachers)
+//        insertSheets(sheets)
+//        insertTeachers(teachers)
     }
 
     @Transaction
-    suspend fun updateSingle(courses: List<Course>, sheets: List<Sheet>, teachers: List<Teacher>) {
+    suspend fun updateSingle(courses: List<Course>) {
         insertCourses(courses)
-        insertSheets(sheets)
-        insertTeachers(teachers)
+//        insertSheets(sheets)
+//        insertTeachers(teachers)
     }
 
 }

@@ -37,7 +37,6 @@ import com.lukasanda.aismobile.util.getSessionId
 import com.tonyodev.fetch2.*
 import com.tonyodev.fetch2core.Func
 import kotlinx.coroutines.launch
-import okhttp3.ResponseBody
 import org.joda.time.DateTime
 import retrofit2.Response
 import java.io.File
@@ -74,7 +73,7 @@ class MainViewModel(
     private fun saveCookie(
         name: String,
         password: String,
-        response: Response<ResponseBody>
+        response: Response<String>
     ): Boolean {
         val cookies = response.headers().get("Set-Cookie") ?: return false
 

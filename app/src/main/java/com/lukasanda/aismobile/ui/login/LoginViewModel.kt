@@ -27,7 +27,6 @@ import com.lukasanda.aismobile.data.remote.api.AISApi
 import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
 import com.lukasanda.aismobile.util.getSessionId
 import kotlinx.coroutines.launch
-import okhttp3.ResponseBody
 import org.joda.time.DateTime
 import retrofit2.Response
 
@@ -81,7 +80,7 @@ class LoginViewModel(
     private fun saveCookie(
         name: String,
         password: String,
-        response: Response<ResponseBody>
+        response: Response<String>
     ): Boolean {
         val cookies = response.headers().get("Set-Cookie") ?: return false
 

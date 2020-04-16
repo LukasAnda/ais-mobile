@@ -49,6 +49,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.remote.AuthException
 import com.lukasanda.aismobile.data.remote.HTTPException
+import com.lukasanda.aismobile.data.remote.RescheduleWorker
 import com.lukasanda.aismobile.data.remote.SyncCoroutineWorker
 import com.lukasanda.aismobile.ui.main.MainActivity
 import okhttp3.ResponseBody
@@ -95,18 +96,9 @@ fun startSingleWorker(applicationContext: Context) {
     val constraints =
         Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED)
 
-    val request = OneTimeWorkRequest.Builder(
-        SyncCoroutineWorker::class.java
-    ).setConstraints(constraints.build())
-        .addTag("Sync")
-//        .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
-        .build()
-    WorkManager.getInstance(applicationContext)
-        .enqueueUniqueWork(
-            "Sync",
-            ExistingWorkPolicy.REPLACE,
-            request
-        )
+    val request = OneTimeWorkRequest.Builder(SyncCoroutineWorker::class.java).setConstraints(constraints.build()).addTag("Sync").build()
+    val request2 = OneTimeWorkRequest.Builder(RescheduleWorker::class.java).setConstraints(constraints.build()).addTag("Reschedule").build()
+    WorkManager.getInstance(applicationContext).beginUniqueWork("Sync", ExistingWorkPolicy.REPLACE, request).then(request2).enqueue()
 }
 
 fun startSingleWorkerWithDelay(applicationContext: Context) {
@@ -156,9 +148,26 @@ fun Response<ResponseBody>.authenticatedOrThrow(): String =
         else -> throw HTTPException()
     }
 
+fun Response<String>.authenticatedOrThrow2(): String =
+    when {
+        this.isSuccessful -> this.body() ?: throw HTTPException()
+        this.code() == 403 -> throw AuthException()
+        else -> throw HTTPException()
+    }
+
 suspend fun Response<ResponseBody>.authenticatedOrReturn(func: suspend (String) -> ResponseResult): ResponseResult {
     return when {
         this.isSuccessful -> this.body()?.string()?.let {
+            func(it)
+        } ?: ResponseResult.NetworkError
+        this.code() == 403 -> ResponseResult.AuthError
+        else -> ResponseResult.NetworkError
+    }
+}
+
+suspend fun Response<String>.authenticatedOrReturn2(func: suspend (String) -> ResponseResult): ResponseResult {
+    return when {
+        this.isSuccessful -> this.body()?.let {
             func(it)
         } ?: ResponseResult.NetworkError
         this.code() == 403 -> ResponseResult.AuthError

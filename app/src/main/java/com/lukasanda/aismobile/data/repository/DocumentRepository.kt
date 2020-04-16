@@ -17,7 +17,7 @@ import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.db.dao.DocumentDao
 import com.lukasanda.aismobile.data.db.entity.Document
 import com.lukasanda.aismobile.data.remote.api.AISApi
-import com.lukasanda.aismobile.util.authenticatedOrThrow
+import com.lukasanda.aismobile.util.authenticatedOrThrow2
 import com.lukasanda.dataprovider.Parser
 
 class DocumentRepository(private val prefs: Prefs, private val documentDao: DocumentDao, private val aisApi: AISApi) {
@@ -27,7 +27,7 @@ class DocumentRepository(private val prefs: Prefs, private val documentDao: Docu
     suspend fun deleteAll() = documentDao.deleteAllDocuments()
 
     suspend fun fetchDocument(folder: String) {
-        val response = aisApi.getDocumentsInFolder("1;id=$folder").authenticatedOrThrow()
+        val response = aisApi.getDocumentsInFolder("1;id=$folder").authenticatedOrThrow2()
         val documents = Parser.getDocuments(response, folder)?.map { Document(it.id, it.name, it.mimeType, it.parentFolderId, it.openable) } ?: emptyList()
         documentDao.updateFolder(folder, documents)
     }

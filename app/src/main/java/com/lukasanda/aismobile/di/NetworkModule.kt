@@ -18,19 +18,18 @@ import com.google.gson.GsonBuilder
 import com.lukasanda.aismobile.BuildConfig
 import com.lukasanda.aismobile.util.AuthInterceptor
 import com.lukasanda.aismobile.util.EncodingInterceptor
-import com.lukasanda.aismobile.util.getSSLFactory
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.dsl.module
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.util.concurrent.TimeUnit
-import javax.net.ssl.SSLSession
+import javax.net.ssl.HostnameVerifier
 
-private const val CONNECT_TIMEOUT = 15L
-private const val WRITE_TIMEOUT = 15L
-private const val READ_TIMEOUT = 15L
+private const val CONNECT_TIMEOUT = 60L
+private const val WRITE_TIMEOUT = 60L
+private const val READ_TIMEOUT = 60L
 
 val networkModule = module {
 //    single { Cache(androidApplication().cacheDir, 10L * 1024 * 1024) }
@@ -39,9 +38,41 @@ val networkModule = module {
 
     single {
         OkHttpClient.Builder().apply {
-//            cache(get())
-            //sslSocketFactory(TLSSocketFactoryCompat())
-            sslSocketFactory(getSSLFactory())
+//            connectionSpecs(
+//                listOf(
+//                    ConnectionSpec.Builder(ConnectionSpec.COMPATIBLE_TLS)
+//                        .supportsTlsExtensions(true)
+//                        .tlsVersions(TlsVersion.TLS_1_2, TlsVersion.TLS_1_1, TlsVersion.TLS_1_0)
+//                        .cipherSuites(
+//                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+//                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
+//                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+//                            CipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
+//                            CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,
+//                            CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
+//                            CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA,
+//                            CipherSuite.TLS_RSA_WITH_AES_256_GCM_SHA384,
+//                            CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256,
+//                            CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
+//                            CipherSuite.TLS_RSA_WITH_CAMELLIA_256_CBC_SHA,
+//                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+//                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+//                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+//                            CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
+//                            CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,
+//                            CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
+//                            CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA,
+//                            CipherSuite.TLS_RSA_WITH_AES_128_GCM_SHA256,
+//                            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256,
+//                            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
+//                            CipherSuite.TLS_RSA_WITH_CAMELLIA_128_CBC_SHA,
+//                            CipherSuite.TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,
+//                            CipherSuite.TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA,
+//                            CipherSuite.TLS_RSA_WITH_3DES_EDE_CBC_SHA
+//                        )
+//                        .build()
+//                )
+//            )
             connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
             writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
             readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
@@ -50,9 +81,22 @@ val networkModule = module {
             retryOnConnectionFailure(true)
             addInterceptor(EncodingInterceptor())
             addInterceptor(AuthInterceptor(get()))
-            addInterceptor(get())
+            addInterceptor(Interceptor { chain ->
+                chain.proceed(chain.request().newBuilder().apply {
+                    addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36")
+                    addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3")
+                    addHeader("Accept-Encoding", "gzip, deflate, br")
+                    addHeader("Accept-Language", "sk-SK,sk;q=0.9,cs;q=0.8,en-US;q=0.7,en;q=0.6")
+                    addHeader("Cache-Control", "max-age=0")
+                    addHeader("Connection", "keep-alive")
+                    addHeader("Host", "is.stuba.sk")
+                    addHeader("Origin", "https://is.stuba.sk")
+                    addHeader("Upgrade-Insecure-Requests", "1")
+                }.build())
+            })
 
-            hostnameVerifier { hostname: String?, session: SSLSession? -> true }
+            hostnameVerifier(HostnameVerifier { hostname, session -> true })
+//            hostnameVerifier { hostname: String?, session: SSLSession? -> true }
             addInterceptor(HttpLoggingInterceptor().apply {
                 if (BuildConfig.DEBUG) {
                     level = HttpLoggingInterceptor.Level.BASIC
@@ -64,25 +108,10 @@ val networkModule = module {
     single {
         Retrofit.Builder()
             .baseUrl("https://is.stuba.sk/")
-            .addConverterFactory(GsonConverterFactory.create(get()))
+            //.addConverterFactory(GsonConverterFactory.create(get()))
 //            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .addConverterFactory(ScalarsConverterFactory.create())
             .client(get())
             .build()
-    }
-
-    single {
-        Interceptor { chain ->
-            chain.proceed(chain.request().newBuilder().apply {
-                addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36")
-                addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3")
-                addHeader("Accept-Encoding", "gzip, deflate, br")
-                addHeader("Accept-Language", "sk-SK,sk;q=0.9,cs;q=0.8,en-US;q=0.7,en;q=0.6")
-                addHeader("Cache-Control", "max-age=0")
-                addHeader("Connection", "keep-alive")
-                addHeader("Host", "is.stuba.sk")
-                addHeader("Origin", "https://is.stuba.sk")
-                addHeader("Upgrade-Insecure-Requests", "1")
-            }.build())
-        }
     }
 }

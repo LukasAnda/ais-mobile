@@ -14,9 +14,11 @@
 package com.lukasanda.aismobile.ui.main.subjectDetail
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.lukasanda.aismobile.data.repository.CourseRepository
 import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
+import kotlinx.coroutines.launch
 
 class SubjectDetailViewModel(
     private val courseRepository: CourseRepository,
@@ -25,6 +27,10 @@ class SubjectDetailViewModel(
 
     override fun logToCrashlytics(e: Throwable) {
         FirebaseCrashlytics.getInstance().recordException(e)
+    }
+
+    fun updateCourse(courseId: String) = viewModelScope.launch(coroutineExceptionHandler) {
+        courseRepository.getSpecificCourse(courseId)
     }
 
 

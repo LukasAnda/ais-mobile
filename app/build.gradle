@@ -24,8 +24,8 @@ android {
 
     defaultConfig {
         applicationId "com.lukasanda.aismobile"
-        versionCode 6
-        versionName "1.0.0-beta6"
+        versionCode 7
+        versionName "1.0.0-beta7"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         minSdkVersion 21
@@ -191,12 +191,20 @@ dependencies {
     implementation "org.koin:koin-androidx-viewmodel:2.0.1"
 
     // Retrofit
-    implementation "com.squareup.retrofit2:retrofit:2.7.1"
+    implementation ("com.squareup.retrofit2:retrofit:2.8.1"){
+        exclude group: 'squareup.okhttp3', module: 'okhttp'
+    }
 //    implementation "com.squareup.retrofit2:adapter-rxjava2:2.5.0"
     implementation "com.squareup.retrofit2:converter-gson:2.7.1"
 
+    implementation 'com.squareup.retrofit2:converter-scalars:2.5.0'
+
+    implementation("com.squareup.okhttp3:okhttp:4.5.0")
+
     // OkHttp
-    implementation "com.squareup.okhttp3:logging-interceptor:3.12.0"
+    implementation "com.squareup.okhttp3:logging-interceptor:4.5.0"
+
+    implementation 'com.google.android.gms:play-services-auth:18.0.0'
 
     // Joda
 //    implementation "net.danlew:android.joda:2.10.1.2"
