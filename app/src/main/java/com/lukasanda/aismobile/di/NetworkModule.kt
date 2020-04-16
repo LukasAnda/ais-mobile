@@ -18,46 +18,41 @@ import com.google.gson.GsonBuilder
 import com.lukasanda.aismobile.BuildConfig
 import com.lukasanda.aismobile.util.AuthInterceptor
 import com.lukasanda.aismobile.util.EncodingInterceptor
-import okhttp3.Cache
-import okhttp3.ConnectionSpec
+import com.lukasanda.aismobile.util.getSSLFactory
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import org.koin.android.ext.koin.androidApplication
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import javax.net.ssl.SSLSession
 
 private const val CONNECT_TIMEOUT = 15L
 private const val WRITE_TIMEOUT = 15L
 private const val READ_TIMEOUT = 15L
 
 val networkModule = module {
-    single { Cache(androidApplication().cacheDir, 10L * 1024 * 1024) }
+//    single { Cache(androidApplication().cacheDir, 10L * 1024 * 1024) }
 
     single { GsonBuilder().setLenient().create() }
 
     single {
         OkHttpClient.Builder().apply {
-            cache(get())
+//            cache(get())
             //sslSocketFactory(TLSSocketFactoryCompat())
+            sslSocketFactory(getSSLFactory())
             connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
             writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
             readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
-            connectionSpecs(
-                listOf(
-                    ConnectionSpec.CLEARTEXT,
-                    ConnectionSpec.Builder(ConnectionSpec.COMPATIBLE_TLS).allEnabledTlsVersions().allEnabledCipherSuites()
-                        .build()
-                )
-            )
-            followSslRedirects(false)
+            followSslRedirects(true)
             followRedirects(false)
             retryOnConnectionFailure(true)
             addInterceptor(EncodingInterceptor())
             addInterceptor(AuthInterceptor(get()))
             addInterceptor(get())
+
+            hostnameVerifier { hostname: String?, session: SSLSession? -> true }
             addInterceptor(HttpLoggingInterceptor().apply {
                 if (BuildConfig.DEBUG) {
                     level = HttpLoggingInterceptor.Level.BASIC

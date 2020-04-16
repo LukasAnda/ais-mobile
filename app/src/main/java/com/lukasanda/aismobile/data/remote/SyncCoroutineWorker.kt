@@ -128,6 +128,8 @@ class SyncCoroutineWorker(
             sendNotification(applicationContext, text, NOTIFICATION_EMAIL)
         }
 
+        Log.d("TAG", "Downloading semesters")
+
         //setProgress(workDataOf(PROGRESS to 75, PROGRESS_MESSAGE to R.string.downloading_courses))
         runCatching {
             var actualSemesters = 0
@@ -149,6 +151,7 @@ class SyncCoroutineWorker(
 
             }).throwOnAuthError()
         }.getOrElse {
+            it.printStackTrace()
             if (it is AuthException) {
                 reLogin()
                 return Result.retry()
@@ -158,6 +161,8 @@ class SyncCoroutineWorker(
                 ResponseResult.NetworkError
             }
         }
+
+        Log.d("TAG", "Semesters downloaded")
 
         setProgress(workDataOf(PROGRESS to 100, PROGRESS_MESSAGE to R.string.downloading_complete))
 

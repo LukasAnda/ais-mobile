@@ -61,17 +61,18 @@ interface AISApi {
 //        ) semester: String
     ): Response<ResponseBody>
 
-    @FormUrlEncoded
-    @POST("/auth/student/list.pl")
-    suspend fun subjectSheets(
-        @Field("studium", encoded = true) study: String, @Field(
-            "obdobi",
-            encoded = true
-        ) semester: String, @Field(
-            "predmet",
-            encoded = true
-        ) predmet: String, @Field("zobraz_prubezne") zobrazPrubezne: String = "1"
-    ): Response<ResponseBody>
+//    @FormUrlEncoded
+@GET("/auth/student/list.pl")
+suspend fun subjectSheets(
+    @Query("studium", encoded = true) studium: String
+//        @Field("studium", encoded = true) study: String, @Field(
+//            "obdobi",
+//            encoded = true
+//        ) semester: String, @Field(
+//            "predmet",
+//            encoded = true
+//        ) predmet: String, @Field("zobraz_prubezne") zobrazPrubezne: String = "1"
+): Response<ResponseBody>
 
     @POST("/auth/posta/slozka.pl")
     suspend fun emails(): Response<ResponseBody>

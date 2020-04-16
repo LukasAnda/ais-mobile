@@ -48,6 +48,12 @@ interface CourseDao {
     @Transaction
     fun getCourses(): LiveData<List<FullCourse>>
 
+    @Query("SELECT * FROM sheet")
+    suspend fun getAllSheets(): List<Sheet>
+
+    @Query("SELECT * FROM course")
+    suspend fun getAllCourses(): List<Course>
+
     @Query("SELECT DISTINCT semester FROM COURSE")
     @Transaction
     fun getSemesters(): LiveData<List<String>>

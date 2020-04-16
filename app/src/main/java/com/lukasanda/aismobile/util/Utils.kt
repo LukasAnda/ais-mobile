@@ -54,8 +54,13 @@ import com.lukasanda.aismobile.ui.main.MainActivity
 import okhttp3.ResponseBody
 import retrofit2.Response
 import java.nio.charset.Charset
+import java.security.SecureRandom
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
+import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLSocketFactory
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 
 const val NOTIFICATION_ID = "ais_notification_id"
@@ -274,3 +279,33 @@ fun getImageUrl(id: String): String {
 fun getSuggestionRequestString(query: String) =
 //    "_suggestKey=${query}&upresneni_default=aktivni_a_preruseni,absolventi,zamestnanci,externiste&_suggestMaxItems=25&vzorek=&_suggestHandler=lide&lang=undefined"
     "_suggestKey=${query}&upresneni_default=aktivni_a_preruseni,zamestnanci&_suggestMaxItems=25&vzorek=&_suggestHandler=lide&lang=undefined"
+
+
+fun getSSLFactory(): SSLSocketFactory {
+    val trustAllCerts: Array<TrustManager> = arrayOf(MyManager())
+    val sslContext = SSLContext.getInstance("SSL")
+    sslContext.init(null, trustAllCerts, SecureRandom())
+
+    return sslContext.socketFactory
+}
+
+class MyManager : X509TrustManager {
+
+    override fun checkServerTrusted(
+        p0: Array<out java.security.cert.X509Certificate>?,
+        p1: String?
+    ) {
+        //allow all
+    }
+
+    override fun checkClientTrusted(
+        p0: Array<out java.security.cert.X509Certificate>?,
+        p1: String?
+    ) {
+        //allow all
+    }
+
+    override fun getAcceptedIssuers(): Array<java.security.cert.X509Certificate> {
+        return arrayOf()
+    }
+}

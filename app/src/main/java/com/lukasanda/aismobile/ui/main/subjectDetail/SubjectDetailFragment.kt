@@ -53,9 +53,11 @@ class SubjectDetailFragment :
             binding?.teachersRecycler?.bindLinear(teachersAdapter)
 
             viewModel.getCourse(args.courseId).observe(viewLifecycleOwner, Observer {
-                sheetsAdapter.swapData(it.sheets)
-                teachersAdapter.swapData(it.teachers)
-                binding?.infoView?.setData(it)
+                if (it != null) {
+                    sheetsAdapter.swapData(it.sheets)
+                    teachersAdapter.swapData(it.teachers)
+                    binding?.infoView?.setData(it)
+                }
 
                 startPostponedEnterTransition()
             })

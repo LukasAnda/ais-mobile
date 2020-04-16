@@ -46,16 +46,17 @@ class CourseRepository(
 
     suspend fun update(handler: CourseUpdateHandler? = null): ResponseResult {
 
-        Log.d("TAG", "ACTUAL: ${prefs.courseExpiration.toString()}")
+        Log.d("TAG", "ACTUAL semesters: ${prefs.courseExpiration.toString()}")
 
-        if (prefs.courseExpiration.isAfterNow) return ResponseResult.Authenticated
+//        if (prefs.courseExpiration.isAfterNow) return ResponseResult.Authenticated
+
 
         val updateType = if (prefs.fullCourseExpiration.isAfterNow) NEWEST else FETCH
 
         prefs.courseExpiration = DateTime.now().plusHours(2)
         prefs.fullCourseExpiration = DateTime.now().plusWeeks(1)
 
-        Log.d("TAG", "NEW: ${prefs.courseExpiration.toString()}")
+        Log.d("TAG", "NEW semesters: ${prefs.courseExpiration.toString()}")
 
         val semestersResponse = aisApi.semesters().authenticatedOrThrow()
 
@@ -89,7 +90,7 @@ class CourseRepository(
                         val teachers = Parser.getTeachers(courseDetailResponse)?.map { teachersToDb(course, it) } ?: emptyList()
                         dbTeachers.addAll(teachers)
 
-                        aisApi.subjectSheets(semester.studiesId, semester.id, course.id).authenticatedOrReturn { sheetResponse ->
+                        aisApi.subjectSheets("${semester.studiesId};obdobi=${semester.id};predmet=${course.id};zobraz_prubezne=1").authenticatedOrReturn { sheetResponse ->
                             val serverSheets = Parser.getSheets(sheetResponse) ?: mutableListOf()
                             dbSheets.addAll(serverSheets.map { sheetToDb(it, course) })
 
@@ -132,6 +133,24 @@ class CourseRepository(
                 false
             )
         }.filterNot { it.id.isEmpty() }
+
+        val savedSheets = courseDao.getAllSheets().groupBy { it.courseId }
+        val mappedSheets = dbSheets.groupBy { it.courseId }
+
+        val updatedCourseIds = mutableListOf<String>()
+
+        savedSheets.forEach {
+            val sheets = it.value.map { Triple(it.name, it.comments(), it.getColumnPairs()) }
+            val otherSheets = mappedSheets[it.key]?.map { Triple(it.name, it.comments(), it.getColumnPairs()) } ?: emptyList()
+
+            if (!sheets.containsAll(otherSheets) && otherSheets.isNotEmpty()) {
+                updatedCourseIds.add(it.key)
+            }
+        }
+
+        //TODO post a notification about updated courses
+
+        val allCourses = courseDao.getAllCourses()
 
 
         when (updateType) {

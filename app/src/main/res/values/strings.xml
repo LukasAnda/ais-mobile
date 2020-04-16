@@ -33,8 +33,8 @@
     <string name="notification_subtitle">Prebieha aktualizácia</string>
     <string name="no_subjects">Žiadne predmety pre zvolený semester</string>
     <string name="action__send">Odoslať</string>
-    <string name="course_presence">Prítomnosť na prednáške:</string>
-    <string name="seminar_presence">Prítomnosť na cvičení:</string>
+    <string name="course_presence">Účasť na prednáške:</string>
+    <string name="seminar_presence">Účasť na cvičení:</string>
     <string name="settings">Nastavenia</string>
     <string name="people_at_stu">Ľudia na STU</string>
     <string name="logout">Odhlásiť sa</string>

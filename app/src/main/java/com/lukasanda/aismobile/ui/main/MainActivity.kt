@@ -149,10 +149,12 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
                 }
             })
 
-            createLiveData<String>(prefs.prefs, prefs.THEME).observe(this@MainActivity, Observer {
+            createLiveData<String>(prefs.prefs, prefs.THEME).observe(this@MainActivity, Observer { number ->
+                val it = number.takeIf { it.isNotEmpty() } ?: "2"
                 Log.d("TAG", "Main activity Actual value: $it")
                 ThemeHelper.applyTheme(it.toInt())
                 delegate.localNightMode = ThemeHelper.getLocalTheme(it.toInt())
+
             })
 
             viewModel.fileHandle().observe(this@MainActivity, Observer { result ->

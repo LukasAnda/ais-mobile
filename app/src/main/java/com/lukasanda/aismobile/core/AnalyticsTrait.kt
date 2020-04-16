@@ -30,6 +30,7 @@ const val ACTION_EMAIL_DELETE = "actione_email_delete"
 const val ACTION_OPEN_FOLDER = "action_documents_folder_open"
 const val ACTION_OPEN_DOCUMENT = "action_documents_document_open"
 const val ACTION_PEOPLE_DETAIL = "action_ppl_detail"
+const val ACTION_SEARCH_PEOPLE = "action_ppl_search"
 const val ACTION_LOGOUT = "action_logout"
 
 

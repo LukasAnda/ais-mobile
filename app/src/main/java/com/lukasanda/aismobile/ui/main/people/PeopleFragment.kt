@@ -16,7 +16,10 @@ package com.lukasanda.aismobile.ui.main.people
 import android.os.Bundle
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.lukasanda.aismobile.R
+import com.lukasanda.aismobile.core.ACTION_SEARCH_PEOPLE
+import com.lukasanda.aismobile.core.AnalyticsTrait
 import com.lukasanda.aismobile.data.db.entity.Suggestion
 import com.lukasanda.aismobile.databinding.PeopleFragmentBinding
 import com.lukasanda.aismobile.ui.activity.BaseViews
@@ -26,7 +29,7 @@ import com.lukasanda.aismobile.ui.recyclerview.bindLinear
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
-class PeopleFragment : BaseFragment<PeopleFragment.Views, PeopleFragmentBinding, PeopleViewModel, PeopleHandler>() {
+class PeopleFragment : BaseFragment<PeopleFragment.Views, PeopleFragmentBinding, PeopleViewModel, PeopleHandler>(), AnalyticsTrait {
     private val peopleAdapter = PeopleAdapter {
         handler.showPeopleDetail(it)
     }
@@ -43,6 +46,7 @@ class PeopleFragment : BaseFragment<PeopleFragment.Views, PeopleFragmentBinding,
 
             binding?.search?.doOnTextChanged { text, start, count, after ->
                 if (text?.length ?: 0 > 2) {
+                    logEvent(ACTION_SEARCH_PEOPLE)
                     viewModel.getSuggestions(text.toString())
                 } else {
                     viewModel.cancelJobs()
@@ -60,6 +64,7 @@ class PeopleFragment : BaseFragment<PeopleFragment.Views, PeopleFragmentBinding,
     override fun createViews() = Views()
 
     override lateinit var handler: PeopleHandler
+    override fun getAnalytics() = FirebaseAnalytics.getInstance(requireContext())
 }
 
 interface PeopleHandler : BaseFragmentHandler {
