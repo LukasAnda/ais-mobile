@@ -27,4 +27,6 @@ data class Document(
     val openable: Boolean
 ) : DiffUtilItem {
     override fun getContentDescription() = "$id $name $mimeType $parentFolderId $openable"
+
+    override fun getUniqueId() = id
 }

@@ -19,4 +19,5 @@ data class ProfileInfo(val id: String, val name: String, val info: List<ProfileI
 
 data class ProfileInfoItem(val info: Pair<Int, String>) : DiffUtilItem {
     override fun getContentDescription() = info.second
+    override fun getUniqueId() = info.first.toString()
 }

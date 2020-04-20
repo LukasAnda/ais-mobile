@@ -53,18 +53,23 @@ abstract class BaseAdapter<ITEM : DiffUtilItem, LISTENER_ITEM : DiffUtilItem?, V
 
 
     inner class ItemDiffCallback(private val oldItems: List<ITEM>, private val newItems: List<ITEM>) : DiffUtil.Callback() {
-        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) = oldItems[oldItemPosition] === newItems[newItemPosition]
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) = oldItems[oldItemPosition].getUniqueId() == newItems[newItemPosition].getUniqueId()
 
         override fun getOldListSize() = oldItems.size
 
         override fun getNewListSize() = newItems.size
 
         override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) = oldItems[oldItemPosition].getContentDescription() == newItems[newItemPosition].getContentDescription()
+
+        override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int): Any? {
+            return super.getChangePayload(oldItemPosition, newItemPosition)
+        }
     }
 }
 
 interface DiffUtilItem {
     fun getContentDescription(): String
+    fun getUniqueId(): String
 }
 
 

@@ -75,6 +75,8 @@
     <string name="settings_sync">Synchronizácia</string>
     <string name="settings_update_time">Aktualizácia dát</string>
     <string name="settings_update_time_hint">Čas (v minútach) medzi jednotlivými aktualizáciami, čím väčší, tým viac sa šetrí baterka</string>
+    <string name="settings_information">Informácie</string>
+    <string name="settings_app_version">Verzia aplikácie</string>
 
     <string-array name="theme_entries">
         <item>Denná</item>
@@ -93,4 +95,6 @@
     <string name="profile_name">Meno:</string>
     <string name="profile_id">AIS ID:</string>
     <string name="profile_email">Email:</string>
+
+    <string name="back">Späť</string>
 </resources>

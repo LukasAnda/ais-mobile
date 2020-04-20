@@ -13,7 +13,6 @@
 
 package com.lukasanda.aismobile.data.repository
 
-import android.util.Log
 import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.db.dao.CourseDao
 import com.lukasanda.aismobile.data.db.dao.DocumentDao
@@ -21,12 +20,11 @@ import com.lukasanda.aismobile.data.db.entity.Course
 import com.lukasanda.aismobile.data.db.entity.Document
 import com.lukasanda.aismobile.data.db.entity.Sheet
 import com.lukasanda.aismobile.data.db.entity.Teacher
+import com.lukasanda.aismobile.data.remote.AuthException
 import com.lukasanda.aismobile.data.remote.api.AISApi
 import com.lukasanda.aismobile.data.repository.CourseRepository.UpdateType.FETCH
 import com.lukasanda.aismobile.data.repository.CourseRepository.UpdateType.NEWEST
-import com.lukasanda.aismobile.util.ResponseResult
-import com.lukasanda.aismobile.util.authenticatedOrReturn2
-import com.lukasanda.aismobile.util.authenticatedOrThrow2
+import com.lukasanda.aismobile.util.*
 import com.lukasanda.dataprovider.Parser
 import com.lukasanda.dataprovider.data.Semester
 import com.snakydesign.livedataextensions.map
@@ -34,6 +32,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
+import timber.log.Timber
 
 class CourseRepository(
     private val aisApi: AISApi,
@@ -46,141 +45,58 @@ class CourseRepository(
 
     fun get(courseId: String) = courseDao.getCourse(courseId)
 
-    suspend fun update(handler: CourseUpdateHandler? = null): ResponseResult {
+    suspend fun update2(handler: CourseUpdateHandler? = null): ResponseResult = withContext(Dispatchers.IO) {
+        Timber.d("Saved semester update time: ${prefs.courseExpiration}$")
 
-        Log.d("TAG", "ACTUAL semesters: ${prefs.courseExpiration.toString()}")
-
-//        if (prefs.courseExpiration.isAfterNow) return ResponseResult.Authenticated
+        if (prefs.courseExpiration.isAfterNow) return@withContext ResponseResult.Authenticated
 
 
-        val updateType = if (prefs.fullCourseExpiration.isAfterNow) FETCH else FETCH
+        val updateType = if (prefs.fullCourseExpiration.isAfterNow) NEWEST else FETCH
 
-        prefs.courseExpiration = DateTime.now().plusHours(2)
+        prefs.courseExpiration = DateTime.now().plusMinutes(10)
         prefs.fullCourseExpiration = DateTime.now().plusWeeks(1)
 
-        Log.d("TAG", "NEW semesters: ${prefs.courseExpiration.toString()}")
-
-        val semestersResponse = aisApi.semesters().authenticatedOrThrow2()
-
-        var semesters = Parser.getSemesters(semestersResponse)
-
-        if (updateType == NEWEST) semesters = semesters?.takeLast(1)
-
-        handler?.onSemesterCount(semesters?.size ?: 0)
-
-        delay(3000)
-
-        val dbCourses = mutableListOf<Course>()
-//        val dbSheets = mutableListOf<Sheet>()
-//        val dbTeachers = mutableListOf<Teacher>()
-
-        val responses = semesters?.mapIndexed { index, semester ->
-            handler?.onSemesterStartDownloading(index, semester.name)
-            withContext(Dispatchers.IO) {
-                aisApi.subjects("${semester.studiesId};obdobi=${semester.id}").authenticatedOrReturn2 { coursesResponse ->
-                    val coursesServer = Parser.getCourses(coursesResponse) ?: mutableListOf()
-                    val courses = coursesServer.map { courseToDb(it, semester) }
-
-                    println(courses)
-
-                    dbCourses.addAll(courses)
-
-                    delay(3000)
-
-                    ResponseResult.Authenticated
-
-//                val responses = courses.map { course ->
-//
-//                    aisApi.getCourseDetail(course.id).authenticatedOrReturn2 { courseDetailResponse ->
-//                        val teachers = Parser.getTeachers(courseDetailResponse)?.map { teachersToDb(course, it) } ?: emptyList()
-//                        dbTeachers.addAll(teachers)
-//
-//                        aisApi.subjectSheets("${semester.studiesId};obdobi=${semester.id};predmet=${course.id};zobraz_prubezne=1").authenticatedOrReturn2 { sheetResponse ->
-//                            val serverSheets = Parser.getSheets(sheetResponse) ?: mutableListOf()
-//                            dbSheets.addAll(serverSheets.map { sheetToDb(it, course) })
-//
-//                            ResponseResult.Authenticated
-//                        }
-//
-//                        delay(3000)
-//                        ResponseResult.Authenticated
-//                    }
-//                }
-
-//                val result = if (responses.all { it == ResponseResult.Authenticated }) {
-//                    ResponseResult.Authenticated
-//                } else if (responses.contains(ResponseResult.AuthError)) {
-//                    ResponseResult.AuthError
-//                } else {
-//                    ResponseResult.NetworkError
-//                }
-
-//                result
+        runCatching {
+            repeatIfException(5, 2000) { aisApi.semesters().authenticatedOrThrow2() } // Get semester response
+                ?.let { Parser.getSemesters(it) } // Map it to semester list
+                ?.lastOrAll(updateType == NEWEST) // If we update the newest, just take the last one, otherwise take all of them
+                ?.also { handler?.onSemesterCount(it.size) } // Notify the handler about the size of our semester list
+                ?.mapIndexed { index: Int, semester: Semester ->
+                    handler?.onSemesterStartDownloading(index, semester.name) //Notify the handler we are working with current semester
+                    Pair(repeatIfException(5, 2000) {  // Get courses response for every semester
+                        aisApi.subjects("${semester.studiesId};obdobi=${semester.id}").authenticatedOrThrow2()
+                    }, semester)
                 }
-            }
-        } ?: listOf(ResponseResult.NetworkError)
-
-        val dbSemesterDocuments = dbCourses.map { Pair(it.semester, it.semesterId) }.toSet().map {
-            Document(
-                "__${it.second})",
-                it.first,
-                "",
-                "",
-                false
-            )
-        }
-
-        val dbDocuments = dbCourses.map {
-            Document(
-                it.documentsId,
-                it.courseName.substringAfter(" "),
-                "",
-                "__${it.semesterId})",
-                false
-            )
-        }.filterNot { it.id.isEmpty() }
-
-//        val savedSheets = courseDao.getAllSheets().groupBy { it.courseId }
-//        val mappedSheets = dbSheets.groupBy { it.courseId }
-//
-//        val updatedCourseIds = mutableListOf<String>()
-//
-//        savedSheets.forEach {
-//            val sheets = it.value.map { Triple(it.name, it.comments(), it.getColumnPairs()) }
-//            val otherSheets = mappedSheets[it.key]?.map { Triple(it.name, it.comments(), it.getColumnPairs()) } ?: emptyList()
-//
-//            if (!sheets.containsAll(otherSheets) && otherSheets.isNotEmpty()) {
-//                updatedCourseIds.add(it.key)
-//            }
-//        }
-
-        //TODO post a notification about updated courses
-
-        val allCourses = courseDao.getAllCourses()
-
-
-        when (updateType) {
-            FETCH -> {
-                documentDao.updateFolder("", dbSemesterDocuments)
-                dbDocuments.groupBy { it.parentFolderId }.forEach {
-                    documentDao.updateFolder(it.key, it.value)
+                ?.filter { it.first != null } // Pretty self explanatory
+                ?.map { Pair(Parser.getCourses(it.first!!), it.second) } // Map the responses to courses
+                ?.filter { it.first != null } // Again, self explanatory
+                ?.flatMap { pair ->  // Transform List<Pair<List<Course>, Semester>> into List<List<Pair<Course, Semester>>>
+                    pair.first?.map {
+                        Pair(it, pair.second)
+                    } ?: emptyList()
                 }
-                courseDao.update(dbCourses)
-            }
-            NEWEST -> {
-                documentDao.insertDocuments(dbSemesterDocuments)
-                documentDao.insertDocuments(dbDocuments)
-                courseDao.updateSingle(dbCourses)
-            }
+                ?.map { courseToDb(it.first, it.second) } // Map downloaded courses to db objects
+                ?.also {
+                    it.map { Pair(it.semester, it.semesterId) } // Map semesters
+                        .toSet() // Make unique sets, because we have repetitions
+                        .map { Document("__${it.second})", it.first, "", "", false) } // Map to db object
+                        .also { documentDao.insertDocuments(it) } // Insert them to db
+                }
+                ?.also {
+                    it.map { Document(it.documentsId, it.courseName.substringAfter(" "), "", "__${it.semesterId})", false) }
+                        .filterNot { it.id.isEmpty() } // Filter out the documents with empty id
+                        .also { documentDao.insertDocuments(it) } // Insert them to db
+                }
+                ?.also { courseDao.insertCourses(it) } // Insert the courses to db
+                ?.groupBy { it.semesterId }
+                ?.maxBy { it.key }
+                ?.let { it.value }
+                ?.forEach { getSpecificCourse(it) }
+        }.exceptionOrNull()?.takeIf { it is AuthException }?.let {
+            return@withContext ResponseResult.AuthError
         }
 
-        return if (responses.all { it == ResponseResult.Authenticated }) {
-            ResponseResult.Authenticated
-        } else if (responses.contains(ResponseResult.AuthError)) {
-            ResponseResult.AuthError
-        } else {
-            ResponseResult.NetworkError
-        }
+        return@withContext ResponseResult.Authenticated
     }
 
     suspend fun deleteAll() {
@@ -189,12 +105,11 @@ class CourseRepository(
         courseDao.deleteSheets()
     }
 
-    suspend fun getSpecificCourse(courseId: String) {
-        val course = courseDao.getAllCourses().find { it.id == courseId } ?: return
+    private suspend fun getSpecificCourse(course: Course) {
         val dbTeachers = mutableListOf<Teacher>()
         val dbSheets = mutableListOf<Sheet>()
 
-        aisApi.getCourseDetail(courseId).authenticatedOrReturn2 { courseDetailResponse ->
+        aisApi.getCourseDetail(course.id).authenticatedOrReturn2 { courseDetailResponse ->
             val teachers = Parser.getTeachers(courseDetailResponse)?.map { teachersToDb(course, it) } ?: emptyList()
             dbTeachers.addAll(teachers)
             ResponseResult.Authenticated
@@ -204,11 +119,23 @@ class CourseRepository(
             val serverSheets = Parser.getSheets(sheetResponse) ?: mutableListOf()
             dbSheets.addAll(serverSheets.map { sheetToDb(it, course) })
 
+            delay(3000)
             ResponseResult.Authenticated
+        }
+
+        val allSheets = courseDao.getAllSheets().filter { it.courseId == course.id }
+
+        allSheets.forEach {
+            courseDao.deleteSheet(it)
         }
 
         courseDao.insertTeachers(dbTeachers)
         courseDao.insertSheets(dbSheets)
+    }
+
+    suspend fun getSpecificCourse(courseId: String) {
+        val course = courseDao.getAllCourses().find { it.id == courseId } ?: return
+        getSpecificCourse(course)
     }
 
     private fun teachersToDb(course: Course, teacher: com.lukasanda.dataprovider.data.Teacher) = Teacher(name = teacher.name, id = teacher.id, courseId = course.id)

@@ -17,6 +17,7 @@ import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.runBlocking
 
 abstract class BaseViewModel(private val handle: SavedStateHandle) : ViewModel() {
 
@@ -31,6 +32,8 @@ abstract class BaseViewModel(private val handle: SavedStateHandle) : ViewModel()
             t.printStackTrace()
             logToCrashlytics(t)
         }
+
+        runBlocking { }
     }
 
     abstract fun logToCrashlytics(e: Throwable)

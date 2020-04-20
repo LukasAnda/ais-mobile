@@ -36,6 +36,6 @@ class EmailViewModel(
     fun deleteEmail(email: Email) = viewModelScope.launch(coroutineExceptionHandler) { emailRepository.delete(email) }
 
     fun update() = viewModelScope.launch(coroutineExceptionHandler) {
-        emailRepository.update(updateType = EmailRepository.UpdateType.Purge)
+        //emailRepository.update(updateType = EmailRepository.UpdateType.Purge)
     }
 }

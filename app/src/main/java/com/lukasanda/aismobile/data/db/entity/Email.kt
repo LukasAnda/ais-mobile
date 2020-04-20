@@ -37,5 +37,7 @@ data class Email(
         }
     }
 
+    override fun getUniqueId() = eid + fid
+
     override fun getContentDescription() = "$eid $fid $senderId $sender $subject $date $opened"
 }

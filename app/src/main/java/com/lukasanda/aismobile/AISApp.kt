@@ -25,6 +25,7 @@ import com.lukasanda.aismobile.util.ThemeHelper
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
+import timber.log.Timber
 import java.security.KeyManagementException
 import java.security.NoSuchAlgorithmException
 import javax.net.ssl.SSLContext
@@ -34,6 +35,10 @@ class AISApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
 
         initializeSSLContext(applicationContext)
 
@@ -62,7 +67,7 @@ class AISApp : Application() {
 fun initializeSSLContext(mContext: Context) {
     try {
         ProviderInstaller.installIfNeeded(mContext)
-        val sslContext: SSLContext = SSLContext.getInstance("TLSv1.2")
+        val sslContext: SSLContext = SSLContext.getInstance("TLS")
         sslContext.init(null, null, null)
         sslContext.createSSLEngine()
     } catch (e: GooglePlayServicesRepairableException) {

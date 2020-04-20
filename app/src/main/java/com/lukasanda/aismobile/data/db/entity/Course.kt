@@ -57,10 +57,12 @@ class FullCourse : DiffUtilItem {
     }
 
     override fun getContentDescription() = "$course ${sheets.joinToString(" ")} ${timetable.joinToString(" ")} ${teachers.joinToString(" ")}"
+    override fun getUniqueId() = course.id
 }
 
 data class Semester(val courses: List<FullCourse>) : DiffUtilItem {
     override fun getContentDescription() = UUID.randomUUID().toString()
+    override fun getUniqueId() = courses.firstOrNull()?.getUniqueId() ?: ""
 }
 
 @Entity(tableName = "sheet")
@@ -90,6 +92,8 @@ data class Sheet(
         ""
     }
 
+    override fun getUniqueId() = id
+
     override fun getContentDescription() = "$courseId $name ${comments()} $headers $values"
 
     override fun toString(): String {
@@ -107,4 +111,6 @@ data class Teacher(
     fun isLector() = name.contains("prednášajúci")
 
     override fun getContentDescription() = "$name $courseId"
+
+    override fun getUniqueId() = id
 }

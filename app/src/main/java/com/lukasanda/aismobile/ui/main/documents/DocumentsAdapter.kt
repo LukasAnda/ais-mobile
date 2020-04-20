@@ -29,10 +29,13 @@ import java.util.*
 sealed class Either<out A : DiffUtilItem, out B : DiffUtilItem> : DiffUtilItem {
     class Left<A : DiffUtilItem>(val value: A) : Either<A, Nothing>() {
         override fun getContentDescription() = value.getContentDescription()
+        override fun getUniqueId() = "Back"
+
     }
 
     class Right<B : DiffUtilItem>(val value: B) : Either<Nothing, B>() {
         override fun getContentDescription() = value.getContentDescription()
+        override fun getUniqueId() = value.getUniqueId()
     }
 }
 
@@ -44,7 +47,7 @@ class DocumentItemHolder(binding: DocumentItemBinding) : BaseBindingViewHolder<E
     override fun bind(item: Either<Document, Document>, onClick: (Document?) -> Unit) {
         when (item) {
             is Either.Left -> {
-                binding.name.text = ".."
+                binding.name.setText(R.string.back)
                 binding.icon.setImageResource(R.drawable.ic_back)
                 binding.icon.show()
                 binding.iconBackground.setBackgroundColor(binding.iconBackground.context.getMimeColor(""))

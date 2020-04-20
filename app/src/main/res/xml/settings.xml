@@ -34,4 +34,10 @@
             app:summary="@string/settings_update_time_hint"
             app:title="@string/settings_update_time" />
     </PreferenceCategory>
+    <PreferenceCategory android:title="@string/settings_information">
+        <Preference
+            android:title="@string/settings_app_version"
+            app:icon="@drawable/ic_info"
+            app:key="version" />
+    </PreferenceCategory>
 </PreferenceScreen>

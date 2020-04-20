@@ -66,12 +66,12 @@ interface AISApi {
         @Query("studium", encoded = true) studium: String
     ): Response<String>
 
-    @POST("/auth/posta/slozka.pl")
+    @GET("/auth/posta/slozka.pl")
     suspend fun emails(): Response<String>
 
-    @FormUrlEncoded
-    @POST("/auth/posta/slozka.pl")
-    suspend fun emailPage(@Field("on", encoded = true) page: String): Response<String>
+    //    @FormUrlEncoded
+    @GET("/auth/posta/slozka.pl")
+    suspend fun emailPage(@Query("on", encoded = true) page: String): Response<String>
 
     @GET("/auth/posta/email.pl")
     suspend fun emailDetail(@Query("eid", encoded = true) params: String): Response<String>
@@ -143,7 +143,10 @@ interface AISApi {
     suspend fun getCourseDetail(@Query("predmet", encoded = true) predmet: String): Response<String>
 
     @GET("/auth/dok_server/slozka.pl")
-    suspend fun getDocumentsInFolder(@Query("ds", encoded = true) folder: String): Response<String>
+    suspend fun getDocumentPages(@Query("ds", encoded = true) folder: String): Response<String>
+
+    @GET("/auth/dok_server/slozka.pl")
+    suspend fun getDocumentItems(@Query("zobraz", encoded = true) folder: String): Response<String>
 
     @GET("/auth/dok_server/slozka.pl")
     suspend fun getDocumentInfo(@Query("id", encoded = true) id: String): Response<String>

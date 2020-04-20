@@ -31,9 +31,8 @@ import com.lukasanda.aismobile.data.repository.EmailRepository
 import com.lukasanda.aismobile.data.repository.TimetableRepository
 import com.lukasanda.aismobile.util.*
 import com.lukasanda.dataprovider.Parser
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -58,28 +57,23 @@ class SyncCoroutineWorker(
     private val emailRepository: EmailRepository by inject()
 
 
-    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-
+    override suspend fun doWork(): Result = coroutineScope {
         if (runAttemptCount > 3) {
-            return@withContext Result.success()
+            return@coroutineScope Result.success()
         }
 
         Log.d("TAG", "Starting worker")
-
-//        if (BuildConfig.DEBUG) {
-//            sendNotification(applicationContext, "Zapinam workera", NOTIFICATION_DEBUG)
-//        }
 
         setProgress(workDataOf(PROGRESS to 0, PROGRESS_MESSAGE to R.string.downloading_timetable))
         runCatching {
             val result = timetableRepository.update().throwOnAuthError()
             if (result is ResponseResult.AuthenticatedWithResult<*>) {
-                sendNotification(applicationContext, result.result.parseMessage(), NOTIFICATION_TIMETABLE)
+                //sendNotification(applicationContext, result.result.parseMessage(), NOTIFICATION_TIMETABLE)
             }
         }.getOrElse {
             if (it is AuthException) {
                 reLogin()
-                return@withContext Result.success()
+                return@coroutineScope Result.success()
             } else {
                 FirebaseCrashlytics.getInstance().recordException(it)
                 it.printStackTrace()
@@ -91,17 +85,19 @@ class SyncCoroutineWorker(
 
         setProgress(workDataOf(PROGRESS to 25, PROGRESS_MESSAGE to R.string.downloading_profile))
         runCatching {
-            service.educationInfo().authenticatedOrReturn2 { educationResponse ->
-                delay(3000)
-                return@authenticatedOrReturn2 service.wifiInfo().authenticatedOrReturn2 { wifiResponse ->
-                    saveProfile(educationResponse, wifiResponse)
-                    ResponseResult.Authenticated
-                }
-            }.throwOnAuthError()
+            repeatIfException(3, 2000) {
+                service.educationInfo().authenticatedOrReturn2 { educationResponse ->
+                    delay(3000)
+                    return@authenticatedOrReturn2 service.wifiInfo().authenticatedOrReturn2 { wifiResponse ->
+                        saveProfile(educationResponse, wifiResponse)
+                        ResponseResult.Authenticated
+                    }
+                }.throwOnAuthError()
+            }
         }.getOrElse {
             if (it is AuthException) {
                 reLogin()
-                return@withContext Result.success()
+                return@coroutineScope Result.success()
             } else {
                 FirebaseCrashlytics.getInstance().recordException(it)
                 it.printStackTrace()
@@ -111,30 +107,29 @@ class SyncCoroutineWorker(
 
         val previousEmailCount = prefs.newEmailCount
         setProgress(workDataOf(PROGRESS to 50, PROGRESS_MESSAGE to R.string.downloading_emails))
-        runCatching { emailRepository.update().throwOnAuthError() }.getOrElse {
+
+        runCatching { emailRepository.update2().throwOnAuthError() }.getOrElse {
             if (it is AuthException) {
                 reLogin()
-                return@withContext Result.success()
+                return@coroutineScope Result.success()
             } else {
                 FirebaseCrashlytics.getInstance().recordException(it)
                 it.printStackTrace()
                 ResponseResult.NetworkError
             }
-        }
-
-        val newEmailCount = prefs.newEmailCount
-
-        if (newEmailCount != previousEmailCount) {
-            val text = applicationContext.resources.getQuantityString(R.plurals.new_emails_notficiation, newEmailCount, newEmailCount)
-            sendNotification(applicationContext, text, NOTIFICATION_EMAIL)
-        }
+        }.takeIf { it is ResponseResult.AuthenticatedWithResult<*> }
+            ?.also {
+                it as ResponseResult.AuthenticatedWithResult<*>
+                val text = applicationContext.resources.getQuantityString(R.plurals.new_emails_notficiation, it.result as Int, it.result as Int)
+                sendNotification(applicationContext, text, NOTIFICATION_EMAIL)
+            }
 
         Log.d("TAG", "Downloading semesters")
 
         //setProgress(workDataOf(PROGRESS to 75, PROGRESS_MESSAGE to R.string.downloading_courses))
         runCatching {
             var actualSemesters = 0
-            courseRepository.update(object : CourseRepository.CourseUpdateHandler {
+            courseRepository.update2(object : CourseRepository.CourseUpdateHandler {
                 override suspend fun onSemesterCount(semesterCount: Int) {
                     actualSemesters = semesterCount
                 }
@@ -155,7 +150,7 @@ class SyncCoroutineWorker(
             it.printStackTrace()
             if (it is AuthException) {
                 reLogin()
-                return@withContext Result.success()
+                return@coroutineScope Result.success()
             } else {
                 FirebaseCrashlytics.getInstance().recordException(it)
                 it.printStackTrace()
@@ -168,7 +163,10 @@ class SyncCoroutineWorker(
         setProgress(workDataOf(PROGRESS to 100, PROGRESS_MESSAGE to R.string.downloading_complete))
 
         delay(prefs.updateInterval.toLong() * 60 * 1000)
-        return@withContext Result.success()
+
+
+        Result.success()
+
     }
 
     private suspend fun reLogin() {

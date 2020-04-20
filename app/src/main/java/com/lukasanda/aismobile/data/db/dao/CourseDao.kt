@@ -40,6 +40,9 @@ interface CourseDao {
     @Query("DELETE FROM teacher")
     suspend fun deleteTeachers()
 
+    @Delete
+    suspend fun deleteSheet(sheet: Sheet)
+
     @Query("SELECT * FROM COURSE WHERE id = :courseId")
     @Transaction
     fun getCourse(courseId: String): LiveData<FullCourse>

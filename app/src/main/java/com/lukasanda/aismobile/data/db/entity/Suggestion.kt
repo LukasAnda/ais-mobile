@@ -20,4 +20,5 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 data class Suggestion(val name: String, val id: String, val study: String) : Parcelable, DiffUtilItem {
     override fun getContentDescription() = "$name $id $study"
+    override fun getUniqueId() = id
 }

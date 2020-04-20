@@ -20,13 +20,18 @@ import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.data.remote.AuthException
 import com.lukasanda.aismobile.data.remote.HTTPException
 import com.lukasanda.aismobile.data.remote.api.AISApi
-import com.lukasanda.aismobile.util.*
+import com.lukasanda.aismobile.util.ResponseResult
+import com.lukasanda.aismobile.util.authenticatedOrThrow2
+import com.lukasanda.aismobile.util.getSuggestionRequestString
+import com.lukasanda.aismobile.util.repeatIfException
 import com.lukasanda.dataprovider.Parser
 import com.lukasanda.dataprovider.data.EmailDetail
 import com.lukasanda.dataprovider.data.Suggestion
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody
 import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
+import timber.log.Timber
 
 class EmailRepository(
     private val emailDao: EmailDao,
@@ -34,35 +39,28 @@ class EmailRepository(
     private val service: AISApi
 ) {
 
-    suspend fun update(updateType: UpdateType = UpdateType.Lazy): ResponseResult {
+    suspend fun update2(updateType: UpdateType = UpdateType.Lazy): ResponseResult {
 
-        var emailCount = 0
 
-        val result = service.emails().authenticatedOrReturn2 { emailCountResponse ->
-            val emailInfo = Parser.getEmailInfo(emailCountResponse)
+        runCatching {
+            repeatIfException(5, 2000) { service.emails().authenticatedOrThrow2() }
+                ?.let { Parser.getEmailInfo(it) }
+                ?.let {
+                    prefs.sentDirectoryId = it.saveDirectoryId
+                    prefs.newEmailCount = it.newEmailCount
+                    (0 until it.emailPages)
+                }
+                ?.takeUnless { updateType == UpdateType.Lazy && prefs.emailExpiration.isAfterNow }
 
-            emailCount = emailInfo.emailPages
-            prefs.sentDirectoryId = emailInfo.saveDirectoryId
-            prefs.newEmailCount = emailInfo.newEmailCount
-
-            ResponseResult.Authenticated
-        }.logOnNetworkError()
-
-        Log.d("TAG", "Email count: $emailCount")
-
-        if (result == ResponseResult.AuthError) return result
-
-        if (updateType == UpdateType.Lazy) {
-            if (prefs.emailExpiration.isAfterNow)
-                return ResponseResult.Authenticated
-        }
-
-        prefs.emailExpiration = DateTime.now().plusMinutes(10)
-
-        val responses = (0 until emailCount).map { i ->
-            service.emailPage(i.toString()).authenticatedOrReturn2 { response ->
-                val emailsList = Parser.getEmails(response) ?: emptyList()
-                emailDao.insertEmails(emailsList.map {
+                ?.map {
+                    Timber.d("Updating page #$it")
+                    repeatIfException(5, 2000) { service.emailPage(it.toString()).authenticatedOrThrow2() }
+                }
+                ?.filterNotNull()
+                ?.map { Parser.getEmails(it) }
+                ?.filterNotNull()
+                ?.flatten()
+                ?.map {
                     Email(
                         it.eid.substringAfter("="),
                         it.fid.substringAfter("="),
@@ -72,23 +70,36 @@ class EmailRepository(
                         it.date,
                         it.opened
                     )
-                })
-                ResponseResult.Authenticated
-            }
+                }
+                ?.let {
+                    val latestMail = emailDao.getEmailsList().maxBy {
+                        DateTime.parse(
+                            it.date,
+                            DateTimeFormat.forPattern("dd. MM. yyyy HH:mm")
+                        )
+                    }
+
+                    Timber.d("Inserting ${it.size} messages")
+
+                    emailDao.update(it)
+
+                    it.sortedByDescending {
+                        DateTime.parse(
+                            it.date,
+                            DateTimeFormat.forPattern("dd. MM. yyyy HH:mm")
+                        )
+                    }.indexOfFirst { latestMail != null && it.eid == latestMail.eid && it.fid == latestMail.fid }
+                        .takeIf { it > 0 }
+                        ?.also { return ResponseResult.AuthenticatedWithResult(it) }
+                }
+        }.exceptionOrNull()?.takeIf { it is AuthException }?.let {
+            return ResponseResult.AuthError
         }
 
-        return when {
-            responses.all { it == ResponseResult.Authenticated } -> {
-                ResponseResult.Authenticated
-            }
-            responses.contains(ResponseResult.AuthError) -> {
-                ResponseResult.AuthError
-            }
-            else -> {
-                ResponseResult.NetworkError
-            }
-        }
+        return ResponseResult.Authenticated
+
     }
+
 
     @Throws(AuthException::class, HTTPException::class)
     suspend fun delete(email: Email) {
@@ -110,7 +121,7 @@ class EmailRepository(
         return message
     }
 
-    fun getEmails() = emailDao.getEmails()
+    fun getEmails() = emailDao.getAllEmails()
 
     suspend fun getSuggestions(query: String): List<Suggestion> {
         val suggestionResponse = service.getSuggestions(
@@ -177,6 +188,4 @@ class EmailRepository(
     enum class UpdateType {
         Lazy, Purge
     }
-
-
 }

@@ -18,12 +18,15 @@ import com.google.gson.GsonBuilder
 import com.lukasanda.aismobile.BuildConfig
 import com.lukasanda.aismobile.util.AuthInterceptor
 import com.lukasanda.aismobile.util.EncodingInterceptor
+import okhttp3.ConnectionPool
+import okhttp3.Dispatcher
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.HostnameVerifier
 
@@ -38,41 +41,8 @@ val networkModule = module {
 
     single {
         OkHttpClient.Builder().apply {
-//            connectionSpecs(
-//                listOf(
-//                    ConnectionSpec.Builder(ConnectionSpec.COMPATIBLE_TLS)
-//                        .supportsTlsExtensions(true)
-//                        .tlsVersions(TlsVersion.TLS_1_2, TlsVersion.TLS_1_1, TlsVersion.TLS_1_0)
-//                        .cipherSuites(
-//                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-//                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
-//                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-//                            CipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
-//                            CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,
-//                            CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
-//                            CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA,
-//                            CipherSuite.TLS_RSA_WITH_AES_256_GCM_SHA384,
-//                            CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256,
-//                            CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
-//                            CipherSuite.TLS_RSA_WITH_CAMELLIA_256_CBC_SHA,
-//                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-//                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
-//                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
-//                            CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
-//                            CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,
-//                            CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
-//                            CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA,
-//                            CipherSuite.TLS_RSA_WITH_AES_128_GCM_SHA256,
-//                            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256,
-//                            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-//                            CipherSuite.TLS_RSA_WITH_CAMELLIA_128_CBC_SHA,
-//                            CipherSuite.TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,
-//                            CipherSuite.TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA,
-//                            CipherSuite.TLS_RSA_WITH_3DES_EDE_CBC_SHA
-//                        )
-//                        .build()
-//                )
-//            )
+            connectionPool(ConnectionPool(10, 1, TimeUnit.MINUTES))
+            this.dispatcher(Dispatcher(Executors.newSingleThreadExecutor()))
             connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
             writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
             readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
@@ -83,6 +53,7 @@ val networkModule = module {
             addInterceptor(AuthInterceptor(get()))
             addInterceptor(Interceptor { chain ->
                 chain.proceed(chain.request().newBuilder().apply {
+                    removeHeader("User-Agent")
                     addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36")
                     addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3")
                     addHeader("Accept-Encoding", "gzip, deflate, br")

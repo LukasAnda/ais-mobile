@@ -443,6 +443,23 @@ object Parser {
         }
     }
 
+    fun getMaxPages(webResponse: String): Pair<Int, Int?>? {
+        if (webResponse.isEmpty()) return null
+        val cleaner = HtmlCleaner()
+        return try {
+            val items = cleaner.clean(webResponse)
+            val arrows = items.getElementListByAttValue("sysid", "tree-vpravo-zarazka", true, true) ?: return Pair(0, null)
+
+            val links = arrows.map { it.parent.getAttributeByName("href") }.toSet()
+
+
+
+            Pair(links.find { it.contains("zobraz=0") }?.substringAfter("on=")?.toInt() ?: 0, links.find { it.contains("zobraz=1") }?.substringAfter("on=")?.toInt())
+        } catch (e: Exception) {
+            Pair(0, null)
+        }
+    }
+
     fun getDocuments(webResponse: String, parentFolder: String = ""): List<Document>? {
         if (webResponse.isEmpty()) return null
 
@@ -451,8 +468,9 @@ object Parser {
         return try {
             val items = cleaner.clean(webResponse)
 
-            val topTable = items.findElementByAttValue("name", "wqqwqqwwqyw0", true, true).findElementByName("tbody", true)
-            topTable.childTagList.forEach {
+            val topTableHead = items.findElementByAttValue("name", "wqqwqqwwqyw0", true, true).getElementListByName("table", false).find { it.childTagList.size == 2 }
+            val topTable = topTableHead?.findElementByName("tbody", false)
+            topTable?.childTagList?.forEach {
                 if (it.childTagList.size == 1) return@forEach
 
                 val name = it.childTagList.component2().findElementByName("small", true).content()
@@ -463,9 +481,10 @@ object Parser {
                 val mimeType = it.getElementList({ it.name == "img" && it.getAttributeByName("sysid").contains("mime") }, true).firstOrNull()?.getAttributeByName("sysid") ?: ""
                 returnList.add(Document(name, mimeType, id, parentId, true))
             }
-            val bottomTable = items.findElementByAttValue("name", "wqqwqqwwqyw1", true, true).findElementByName("tbody", true)
 
-            bottomTable.childTagList.forEach {
+            val bottomTableHead = items.findElementByAttValue("name", "wqqwqqwwqyw1", true, true).getElementListByName("table", false).find { it.childTagList.size == 2 }
+            val bottomTable = bottomTableHead?.findElementByName("tbody", false)
+            bottomTable?.childTagList?.forEach {
                 if (it.childTagList.size == 1) return@forEach
 
                 val name = it.childTagList.component2().findElementByName("small", true).content()

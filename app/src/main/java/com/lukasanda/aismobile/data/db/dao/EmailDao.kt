@@ -31,6 +31,11 @@ interface EmailDao {
     @Query("SELECT * FROM email ")
     fun getEmails(): LiveData<List<Email>>
 
+    fun getAllEmails() = getEmails()
+
+    @Query("SELECT * FROM email ")
+    suspend fun getEmailsList(): List<Email>
+
     @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun update(email: Email)
 

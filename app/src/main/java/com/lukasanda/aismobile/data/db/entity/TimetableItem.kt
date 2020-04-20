@@ -35,6 +35,8 @@ data class TimetableItem(
         return "$name $place $teacher $acronym $dayOfWeek $startTime $endTime $isSeminar"
     }
 
+    override fun getUniqueId() = courseId
+
     @Ignore
     var actual: Boolean = false
 
@@ -43,4 +45,5 @@ data class TimetableItem(
 
 data class WeekItem(val items: List<TimetableItem>) : DiffUtilItem {
     override fun getContentDescription() = items.map { it.getContentDescription() }.joinToString(" ")
+    override fun getUniqueId() = items.firstOrNull()?.courseId ?: ""
 }

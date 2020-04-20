@@ -110,6 +110,10 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
                 startSingleWorker(applicationContext)
             }
 
+            binding.windowTitle.setOnClickListener {
+                //viewModel.debugStuff()
+            }
+
             viewModel.profile().observe(this@MainActivity, Observer {
                 if (it == null) return@Observer
 

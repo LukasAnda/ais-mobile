@@ -25,6 +25,7 @@ import com.lukasanda.aismobile.data.remote.api.AISApi
 import com.lukasanda.aismobile.util.Difference
 import com.lukasanda.aismobile.util.ResponseResult
 import com.lukasanda.aismobile.util.authenticatedOrReturn2
+import com.lukasanda.aismobile.util.repeatIfException
 import com.lukasanda.dataprovider.Parser
 import com.lukasanda.dataprovider.data.Schedule
 import com.snakydesign.livedataextensions.map
@@ -62,21 +63,23 @@ class TimetableRepository(
             return ResponseResult.Authenticated
         }
         prefs.timetableExpiration = DateTime.now().plusWeeks(1)
-        return aisApi.schedule("1?zobraz=1;format=json;rozvrh_student=${prefs.id}").authenticatedOrReturn2 { scheduleResponse ->
+        return repeatIfException(3, 2000) {
+            aisApi.schedule("1?zobraz=1;format=json;rozvrh_student=${prefs.id}").authenticatedOrReturn2 { scheduleResponse ->
 
-            val schedule = parseResponse(scheduleResponse)
-            val courses = parseCourses(schedule)
+                val schedule = parseResponse(scheduleResponse)
+                val courses = parseCourses(schedule)
 
-            val originalCourses = timetableDao.getAllSuspend().map { it.courseId }
+                val originalCourses = timetableDao.getAllSuspend().map { it.courseId }
 
-            updateInDb(courses)
+                updateInDb(courses)
 
-            return@authenticatedOrReturn2 if (originalCourses.isEmpty() || originalCourses.containsAll(courses.map { it.courseId })) {
-                ResponseResult.Authenticated
-            } else {
-                ResponseResult.AuthenticatedWithResult(TimetableDifference(context.getString(R.string.new_timetable)))
+                return@authenticatedOrReturn2 if (originalCourses.isEmpty() || originalCourses.containsAll(courses.map { it.courseId })) {
+                    ResponseResult.Authenticated
+                } else {
+                    ResponseResult.AuthenticatedWithResult(TimetableDifference(context.getString(R.string.new_timetable)))
+                }
             }
-        }
+        } ?: ResponseResult.NetworkError
     }
 
     class TimetableDifference(private val message: String) : Difference {

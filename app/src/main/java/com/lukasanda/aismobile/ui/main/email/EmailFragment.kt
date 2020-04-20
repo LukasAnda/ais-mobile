@@ -37,6 +37,7 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import timber.log.Timber
 
 
 class EmailFragment :
@@ -93,13 +94,8 @@ class EmailFragment :
 
             swipeHelper.attachToRecyclerView(binding?.recycler!!)
 
-            binding?.pullToRefresh?.setOnRefreshListener {
-                binding?.pullToRefresh?.isRefreshing = false
-                viewModel.update()
-            }
-
             viewModel.emails().observe(viewLifecycleOwner, Observer {
-                binding?.pullToRefresh?.isRefreshing = false
+                Timber.d("I have to show ${it.size} emails")
                 adapter.swapData(it.sortedByDescending {
                     DateTime.parse(
                         it.date,

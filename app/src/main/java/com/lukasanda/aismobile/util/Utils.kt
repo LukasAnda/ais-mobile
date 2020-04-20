@@ -40,6 +40,9 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.DEFAULT_ALL
 import androidx.core.app.NotificationCompat.PRIORITY_MAX
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.Observer
 import androidx.viewpager2.widget.ViewPager2
 import androidx.work.*
 import com.amulyakhare.textdrawable.TextDrawable
@@ -52,6 +55,8 @@ import com.lukasanda.aismobile.data.remote.HTTPException
 import com.lukasanda.aismobile.data.remote.RescheduleWorker
 import com.lukasanda.aismobile.data.remote.SyncCoroutineWorker
 import com.lukasanda.aismobile.ui.main.MainActivity
+import com.snakydesign.livedataextensions.nonNull
+import kotlinx.coroutines.delay
 import okhttp3.ResponseBody
 import retrofit2.Response
 import java.nio.charset.Charset
@@ -180,7 +185,7 @@ interface Difference {
 }
 
 sealed class ResponseResult {
-    class AuthenticatedWithResult<T : Difference>(val result: T) : ResponseResult()
+    class AuthenticatedWithResult<T>(val result: T) : ResponseResult()
     object Authenticated : ResponseResult()
     object AuthError : ResponseResult()
     object NetworkError : ResponseResult()
@@ -227,7 +232,6 @@ fun sendNotification(applicationContext: Context, text: String, id: Int) {
         channel.enableLights(true)
         channel.lightColor = RED
         channel.enableVibration(true)
-        channel.vibrationPattern = longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400)
         channel.setSound(ringtoneManager, audioAttributes)
         notificationManager.createNotificationChannel(channel)
     }
@@ -317,4 +321,42 @@ class MyManager : X509TrustManager {
     override fun getAcceptedIssuers(): Array<java.security.cert.X509Certificate> {
         return arrayOf()
     }
+}
+
+suspend fun <T> repeatIfException(times: Int, delay: Long, call: suspend () -> T): T? {
+    repeat(times) {
+        val response = runCatching { call() }
+        delay(delay)
+        if (response.isSuccess) {
+            response.getOrNull()?.let {
+                return it
+            }
+        } else {
+            if (response.isFailure && response.exceptionOrNull() is AuthException) {
+                throw AuthException()
+            }
+        }
+    }
+    return null
+}
+
+fun <T> List<T>.lastOrAll(condition: Boolean) = if (condition) this.takeLast(1) else this
+
+fun <T> LiveData<T>.getDistinctBesidesNull(): LiveData<T> {
+    val distinctLiveData = MediatorLiveData<T>()
+    distinctLiveData.addSource(this, object : Observer<T> {
+        private var initialized = false
+        private var lastObj: T? = null
+        override fun onChanged(obj: T?) {
+            if (!initialized) {
+                initialized = true
+                lastObj = obj
+                distinctLiveData.postValue(lastObj)
+            } else if (obj != lastObj) {
+                lastObj = obj
+                distinctLiveData.postValue(lastObj)
+            }
+        }
+    })
+    return distinctLiveData.nonNull()
 }
