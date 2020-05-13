@@ -21,22 +21,27 @@ import androidx.appcompat.widget.AppCompatDrawableManager
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.lukasanda.aismobile.R
+import com.lukasanda.aismobile.core.ACTION_EMAIL_DELETE
+import com.lukasanda.aismobile.core.AnalyticsTrait
 import com.lukasanda.aismobile.core.SwipeHelper
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.databinding.EmailFragmentBinding
+import com.lukasanda.aismobile.ui.activity.BaseViews
+import com.lukasanda.aismobile.ui.fragment.BaseFragment
+import com.lukasanda.aismobile.ui.main.BaseFragmentHandler
 import com.lukasanda.aismobile.ui.main.email.adapter.EmailAdapter
+import com.lukasanda.aismobile.ui.recyclerview.bindLinear
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import sk.lukasanda.base.ui.activity.BaseViews
-import sk.lukasanda.base.ui.fragment.BaseFragment
-import sk.lukasanda.base.ui.recyclerview.bindLinear
+import timber.log.Timber
 
 
 class EmailFragment :
-    BaseFragment<EmailFragment.Views, EmailFragmentBinding, EmailViewModel, EmailFragmentHandler>() {
+    BaseFragment<EmailFragment.Views, EmailFragmentBinding, EmailViewModel, EmailFragmentHandler>(), AnalyticsTrait {
 
     override val viewModel: EmailViewModel by viewModel { parametersOf(Bundle()) }
 
@@ -50,23 +55,29 @@ class EmailFragment :
         handler.showEmailDetail(it)
     }
 
+    override fun getAnalytics() = FirebaseAnalytics.getInstance(requireContext())
+
     inner class Views : BaseViews {
         override fun modifyViews() {
             postponeEnterTransition()
-            binding.recycler.bindLinear(adapter)
+            handler.setTitle(getString(R.string.emails))
+            binding?.recycler?.bindLinear(adapter)
 
             val swipeHelper: SwipeHelper = object : SwipeHelper() {
                 @SuppressLint("RestrictedApi")
                 override fun instantiateUnderlayButton(viewHolder: RecyclerView.ViewHolder?, underlayButtons: MutableList<UnderlayButton>?) {
-                    underlayButtons?.add(UnderlayButton("", AppCompatDrawableManager.get().getDrawable(requireContext(), R.drawable.ic_delete), Color.parseColor("#E57373"),
-                        object : UnderlayButtonClickListener {
-                            override fun onClick(pos: Int) {
-                                val email = adapter.getEmailAt(pos)
-                                viewModel.deleteEmail(email)
-                                Log.d("TAG", "Delete clicked")
+                    underlayButtons?.add(
+                        UnderlayButton(
+                            "", AppCompatDrawableManager.get().getDrawable(requireContext(), R.drawable.ic_delete), Color.parseColor("#E57373"),
+                            object : UnderlayButtonClickListener {
+                                override fun onClick(pos: Int) {
+                                    logEvent(ACTION_EMAIL_DELETE)
+                                    val email = adapter.getEmailAt(pos)
+                                    viewModel.deleteEmail(email)
+                                    Log.d("TAG", "Delete clicked")
+                                }
                             }
-                        }
-                    ))
+                        ))
                     underlayButtons?.add(UnderlayButton("",
                         AppCompatDrawableManager.get().getDrawable(requireContext(), R.drawable.ic_reply),
                         ContextCompat.getColor(requireContext(), R.color.color_primary_variant),
@@ -81,25 +92,19 @@ class EmailFragment :
                 }
             }
 
-            swipeHelper.attachToRecyclerView(binding.recycler)
-
-            binding.pullToRefresh.setOnRefreshListener {
-                binding.pullToRefresh.isRefreshing = true
-                viewModel.update()
-            }
+            swipeHelper.attachToRecyclerView(binding?.recycler!!)
 
             viewModel.emails().observe(viewLifecycleOwner, Observer {
-                binding.pullToRefresh.isRefreshing = false
+                Timber.d("I have to show ${it.size} emails")
                 adapter.swapData(it.sortedByDescending {
                     DateTime.parse(
                         it.date,
                         DateTimeFormat.forPattern("dd. MM. yyyy HH:mm")
                     )
                 })
-                handler.riseToolbar()
                 startPostponedEnterTransition()
             })
-            binding.compose.setOnClickListener {
+            binding?.compose?.setOnClickListener {
                 handler.composeEmail()
             }
         }
@@ -107,8 +112,7 @@ class EmailFragment :
     }
 }
 
-interface EmailFragmentHandler {
-    fun riseToolbar()
+interface EmailFragmentHandler : BaseFragmentHandler {
     fun showEmailDetail(email: Email)
     fun replyToEmail(email: Email)
     fun composeEmail()

@@ -25,6 +25,6 @@ public interface TagNodeVisitor {
      * @param htmlNode   node visited
      * @return True if tree traversal should be continued, false if it has to stop.
      */
-    public boolean visit(TagNode parentNode, HtmlNode htmlNode);
+    boolean visit(TagNode parentNode, HtmlNode htmlNode);
 
 }

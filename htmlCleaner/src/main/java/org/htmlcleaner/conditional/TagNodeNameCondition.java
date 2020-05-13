@@ -26,6 +26,6 @@ public class TagNodeNameCondition implements ITagNodeCondition {
     }
 
     public boolean satisfy(TagNode tagNode) {
-        return tagNode == null ? false : tagNode.getName().equalsIgnoreCase(this.name);
+        return tagNode != null && tagNode.getName().equalsIgnoreCase(this.name);
     }
 }

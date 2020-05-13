@@ -29,6 +29,9 @@ interface TimetableDao {
     @Query("SELECT * FROM timetable_entry")
     fun getAll(): LiveData<List<TimetableItem>>
 
+    @Query("SELECT * FROM timetable_entry")
+    suspend fun getAllSuspend(): List<TimetableItem>
+
     @Transaction
     suspend fun update(items: List<TimetableItem>) {
         deleteAll()

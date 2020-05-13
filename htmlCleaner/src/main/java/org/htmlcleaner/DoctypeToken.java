@@ -133,11 +133,7 @@ public class DoctypeToken extends BaseTokenImpl implements HtmlNode {
             //
             if ("-//W3C//DTD HTML 4.0//EN".equals(getPublicId())) {
                 type = HTML4_0;
-                if ("http://www.w3.org/TR/REC-html40/strict.dtd".equals(part4) || "".equals(getSystemId())) {
-                    valid = true;
-                } else {
-                    valid = false;
-                }
+                valid = "http://www.w3.org/TR/REC-html40/strict.dtd".equals(part4) || "".equals(getSystemId());
             }
 
             //
@@ -145,11 +141,7 @@ public class DoctypeToken extends BaseTokenImpl implements HtmlNode {
             //
             if ("-//W3C//DTD HTML 4.01//EN".equals(getPublicId())) {
                 type = HTML4_01_STRICT;
-                if ("http://www.w3.org/TR/html4/strict.dtd".equals(part4) || "".equals(getSystemId())) {
-                    valid = true;
-                } else {
-                    valid = false;
-                }
+                valid = "http://www.w3.org/TR/html4/strict.dtd".equals(part4) || "".equals(getSystemId());
             }
 
             //
@@ -157,11 +149,7 @@ public class DoctypeToken extends BaseTokenImpl implements HtmlNode {
             //
             if ("-//W3C//DTD HTML 4.01 Transitional//EN".equals(getPublicId())) {
                 type = HTML4_01_TRANSITIONAL;
-                if ("http://www.w3.org/TR/html4/loose.dtd".equals(getSystemId())) {
-                    valid = true;
-                } else {
-                    valid = false;
-                }
+                valid = "http://www.w3.org/TR/html4/loose.dtd".equals(getSystemId());
             }
 
             //
@@ -170,11 +158,7 @@ public class DoctypeToken extends BaseTokenImpl implements HtmlNode {
             if ("-//W3C//DTD HTML 4.01 Frameset//EN".equals(getPublicId())) {
                 type = HTML4_01_FRAMESET;
 
-                if ("http://www.w3.org/TR/html4/frameset.dtd".equals(getSystemId())) {
-                    valid = true;
-                } else {
-                    valid = false;
-                }
+                valid = "http://www.w3.org/TR/html4/frameset.dtd".equals(getSystemId());
             }
 
 
@@ -183,11 +167,7 @@ public class DoctypeToken extends BaseTokenImpl implements HtmlNode {
             //
             if ("-//W3C//DTD XHTML 1.0 Strict//EN".equals(getPublicId())) {
                 type = XHTML1_0_STRICT;
-                if ("http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd".equals(getSystemId())) {
-                    valid = true;
-                } else {
-                    valid = false;
-                }
+                valid = "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd".equals(getSystemId());
 
             }
 
@@ -197,11 +177,7 @@ public class DoctypeToken extends BaseTokenImpl implements HtmlNode {
             if ("-//W3C//DTD XHTML 1.0 Transitional//EN".equals(getPublicId())) {
                 type = XHTML1_0_TRANSITIONAL;
 
-                if ("http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd".equals(getSystemId())) {
-                    valid = true;
-                } else {
-                    valid = false;
-                }
+                valid = "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd".equals(getSystemId());
             }
 
             //
@@ -210,11 +186,7 @@ public class DoctypeToken extends BaseTokenImpl implements HtmlNode {
             if ("-//W3C//DTD XHTML 1.0 Frameset//EN".equals(getPublicId())) {
                 type = XHTML1_0_FRAMESET;
 
-                if ("http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd".equals(getSystemId())) {
-                    valid = true;
-                } else {
-                    valid = false;
-                }
+                valid = "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd".equals(getSystemId());
             }
 
             //
@@ -222,11 +194,7 @@ public class DoctypeToken extends BaseTokenImpl implements HtmlNode {
             //
             if ("-//W3C//DTD XHTML 1.1//EN".equals(getPublicId())) {
                 type = XHTML1_1;
-                if ("http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd".equals(getSystemId())) {
-                    valid = true;
-                } else {
-                    valid = false;
-                }
+                valid = "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd".equals(getSystemId());
             }
 
             //
@@ -235,11 +203,7 @@ public class DoctypeToken extends BaseTokenImpl implements HtmlNode {
             if ("-//W3C//DTD XHTML Basic 1.1//EN".equals(getPublicId())) {
                 type = XHTML1_1_BASIC;
 
-                if ("http://www.w3.org/TR/xhtml11/DTD/xhtml-basic11.dtd".equals(getSystemId())) {
-                    valid = true;
-                } else {
-                    valid = false;
-                }
+                valid = "http://www.w3.org/TR/xhtml11/DTD/xhtml-basic11.dtd".equals(getSystemId());
             }
         }
 

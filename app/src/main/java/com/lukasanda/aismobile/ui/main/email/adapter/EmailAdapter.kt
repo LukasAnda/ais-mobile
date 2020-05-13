@@ -20,11 +20,11 @@ import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.databinding.EmailItemBinding
+import com.lukasanda.aismobile.ui.recyclerview.BaseAdapter
+import com.lukasanda.aismobile.ui.recyclerview.BindingViewHolder
+import com.lukasanda.aismobile.ui.recyclerview.create
 import com.lukasanda.aismobile.util.getInitialsFromName
 import com.lukasanda.aismobile.util.getNameFromSender
-import sk.lukasanda.base.ui.recyclerview.BaseAdapter
-import sk.lukasanda.base.ui.recyclerview.BindingViewHolder
-import sk.lukasanda.base.ui.recyclerview.create
 
 class EmailAdapter(listener: (Email) -> Unit) :
     BaseAdapter<Email, Email, EmailItemHolder>(listener) {
@@ -56,7 +56,7 @@ class EmailItemHolder(binding: EmailItemBinding) :
         }
 
         binding.root.setOnClickListener {
-            onClick?.invoke(item)
+            onClick.invoke(item)
         }
     }
 }

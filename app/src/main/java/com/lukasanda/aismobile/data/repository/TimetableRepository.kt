@@ -14,19 +14,22 @@
 package com.lukasanda.aismobile.data.repository
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.db.dao.TimetableDao
 import com.lukasanda.aismobile.data.db.entity.TimetableItem
-import com.lukasanda.aismobile.data.remote.AuthException
-import com.lukasanda.aismobile.data.remote.HTTPException
 import com.lukasanda.aismobile.data.remote.api.AISApi
-import com.lukasanda.aismobile.util.authenticatedOrThrow
+import com.lukasanda.aismobile.util.Difference
+import com.lukasanda.aismobile.util.ResponseResult
+import com.lukasanda.aismobile.util.authenticatedOrReturn2
+import com.lukasanda.aismobile.util.repeatIfException
+import com.lukasanda.dataprovider.Parser
+import com.lukasanda.dataprovider.data.Schedule
 import com.snakydesign.livedataextensions.map
 import org.joda.time.DateTime
-import sk.lukasanda.dataprovider.Parser
 
 class TimetableRepository(
     private val aisApi: AISApi,
@@ -45,48 +48,73 @@ class TimetableRepository(
 
 
     fun getCurrentDay(): Int {
-        var pageToSelect = Int.MAX_VALUE / 2
-        while (pageToSelect % dayNames.size != actualDay) {
-            pageToSelect++
-        }
-        return pageToSelect
+//        var pageToSelect = Int.MAX_VALUE / 2
+//        while (pageToSelect % dayNames.size != actualDay) {
+//            pageToSelect++
+//        }
+        return actualDay + 1
     }
 
     fun get() = timetableDao.getAll().map { mapCourses(it) }
 
-    @Throws(AuthException::class, HTTPException::class)
-    suspend fun update() {
-        val scheduleResponse =
-            aisApi.schedule("1?zobraz=1;format=json;rozvrh_student=${prefs.id}")
-                .authenticatedOrThrow()
-        saveCourses(scheduleResponse)
-    }
-
-    private suspend fun saveCourses(response: String) {
-        val schedule =
-            Parser.getSchedule(response) ?: return
-
-        val courses = schedule.periodicLessons?.map {
-            TimetableItem(
-                0,
-                it.courseId,
-                it.courseName,
-                it.room,
-                it.teachers?.first()?.fullName ?: "",
-                it.courseCode,
-                it.dayOfWeek.toInt(),
-                it.startTime,
-                it.endTime,
-                it.isSeminar.toBoolean()
-            )
+    suspend fun update(): ResponseResult {
+        Log.d("TAG", prefs.timetableExpiration.toString())
+        if (prefs.timetableExpiration.isAfterNow) {
+            return ResponseResult.Authenticated
         }
+        prefs.timetableExpiration = DateTime.now().plusWeeks(1)
+        return repeatIfException(3, 2000) {
+            aisApi.schedule("1?zobraz=1;format=json;rozvrh_student=${prefs.id}").authenticatedOrReturn2 { scheduleResponse ->
 
-        courses?.let { timetableDao.update(it) }
+                val schedule = parseResponse(scheduleResponse)
+                val courses = parseCourses(schedule)
+
+                val originalCourses = timetableDao.getAllSuspend().map { it.courseId }
+
+                updateInDb(courses)
+
+                return@authenticatedOrReturn2 if (originalCourses.isEmpty() || originalCourses.containsAll(courses.map { it.courseId })) {
+                    ResponseResult.Authenticated
+                } else {
+                    ResponseResult.AuthenticatedWithResult(TimetableDifference(context.getString(R.string.new_timetable)))
+                }
+            }
+        } ?: ResponseResult.NetworkError
     }
+
+    class TimetableDifference(private val message: String) : Difference {
+        override fun parseMessage(): String = message
+    }
+
+    suspend fun deleteAll() = timetableDao.deleteAll()
+
+    private fun parseResponse(response: String) = Parser.getSchedule(response) ?: Schedule(emptyList())
+
+    private fun parseCourses(courses: Schedule) = courses.periodicLessons?.map {
+        TimetableItem(
+            0,
+            it.courseId,
+            it.courseName,
+            it.room,
+            it.teachers?.first()?.fullName ?: "",
+            it.courseCode,
+            it.dayOfWeek.toInt(),
+            it.startTime,
+            it.endTime,
+            it.isSeminar.toBoolean()
+        )
+    } ?: emptyList()
+
+    private suspend fun updateInDb(courses: List<TimetableItem>) = timetableDao.update(courses)
 
     fun setDay(position: Int) {
-        actualDay = position % dayNames.size
-        dayNamesLiveData.postValue(dayNames[actualDay])
+        //actualDay = position % dayNames.size
+        val realPosition = if (position % 7 == 0) {
+            dayNames.size - 1
+        } else {
+            (position % 7) - 1
+        }
+        dayNamesLiveData.postValue(dayNames[realPosition])
     }
 
     private fun mapCourses(
@@ -102,13 +130,8 @@ class TimetableRepository(
         run days@{
             realWeek.forEach { day ->
                 day.forEachIndexed { index, item ->
-                    if (actualDay == 7) {
-                        //Special case for sunday
-                        day[index] = item.next()
-                        return@days
-                    }
-                    if (getTimeFromCourse(item).isAfterNow) {
-                        day[index] = item.next()
+                    if (getStartTimeFromCourse(item).isBeforeNow && getEndTimeFromCourse(item).isAfterNow) {
+                        day[index] = item.actual()
                         return@days
                     }
                 }
@@ -119,12 +142,20 @@ class TimetableRepository(
         return realWeek.toList()
     }
 
-    private fun getTimeFromCourse(item: TimetableItem): DateTime {
+    private fun getStartTimeFromCourse(item: TimetableItem): DateTime {
         return DateTime.now().withHourOfDay(
             item.startTime.substringBefore(
                 ":"
             ).toInt()
         ).withMinuteOfHour(item.startTime.substringAfter(":").toInt()).withDayOfWeek(item.dayOfWeek)
+    }
+
+    private fun getEndTimeFromCourse(item: TimetableItem): DateTime {
+        return DateTime.now().withHourOfDay(
+            item.endTime.substringBefore(
+                ":"
+            ).toInt()
+        ).withMinuteOfHour(item.endTime.substringAfter(":").toInt()).withDayOfWeek(item.dayOfWeek)
     }
 
 }

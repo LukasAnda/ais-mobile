@@ -16,39 +16,49 @@ package com.lukasanda.aismobile.ui.main.subjects.courses
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.lukasanda.aismobile.data.db.entity.FullCourse
+import com.lukasanda.aismobile.data.db.entity.Semester
 import com.lukasanda.aismobile.databinding.SemesterItemBinding
+import com.lukasanda.aismobile.ui.recyclerview.BaseAdapter
+import com.lukasanda.aismobile.ui.recyclerview.BaseBindingViewHolder
+import com.lukasanda.aismobile.ui.recyclerview.bindLinear
+import com.lukasanda.aismobile.ui.recyclerview.create
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
-import sk.lukasanda.base.ui.recyclerview.BaseAdapter
-import sk.lukasanda.base.ui.recyclerview.BaseBindingViewHolder
-import sk.lukasanda.base.ui.recyclerview.bindLinear
-import sk.lukasanda.base.ui.recyclerview.create
 
 class SemesterAdapter(private val listener: (FullCourse) -> Unit) :
-    BaseAdapter<List<FullCourse>, FullCourse, SemesterItemHolder>(listener) {
+    BaseAdapter<Semester, FullCourse, SemesterItemHolder>(listener) {
     private val pool = RecyclerView.RecycledViewPool()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         parent.create(::SemesterItemHolder, SemesterItemBinding::inflate).apply {
             binding.recycler.setRecycledViewPool(pool)
         }
 
-    override fun getItemCount() = items.size
+    override fun getItemCount() = items.size + 2
+
+    private fun getItemRealPosition(position: Int) = when {
+        position == 0 -> itemCount - 1 - 2
+        position > itemCount - 2 -> 0
+        else -> position - 1
+    }
 
     override fun onBindViewHolder(holder: SemesterItemHolder, position: Int) {
-        if (items.isNotEmpty()) {
-            holder.bind(items[position % items.size], listener)
-        }
+        if (items.isEmpty()) return
+        holder.bind(items[getItemRealPosition(position)], listener)
     }
 }
 
 class SemesterItemHolder(binding: SemesterItemBinding) :
-    BaseBindingViewHolder<List<FullCourse>, FullCourse, SemesterItemBinding>(binding) {
-    override fun bind(item: List<FullCourse>, onClick: (FullCourse) -> Unit) {
+    BaseBindingViewHolder<Semester, FullCourse, SemesterItemBinding>(binding) {
+    override fun bind(item: Semester, onClick: (FullCourse) -> Unit) {
         val adapter = CourseAdapter(onClick)
-        binding.recycler.bindLinear(adapter)
-        adapter.swapData(item)
 
-        if (item.isEmpty()) {
+        binding.recycler.bindLinear(adapter)
+
+        adapter.swapData(item.courses)
+
+        println(item.courses.size)
+
+        if (item.courses.isEmpty()) {
             binding.empty.show()
             binding.recycler.hide()
         } else {

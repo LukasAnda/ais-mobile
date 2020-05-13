@@ -35,7 +35,7 @@ public enum CloseTag {
      * @param minimizedTagPermitted if true tag can be reduced to <x/>
      * @param endTagPermitted       TODO
      */
-    private CloseTag(boolean minimizedTagPermitted, boolean endTagPermitted) {
+    CloseTag(boolean minimizedTagPermitted, boolean endTagPermitted) {
         this.minimizedTagPermitted = minimizedTagPermitted;
         this.endTagPermitted = endTagPermitted;
     }

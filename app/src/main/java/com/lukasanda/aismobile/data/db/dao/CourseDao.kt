@@ -40,6 +40,9 @@ interface CourseDao {
     @Query("DELETE FROM teacher")
     suspend fun deleteTeachers()
 
+    @Delete
+    suspend fun deleteSheet(sheet: Sheet)
+
     @Query("SELECT * FROM COURSE WHERE id = :courseId")
     @Transaction
     fun getCourse(courseId: String): LiveData<FullCourse>
@@ -48,25 +51,31 @@ interface CourseDao {
     @Transaction
     fun getCourses(): LiveData<List<FullCourse>>
 
+    @Query("SELECT * FROM sheet")
+    suspend fun getAllSheets(): List<Sheet>
+
+    @Query("SELECT * FROM course")
+    suspend fun getAllCourses(): List<Course>
+
     @Query("SELECT DISTINCT semester FROM COURSE")
     @Transaction
     fun getSemesters(): LiveData<List<String>>
 
     @Transaction
-    suspend fun update(courses: List<Course>, sheets: List<Sheet>, teachers: List<Teacher>) {
-        deleteSheets()
+    suspend fun update(courses: List<Course>) {
+//        deleteSheets()
         deleteCourses()
-        deleteTeachers()
+//        deleteTeachers()
         insertCourses(courses)
-        insertSheets(sheets)
-        insertTeachers(teachers)
+//        insertSheets(sheets)
+//        insertTeachers(teachers)
     }
 
     @Transaction
-    suspend fun updateSingle(courses: List<Course>, sheets: List<Sheet>, teachers: List<Teacher>) {
+    suspend fun updateSingle(courses: List<Course>) {
         insertCourses(courses)
-        insertSheets(sheets)
-        insertTeachers(teachers)
+//        insertSheets(sheets)
+//        insertTeachers(teachers)
     }
 
 }

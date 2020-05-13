@@ -16,12 +16,12 @@ package com.lukasanda.aismobile.ui.main.subjectDetail.adapters
 import android.view.ViewGroup
 import com.lukasanda.aismobile.data.db.entity.Sheet
 import com.lukasanda.aismobile.databinding.SubjectTableItemBinding
+import com.lukasanda.aismobile.ui.recyclerview.BaseAdapter
+import com.lukasanda.aismobile.ui.recyclerview.BindingViewHolder
+import com.lukasanda.aismobile.ui.recyclerview.create
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
 import com.lukasanda.aismobile.view.TableRowView
-import sk.lukasanda.base.ui.recyclerview.BaseAdapter
-import sk.lukasanda.base.ui.recyclerview.BindingViewHolder
-import sk.lukasanda.base.ui.recyclerview.create
 
 class SubjectTablesAdapter(private val listener: (Sheet) -> Unit) :
     BaseAdapter<Sheet, Sheet, SubjectTableItemHolder>(listener) {

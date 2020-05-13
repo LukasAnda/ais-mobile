@@ -24,13 +24,14 @@ import com.afollestad.materialdialogs.customview.customView
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.db.entity.Teacher
 import com.lukasanda.aismobile.databinding.SubjectDetailFragmentBinding
+import com.lukasanda.aismobile.ui.activity.BaseViews
+import com.lukasanda.aismobile.ui.fragment.BaseFragment
+import com.lukasanda.aismobile.ui.main.BaseFragmentHandler
 import com.lukasanda.aismobile.ui.main.subjectDetail.adapters.SubjectTablesAdapter
 import com.lukasanda.aismobile.ui.main.subjectDetail.adapters.SubjectTeachersAdapter
+import com.lukasanda.aismobile.ui.recyclerview.bindLinear
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import sk.lukasanda.base.ui.activity.BaseViews
-import sk.lukasanda.base.ui.fragment.BaseFragment
-import sk.lukasanda.base.ui.recyclerview.bindLinear
 
 class SubjectDetailFragment :
     BaseFragment<SubjectDetailFragment.Views, SubjectDetailFragmentBinding, SubjectDetailViewModel, SubjectDetailHandler>() {
@@ -42,18 +43,23 @@ class SubjectDetailFragment :
     inner class Views : BaseViews {
         override fun modifyViews() {
             setHasOptionsMenu(true)
+            handler.setTitle(" ")
 
             postponeEnterTransition()
 
             val args by navArgs<SubjectDetailFragmentArgs>()
 
-            binding.tablesRecycler.bindLinear(sheetsAdapter)
-            binding.teachersRecycler.bindLinear(teachersAdapter)
+            binding?.tablesRecycler?.bindLinear(sheetsAdapter)
+            binding?.teachersRecycler?.bindLinear(teachersAdapter)
+
+            viewModel.updateCourse(args.courseId)
 
             viewModel.getCourse(args.courseId).observe(viewLifecycleOwner, Observer {
-                sheetsAdapter.swapData(it.sheets)
-                teachersAdapter.swapData(it.teachers)
-                binding.infoView.setData(it)
+                if (it != null) {
+                    sheetsAdapter.swapData(it.sheets)
+                    teachersAdapter.swapData(it.teachers)
+                    binding?.infoView?.setData(it)
+                }
 
                 startPostponedEnterTransition()
             })
@@ -88,6 +94,6 @@ class SubjectDetailFragment :
     override lateinit var handler: SubjectDetailHandler
 }
 
-interface SubjectDetailHandler {
+interface SubjectDetailHandler : BaseFragmentHandler {
     fun writeToTeacher(teacher: Teacher)
 }

@@ -128,7 +128,7 @@ public class Utils {
         } else if (first != '\r') {
             firstIndex = 0;
         }
-        return str.substring(firstIndex, str.length());
+        return str.substring(firstIndex);
     }
 
     /**
@@ -648,7 +648,7 @@ public class Utils {
         }
 
         StringTokenizer tokenizer = new StringTokenizer(s, delimiters);
-        String result[] = new String[tokenizer.countTokens()];
+        String[] result = new String[tokenizer.countTokens()];
         int index = 0;
         while (tokenizer.hasMoreTokens()) {
             result[index++] = tokenizer.nextToken();

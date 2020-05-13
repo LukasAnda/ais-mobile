@@ -29,22 +29,26 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.google.android.material.chip.Chip
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.lukasanda.aismobile.R
+import com.lukasanda.aismobile.core.ACTION_SEND_COMPOSED
+import com.lukasanda.aismobile.core.ACTION_SEND_REPLY
+import com.lukasanda.aismobile.core.AnalyticsTrait
 import com.lukasanda.aismobile.data.db.entity.Email
+import com.lukasanda.aismobile.data.db.entity.Suggestion
 import com.lukasanda.aismobile.databinding.ComposeEmailFragmentBinding
+import com.lukasanda.aismobile.ui.activity.BaseViews
+import com.lukasanda.aismobile.ui.fragment.BaseFragment
 import com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailViewModel.EmailSendState.Fail
 import com.lukasanda.aismobile.ui.main.composeEmail.ComposeEmailViewModel.EmailSendState.Success
+import com.lukasanda.aismobile.ui.recyclerview.bindLinear
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import sk.lukasanda.base.ui.activity.BaseViews
-import sk.lukasanda.base.ui.fragment.BaseFragment
-import sk.lukasanda.base.ui.recyclerview.bindLinear
-import sk.lukasanda.dataprovider.data.Suggestion
 
 class ComposeEmailFragment :
-    BaseFragment<ComposeEmailFragment.Views, ComposeEmailFragmentBinding, ComposeEmailViewModel, ComposeEmailHandler>() {
+    BaseFragment<ComposeEmailFragment.Views, ComposeEmailFragmentBinding, ComposeEmailViewModel, ComposeEmailHandler>(), AnalyticsTrait {
 
     private val selected = mutableListOf<Suggestion>()
 
@@ -53,30 +57,30 @@ class ComposeEmailFragment :
 
     private val contactAdapter: ContactAdapter = ContactAdapter {
         selected.add(it)
-        binding.recipients.setText("")
-        binding.chipGroup.addView(createChip(it))
-        binding.chipGroup.show()
+        binding?.recipients?.setText("")
+        binding?.chipGroup?.addView(createChip(it))
+        binding?.chipGroup?.show()
         clearLoading()
     }
 
     private fun clearLoading() {
         viewModel.cancelJobs()
         contactAdapter.swapData(emptyList())
-        binding.contactsRecycler.hide()
+        binding?.contactsRecycler?.hide()
     }
 
     private fun removeLastContact() {
-        binding.contactsRecycler.hide()
-        val viewCount = binding.chipGroup.childCount
+        binding?.contactsRecycler?.hide()
+        val viewCount = binding?.chipGroup?.childCount ?: 0
         if (viewCount > 0) {
             selected.dropLast(1)
-            binding.chipGroup.removeViewAt(viewCount - 1)
+            binding?.chipGroup?.removeViewAt(viewCount - 1)
 
-            if (binding.chipGroup.isEmpty()) {
-                binding.chipGroup.hide()
+            if (binding?.chipGroup?.isEmpty() == true) {
+                binding?.chipGroup?.hide()
             }
         } else {
-            binding.chipGroup.hide()
+            binding?.chipGroup?.hide()
         }
     }
 
@@ -86,40 +90,39 @@ class ComposeEmailFragment :
 
             val args by navArgs<ComposeEmailFragmentArgs>()
 
-            args.teacher?.let {
-                val suggestion = Suggestion(it.name, it.id, "")
-                selected.add(suggestion)
-                binding.chipGroup.addView(createChip(suggestion))
-                binding.chipGroup.show()
+            args.suggestion?.let {
+                selected.add(it)
+                binding?.chipGroup?.addView(createChip(it))
+                binding?.chipGroup?.show()
 
-                binding.recipients.hide()
+                binding?.recipients?.hide()
 
-                binding.recipients.isEnabled = false
+                binding?.recipients?.isEnabled = false
             }
 
             type = args.email?.let {
                 if (it.subject.contains("Re:")) {
-                    binding.subject.setText(it.subject)
+                    binding?.subject?.setText(it.subject)
                 } else {
-                    binding.subject.setText("Re: ${it.subject}")
+                    binding?.subject?.setText("Re: ${it.subject}")
                 }
-                binding.subject.isEnabled = false
-                binding.subject.isClickable = false
+                binding?.subject?.isEnabled = false
+                binding?.subject?.isClickable = false
 
                 val suggestion = Suggestion(it.sender, it.senderId, "")
                 selected.add(suggestion)
-                binding.chipGroup.addView(createChip(suggestion))
-                binding.chipGroup.show()
+                binding?.chipGroup?.addView(createChip(suggestion))
+                binding?.chipGroup?.show()
 
-                binding.recipients.hide()
-                binding.recipients.isEnabled = false
+                binding?.recipients?.hide()
+                binding?.recipients?.isEnabled = false
 
                 SendType.Reply(it)
             } ?: run {
                 SendType.Send()
             }
 
-            binding.recipients.apply {
+            binding?.recipients?.apply {
                 doOnTextChanged { text, start, count, after ->
                     if (text?.length ?: 0 > 2) {
                         viewModel.getSuggestions(text.toString())
@@ -129,14 +132,14 @@ class ComposeEmailFragment :
                     }
                 }
                 setOnKeyListener { v, keyCode, event ->
-                    if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_DEL && binding.recipients.text?.isEmpty() == true) {
+                    if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_DEL && binding?.recipients?.text?.isEmpty() == true) {
                         removeLastContact()
                     }
                     false
                 }
             }
 
-            binding.contactsRecycler.apply {
+            binding?.contactsRecycler?.apply {
                 bindLinear(contactAdapter)
                 addItemDecoration(
                     DividerItemDecoration(
@@ -148,16 +151,22 @@ class ComposeEmailFragment :
 
             viewModel.suggestions().observe(viewLifecycleOwner, Observer {
                 if (it.isEmpty()) {
-                    binding.contactsRecycler.hide()
+                    binding?.contactsRecycler?.hide()
                 } else {
-                    binding.contactsRecycler.show()
+                    binding?.contactsRecycler?.show()
                 }
-                contactAdapter.swapData(it)
+                contactAdapter.swapData(it.map { Suggestion(it.name, it.id, it.study) })
             })
 
             viewModel.sentMailState().observe(viewLifecycleOwner, Observer { emailSendState ->
                 when (emailSendState) {
-                    Success -> handler.closeFragment()
+                    Success -> {
+                        when (type) {
+                            is SendType.Reply -> logEvent(ACTION_SEND_REPLY)
+                            is SendType.Send -> logEvent(ACTION_SEND_COMPOSED)
+                        }
+                        handler.closeFragment()
+                    }
                     Fail -> {
                         Toast.makeText(
                             requireContext(),
@@ -184,16 +193,16 @@ class ComposeEmailFragment :
                     is SendType.Reply -> {
                         viewModel.replyMail(
                             getEmails(),
-                            binding.subject.text.toString(),
-                            binding.message.text.toString(),
+                            binding?.subject?.text.toString(),
+                            binding?.message?.text.toString(),
                             (type as SendType.Reply).email
                         )
                     }
                     is SendType.Send -> {
                         viewModel.sendMail(
                             getEmails(),
-                            binding.subject.text.toString(),
-                            binding.message.text.toString()
+                            binding?.subject?.text.toString(),
+                            binding?.message?.text.toString()
                         )
                     }
                 }
@@ -201,6 +210,8 @@ class ComposeEmailFragment :
         }
         return super.onOptionsItemSelected(item)
     }
+
+    override fun getAnalytics() = FirebaseAnalytics.getInstance(requireContext())
 
     private fun getEmails(): String {
         val builder = StringBuilder()
@@ -242,7 +253,7 @@ class ComposeEmailFragment :
 
     sealed class SendType {
         class Reply(val email: Email) : SendType()
-        class Send() : SendType()
+        class Send : SendType()
     }
 
 }

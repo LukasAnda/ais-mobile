@@ -32,11 +32,7 @@ public class AttributeTransformationPatternImpl implements AttributeTransformati
     }
 
     public boolean satisfy(String attName, String attValue) {
-        if ((attNamePattern == null || attNamePattern.matcher(attName).find()) && (attValuePattern == null || attValuePattern.matcher(attValue).find())) {
-            return true;
-        } else {
-            return false;
-        }
+        return (attNamePattern == null || attNamePattern.matcher(attName).find()) && (attValuePattern == null || attValuePattern.matcher(attValue).find());
     }
 
     /**

@@ -14,20 +14,33 @@
 package com.lukasanda.aismobile.ui.main.subjects
 
 import androidx.lifecycle.SavedStateHandle
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.lukasanda.aismobile.data.repository.CourseRepository
-import sk.lukasanda.base.ui.viewmodel.BaseViewModel
+import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
 import kotlin.math.max
 
 class SubjectsViewModel(
     private val courseRepository: CourseRepository,
     private val handle: SavedStateHandle
 ) : BaseViewModel(handle) {
+
+    override fun logToCrashlytics(e: Throwable) {
+        FirebaseCrashlytics.getInstance().recordException(e)
+    }
+
     fun courses() = courseRepository.get()
 
     val semesters = mutableListOf<String>()
 
-    fun getSemesterName(position: Int) =
-        if (semesters.isNotEmpty()) semesters[position % semesters.size] else ""
+    fun getSemesterName(position: Int): String {
+        if (semesters.isEmpty()) return ""
+        val realPosition = if (position % semesters.size == 0) {
+            semesters.size - 1
+        } else {
+            (position % semesters.size) - 1
+        }
+        return if (semesters.isNotEmpty()) semesters[realPosition] else ""
+    }
 
     fun setPage(position: Int) {
         handle.set(PAGE, position)

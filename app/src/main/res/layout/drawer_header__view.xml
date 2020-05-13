@@ -58,7 +58,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginBottom="4dp"
         android:fontFamily="@font/open_sans_bold"
-        android:text="Wifi username:"
+        android:text="@string/wifi_username"
         android:textColor="@color/color_on_surface"
         android:textSize="14sp"
         app:layout_constraintBottom_toTopOf="@id/passwordTitle"
@@ -70,7 +70,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
         android:fontFamily="@font/open_sans"
-        android:text="-"
+        android:text="@string/no_data"
+        android:textIsSelectable="true"
         android:textColor="@color/color_on_surface"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="@id/usernameTitle"
@@ -83,7 +84,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:fontFamily="@font/open_sans_bold"
-        android:text="Wifi password:"
+        android:text="@string/wifi_password"
         android:textColor="@color/color_on_surface"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -95,11 +96,20 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
         android:fontFamily="@font/open_sans"
-        android:text="-"
+        android:text="@string/no_data"
+        android:textIsSelectable="true"
         android:textColor="@color/color_on_surface"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="@id/passwordTitle"
         app:layout_constraintStart_toEndOf="@id/usernameTitle"
         app:layout_constraintTop_toTopOf="@id/passwordTitle" />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="#e8e8e8"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

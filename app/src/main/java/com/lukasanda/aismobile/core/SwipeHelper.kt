@@ -95,7 +95,7 @@ abstract class SwipeHelper : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.L
     }
 
     override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
-        val pos: Int = viewHolder.getAdapterPosition()
+        val pos: Int = viewHolder.adapterPosition
         var translationX = dX
         val itemView: View = viewHolder.itemView
         if (pos < 0) {

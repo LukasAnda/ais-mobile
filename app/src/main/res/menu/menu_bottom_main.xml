@@ -19,11 +19,7 @@
         android:title="" />
     <item
         android:id="@+id/subjectsFragment"
-        android:icon="@drawable/ic_subjects"
-        android:title="" />
-    <item
-        android:id="@+id/notificationsFragment"
-        android:icon="@drawable/ic_notification"
+        android:icon="@drawable/ic_evaluation"
         android:title="" />
     <item
         android:id="@+id/emailFragment"
@@ -32,6 +28,11 @@
     <item
         android:id="@+id/documentsFragment"
         android:icon="@drawable/ic_document"
+        android:title="" />
+
+    <item
+        android:id="@+id/peopleFragment"
+        android:icon="@drawable/ic_people"
         android:title="" />
 
 </menu>

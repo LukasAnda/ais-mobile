@@ -24,7 +24,7 @@ public enum ContentType {
     text("text");
     private final String dbCode;
 
-    private ContentType(String dbCode) {
+    ContentType(String dbCode) {
         this.dbCode = dbCode;
     }
 

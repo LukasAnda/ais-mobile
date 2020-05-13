@@ -16,6 +16,7 @@ package com.lukasanda.aismobile.data.db.entity
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
+import com.lukasanda.aismobile.ui.recyclerview.DiffUtilItem
 
 @Entity(tableName = "timetable_entry")
 data class TimetableItem(
@@ -29,9 +30,20 @@ data class TimetableItem(
     val startTime: String = "",
     val endTime: String = "",
     val isSeminar: Boolean = false
-) {
-    @Ignore
-    var isNext: Boolean = false
+) : DiffUtilItem {
+    override fun getContentDescription(): String {
+        return "$name $place $teacher $acronym $dayOfWeek $startTime $endTime $isSeminar"
+    }
 
-    fun next() = this.copy().apply { isNext = true }
+    override fun getUniqueId() = courseId
+
+    @Ignore
+    var actual: Boolean = false
+
+    fun actual() = this.copy().apply { actual = true }
+}
+
+data class WeekItem(val items: List<TimetableItem>) : DiffUtilItem {
+    override fun getContentDescription() = items.map { it.getContentDescription() }.joinToString(" ")
+    override fun getUniqueId() = items.firstOrNull()?.courseId ?: ""
 }

@@ -18,7 +18,7 @@ apply plugin: "kotlin-kapt"
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.2"
+    buildToolsVersion "29.0.3"
 
     defaultConfig {
         minSdkVersion 21
@@ -34,6 +34,10 @@ android {
                 includeCompileClasspath true
             }
         }
+    }
+
+    buildFeatures{
+        viewBinding = true
     }
 
     androidExtensions {
@@ -82,3 +86,4 @@ dependencies {
     androidTestImplementation "androidx.test:runner:$libraries.test_runner__version"
     androidTestImplementation "androidx.test.espresso:espresso-core:$libraries.espresso_core__version"
 }
+

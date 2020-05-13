@@ -14,12 +14,14 @@
 package com.lukasanda.aismobile.di
 
 import com.lukasanda.aismobile.data.repository.CourseRepository
+import com.lukasanda.aismobile.data.repository.DocumentRepository
 import com.lukasanda.aismobile.data.repository.EmailRepository
 import com.lukasanda.aismobile.data.repository.TimetableRepository
 import org.koin.dsl.module
 
 val repositoryModule = module {
     single(createdAtStart = false) { TimetableRepository(get(), get(), get(), get()) }
-    single(createdAtStart = false) { CourseRepository(get(), get(), get()) }
+    single(createdAtStart = false) { CourseRepository(get(), get(), get(), get()) }
     single(createdAtStart = false) { EmailRepository(get(), get(), get()) }
+    single(createdAtStart = false) { DocumentRepository(get(), get(), get()) }
 }

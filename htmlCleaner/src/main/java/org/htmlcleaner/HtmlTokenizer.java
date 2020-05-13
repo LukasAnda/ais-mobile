@@ -281,9 +281,7 @@ public class HtmlTokenizer {
         // spaces in them.
         //
         if (ch == '<') return false;
-        if (Character.isSpaceChar(ch)) return false;
-
-        return true;
+        return !Character.isSpaceChar(ch);
     }
 
     /**
@@ -319,9 +317,7 @@ public class HtmlTokenizer {
 
         if (Character.isISOControl(ch)) return false;
 
-        if (!Character.isDefined(ch)) return false;
-
-        return true;
+        return Character.isDefined(ch);
 
     }
 

@@ -25,7 +25,7 @@ public class EndTagToken extends TagToken {
     }
 
     public EndTagToken(String name) {
-        super(name == null ? null : name);
+        super(name);
     }
 
     @Override

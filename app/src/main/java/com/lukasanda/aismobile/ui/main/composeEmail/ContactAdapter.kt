@@ -17,11 +17,11 @@ import android.graphics.Color
 import android.view.ViewGroup
 import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
+import com.lukasanda.aismobile.data.db.entity.Suggestion
 import com.lukasanda.aismobile.databinding.ContactItemBinding
-import sk.lukasanda.base.ui.recyclerview.BaseAdapter
-import sk.lukasanda.base.ui.recyclerview.BindingViewHolder
-import sk.lukasanda.base.ui.recyclerview.create
-import sk.lukasanda.dataprovider.data.Suggestion
+import com.lukasanda.aismobile.ui.recyclerview.BaseAdapter
+import com.lukasanda.aismobile.ui.recyclerview.BindingViewHolder
+import com.lukasanda.aismobile.ui.recyclerview.create
 
 class ContactAdapter(private val listener: (Suggestion) -> Unit) :
     BaseAdapter<Suggestion, Suggestion, ContactItemHolder>(listener) {

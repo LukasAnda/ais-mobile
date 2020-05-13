@@ -17,19 +17,20 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.data.repository.EmailRepository
-import kotlinx.coroutines.CoroutineExceptionHandler
+import com.lukasanda.aismobile.ui.viewmodel.BaseViewModel
+import com.lukasanda.dataprovider.data.EmailDetail
 import kotlinx.coroutines.launch
-import sk.lukasanda.base.ui.viewmodel.BaseViewModel
 
 class EmailDetailViewModel(
     private val emailRepository: EmailRepository,
     private val handle: SavedStateHandle
 ) : BaseViewModel(handle) {
 
-    private val _emailDetail = MutableLiveData<String?>()
-    fun emailDetail(): LiveData<String?> = _emailDetail
+    private val _emailDetail = MutableLiveData<EmailDetail?>()
+    fun emailDetail(): LiveData<EmailDetail?> = _emailDetail
 
     fun setEmail(email: Email) {
         handle[EMAIL] = email
@@ -37,10 +38,8 @@ class EmailDetailViewModel(
 
     fun getEmail(): Email? = handle[EMAIL]
 
-    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, t ->
-        run {
-            t.printStackTrace()
-        }
+    override fun logToCrashlytics(e: Throwable) {
+        FirebaseCrashlytics.getInstance().recordException(e)
     }
 
     fun getEmailDetail(email: Email) = viewModelScope.launch(coroutineExceptionHandler) {

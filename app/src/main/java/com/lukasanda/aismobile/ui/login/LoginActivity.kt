@@ -19,31 +19,32 @@ import android.os.Handler
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.lukasanda.aismobile.R
-import com.lukasanda.aismobile.core.State
-import com.lukasanda.aismobile.data.cache.Prefs
+import com.lukasanda.aismobile.core.*
+import com.lukasanda.aismobile.data.cache.SafePrefs
 import com.lukasanda.aismobile.databinding.ActivityLoginBinding
+import com.lukasanda.aismobile.ui.activity.BaseActivityViews
+import com.lukasanda.aismobile.ui.activity.BaseUIActivity
 import com.lukasanda.aismobile.util.hide
 import com.lukasanda.aismobile.util.show
-import com.lukasanda.aismobile.util.startWorker
+import com.lukasanda.aismobile.util.startSingleWorker
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import sk.lukasanda.base.ui.activity.BaseActivityViews
-import sk.lukasanda.base.ui.activity.BaseUIActivity
 
-class LoginActivity : BaseUIActivity<LoginViewModel, LoginActivity.Views, ActivityLoginBinding>() {
-    private val prefs by inject<Prefs>()
+class LoginActivity : BaseUIActivity<LoginViewModel, LoginActivity.Views, ActivityLoginBinding>(), AnalyticsTrait {
+    private val prefs by inject<SafePrefs>()
     private var hasPressedBack = false
 
     inner class Views : BaseActivityViews {
         override fun setNavigationGraph(): Int? = null
 
         override fun modifyViews() {
-            binding.emailEditText.setText(prefs.username)
+            binding.emailEditText.setText(prefs.email)
             binding.passwordEditText.setText(prefs.password)
 
-            if (prefs.username.isNotEmpty() && prefs.password.isNotEmpty()) {
+            if (prefs.email.isNotEmpty() && prefs.password.isNotEmpty()) {
                 viewModel.login(
                     binding.emailEditText.text.toString(),
                     binding.passwordEditText.text.toString()
@@ -63,14 +64,18 @@ class LoginActivity : BaseUIActivity<LoginViewModel, LoginActivity.Views, Activi
                         showProgress()
                     }
                     is State.Success -> {
+                        logEvent(ACTION_LOGIN)
                         hideProgress()
-                        startWorker(applicationContext)
+                        startSingleWorker(applicationContext)
                         finish()
                     }
                     is State.Failure -> {
                         hideProgress()
                         when (it.errorType) {
                             LoginViewModel.ErrorState.Auth -> {
+
+                                logEvent(EVENT_WRONG_PASSWORD)
+
                                 binding.emailInputLayout.error = "Zlé meno alebo heslo"
                                 binding.passwordInputLayout.error = "Zlé meno alebo heslo"
                             }
@@ -91,6 +96,7 @@ class LoginActivity : BaseUIActivity<LoginViewModel, LoginActivity.Views, Activi
 
     override fun onBackPressed() {
         if (hasPressedBack) {
+            logEvent(ACTION_EXIT)
             //exit the whole app
             this.finishAffinity()
         } else {
@@ -117,4 +123,5 @@ class LoginActivity : BaseUIActivity<LoginViewModel, LoginActivity.Views, Activi
 
     override fun setBinding(): ActivityLoginBinding = ActivityLoginBinding.inflate(layoutInflater)
     override fun createViews() = Views()
+    override fun getAnalytics() = FirebaseAnalytics.getInstance(this)
 }

@@ -26,6 +26,6 @@ public class TagNodeAttExistsCondition implements ITagNodeCondition {
     }
 
     public boolean satisfy(TagNode tagNode) {
-        return tagNode == null ? false : tagNode.getAttributes().containsKey(attName.toLowerCase());
+        return tagNode != null && tagNode.getAttributes().containsKey(attName.toLowerCase());
     }
 }

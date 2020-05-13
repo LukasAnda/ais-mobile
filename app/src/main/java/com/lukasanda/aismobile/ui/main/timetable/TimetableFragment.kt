@@ -14,19 +14,23 @@
 package com.lukasanda.aismobile.ui.main.timetable
 
 import android.os.Bundle
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.viewpager2.widget.ViewPager2
-import com.lukasanda.aismobile.databinding.FragmentScheduleBinding
+import com.lukasanda.aismobile.data.db.entity.WeekItem
+import com.lukasanda.aismobile.databinding.TimetableFragmentBinding
+import com.lukasanda.aismobile.ui.activity.BaseViews
+import com.lukasanda.aismobile.ui.fragment.BaseFragment
+import com.lukasanda.aismobile.ui.main.BaseFragmentHandler
 import com.lukasanda.aismobile.ui.main.timetable.timetable.WeekAdapter
-import com.lukasanda.aismobile.util.dec
-import com.lukasanda.aismobile.util.inc
+import com.lukasanda.aismobile.util.hide
+import com.lukasanda.aismobile.util.show
+import org.joda.time.DateTime
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import sk.lukasanda.base.ui.activity.BaseViews
-import sk.lukasanda.base.ui.fragment.BaseFragment
 
 class TimetableFragment :
-    BaseFragment<TimetableFragment.Views, FragmentScheduleBinding, TimetableViewModel, TimetableFragmentHandler>() {
+    BaseFragment<TimetableFragment.Views, TimetableFragmentBinding, TimetableViewModel, TimetableFragmentHandler>() {
 
     override lateinit var handler: TimetableFragmentHandler
     override val viewModel: TimetableViewModel by viewModel { parametersOf(Bundle()) }
@@ -42,54 +46,64 @@ class TimetableFragment :
             super.onPageSelected(position)
             viewModel.setDay(position)
         }
+
+        override fun onPageScrollStateChanged(state: Int) {
+            if (state == ViewPager2.SCROLL_STATE_IDLE) {
+                if (binding?.pager?.currentItem == 0) {
+                    binding?.pager?.setCurrentItem(weekAdapter.itemCount - 2, false)
+                } else if (binding?.pager?.currentItem == weekAdapter.itemCount - 1) {
+                    binding?.pager?.setCurrentItem(1, false)
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {
-        binding.pager.unregisterOnPageChangeCallback(pageChangeCallback)
+        binding?.pager?.unregisterOnPageChangeCallback(pageChangeCallback)
         super.onDestroyView()
     }
 
-    override fun setBinding(): FragmentScheduleBinding =
-        FragmentScheduleBinding.inflate(layoutInflater)
+    override fun setBinding(): TimetableFragmentBinding =
+        TimetableFragmentBinding.inflate(layoutInflater)
 
     override fun createViews() = Views()
 
     inner class Views : BaseViews {
         override fun modifyViews() {
-            binding.buttonBack.setOnClickListener {
-                binding.pager.dec()
-            }
-
-            binding.buttonForward.setOnClickListener {
-                binding.pager.inc()
-            }
-
-            binding.pager.apply {
-                offscreenPageLimit = 1
+            binding?.pager?.apply {
+                offscreenPageLimit = 3
                 adapter = weekAdapter
                 orientation = ViewPager2.ORIENTATION_HORIZONTAL
-                binding.pager.setCurrentItem(viewModel.getCurrentDay(), false)
-
-                binding.pager.registerOnPageChangeCallback(pageChangeCallback)
+                binding?.pager?.registerOnPageChangeCallback(pageChangeCallback)
             }
 
-            viewModel.timetable().observe(this@TimetableFragment, Observer {
-                binding.progress.hide()
-                weekAdapter.swapData(it)
-                handler.lowerToolbar()
+            viewModel.timetable().observe(viewLifecycleOwner, Observer {
+                if (it == null) return@Observer
+                binding?.progress?.hide()
+                if (it.isEmpty()) {
+                    binding?.pager?.hide()
+                    binding?.indicatorLayout?.hide()
+                } else {
+                    binding?.pager?.show()
+                    binding?.indicatorLayout?.show()
+
+                    weekAdapter.swapData(it.map { WeekItem(it) })
+                    binding?.indicator?.attachToPager(binding?.pager!!)
+                    binding?.pager?.setCurrentItem(DateTime.now().dayOfWeek, false)
+
+                }
             })
 
-            viewModel.days().observe(this@TimetableFragment, Observer {
-                binding.day.text = it
+            viewModel.days().observe(viewLifecycleOwner, Observer {
+                if (viewLifecycleOwner.lifecycle.currentState == Lifecycle.State.RESUMED) {
+                    handler.setTitle(it)
+                }
             })
-
-            viewModel.setDay(viewModel.getActualDay())
         }
 
     }
 }
 
-interface TimetableFragmentHandler {
-    fun lowerToolbar()
+interface TimetableFragmentHandler : BaseFragmentHandler {
     fun showDetailFromTimetable(courseId: String)
 }

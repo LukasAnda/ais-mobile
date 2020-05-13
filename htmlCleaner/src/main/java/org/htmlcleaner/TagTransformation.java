@@ -200,7 +200,7 @@ public class TagTransformation {
         int endIndex = -1;
 
         while (startIndex >= 0 && startIndex < template.length()) {
-            result.append(template.substring(endIndex + 1, startIndex));
+            result.append(template, endIndex + 1, startIndex);
             endIndex = template.indexOf(VAR_END, startIndex);
 
             if (endIndex > startIndex) {

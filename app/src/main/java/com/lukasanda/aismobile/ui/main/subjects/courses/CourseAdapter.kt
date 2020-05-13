@@ -16,10 +16,10 @@ package com.lukasanda.aismobile.ui.main.subjects.courses
 import android.view.ViewGroup
 import com.lukasanda.aismobile.data.db.entity.FullCourse
 import com.lukasanda.aismobile.databinding.CourseItemBinding
+import com.lukasanda.aismobile.ui.recyclerview.BaseAdapter
+import com.lukasanda.aismobile.ui.recyclerview.BindingViewHolder
+import com.lukasanda.aismobile.ui.recyclerview.create
 import com.lukasanda.aismobile.util.getTextDrawable
-import sk.lukasanda.base.ui.recyclerview.BaseAdapter
-import sk.lukasanda.base.ui.recyclerview.BindingViewHolder
-import sk.lukasanda.base.ui.recyclerview.create
 
 class CourseAdapter(private val listener: (FullCourse) -> Unit) :
     BaseAdapter<FullCourse, FullCourse, CourseViewHolder>(listener) {

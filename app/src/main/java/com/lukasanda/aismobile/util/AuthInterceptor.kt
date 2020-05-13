@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Lukáš Anda. All rights reserved.
+ * Copyright 2020 Lukáš Anda. All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,23 @@
 
 package com.lukasanda.aismobile.util
 
-import com.lukasanda.aismobile.data.cache.Prefs
+import com.lukasanda.aismobile.data.cache.SafePrefs
 import okhttp3.Interceptor
 import okhttp3.Response
 
-class AuthInterceptor(val prefs: Prefs) : Interceptor {
+class AuthInterceptor(val prefs: SafePrefs) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         return chain.proceed(chain.request().newBuilder().apply {
-            if(!chain.request().url().uri().toString().contains("login.pl")){
+            if (!chain.request().url.toUri().toString().contains("login.pl")) {
                 addHeader("Cookie", prefs.sessionCookie)
             }
         }.build())
     }
 }
 
-class EncodingInterceptor(): Interceptor{
+class EncodingInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val url = chain.request().url().toString().replace("%3D", "=")
+        val url = chain.request().url.toString().replace("%3D", "=")
         return chain.proceed(chain.request().newBuilder().apply {
             url(url)
         }.build())

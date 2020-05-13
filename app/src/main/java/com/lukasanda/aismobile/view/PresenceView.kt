@@ -21,7 +21,7 @@ import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.lukasanda.aismobile.R
-import sk.lukasanda.base.ui.recyclerview.replaceWith
+import com.lukasanda.aismobile.ui.recyclerview.replaceWith
 
 class PresenceView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0

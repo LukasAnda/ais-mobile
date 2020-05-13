@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "565773496061",
+    "firebase_url": "https://moja-stu.firebaseio.com",
+    "project_id": "moja-stu",
+    "storage_bucket": "moja-stu.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:565773496061:android:911f165e0f03a4cd201894",
+        "android_client_info": {
+          "package_name": "com.lukasanda.aismobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "565773496061-9g0ta46douknfg89m79a27ivfes9pds4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.lukasanda.aismobile",
+            "certificate_hash": "4ee41e6d24259b3d9ca694123abddcfafe1f6910"
+          }
+        },
+        {
+          "client_id": "565773496061-o6hddfs0scom2trpui4nr3m6f4n39etv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBA-5mXrx1J-_V8cgudMsVdtmRL-ZEgRuU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "565773496061-o6hddfs0scom2trpui4nr3m6f4n39etv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

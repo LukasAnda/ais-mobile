@@ -17,24 +17,23 @@ import android.os.Bundle
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
-import com.lukasanda.aismobile.databinding.FragmentSubjectsBinding
+import com.lukasanda.aismobile.data.db.entity.Semester
+import com.lukasanda.aismobile.databinding.SubjectsFragmentBinding
+import com.lukasanda.aismobile.ui.activity.BaseViews
+import com.lukasanda.aismobile.ui.fragment.BaseFragment
+import com.lukasanda.aismobile.ui.main.BaseFragmentHandler
 import com.lukasanda.aismobile.ui.main.subjects.courses.SemesterAdapter
-import com.lukasanda.aismobile.util.dec
+import com.lukasanda.aismobile.ui.recyclerview.replaceWith
 import com.lukasanda.aismobile.util.hide
-import com.lukasanda.aismobile.util.inc
 import com.lukasanda.aismobile.util.show
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import sk.lukasanda.base.ui.activity.BaseViews
-import sk.lukasanda.base.ui.fragment.BaseFragment
-import sk.lukasanda.base.ui.recyclerview.replaceWith
 
 class SubjectsFragment :
-    BaseFragment<SubjectsFragment.Views, FragmentSubjectsBinding, SubjectsViewModel, SubjectsFragmentHandler>() {
+    BaseFragment<SubjectsFragment.Views, SubjectsFragmentBinding, SubjectsViewModel, SubjectsFragmentHandler>() {
     override val viewModel: SubjectsViewModel by viewModel { parametersOf(Bundle()) }
 
-    override fun setBinding(): FragmentSubjectsBinding =
-        FragmentSubjectsBinding.inflate(layoutInflater)
+    override fun setBinding(): SubjectsFragmentBinding = SubjectsFragmentBinding.inflate(layoutInflater)
 
     override fun createViews() = Views()
     override lateinit var handler: SubjectsFragmentHandler
@@ -51,69 +50,67 @@ class SubjectsFragment :
             updateToolbar(position)
             viewModel.setPage(position)
         }
+
+        override fun onPageScrollStateChanged(state: Int) {
+            if (state == ViewPager2.SCROLL_STATE_IDLE) {
+                if (binding?.pager?.currentItem == 0) {
+                    binding?.pager?.setCurrentItem(semesterAdapter.itemCount - 2, false)
+                } else if (binding?.pager?.currentItem == semesterAdapter.itemCount - 1) {
+                    binding?.pager?.setCurrentItem(1, false)
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {
-        binding.pager.unregisterOnPageChangeCallback(pageChangeCallback)
+        binding?.pager?.unregisterOnPageChangeCallback(pageChangeCallback)
         super.onDestroyView()
     }
 
     inner class Views : BaseViews {
         override fun modifyViews() {
             postponeEnterTransition()
-            binding.buttonBack.setOnClickListener {
-                binding.pager.dec()
-            }
 
-            binding.buttonForward.setOnClickListener {
-                binding.pager.inc()
-            }
-
-            binding.pager.apply {
-                offscreenPageLimit = 1
+            binding?.pager?.apply {
+                offscreenPageLimit = 3
                 adapter = semesterAdapter
                 orientation = ViewPager2.ORIENTATION_HORIZONTAL
                 (getChildAt(0) as? RecyclerView)?.overScrollMode = RecyclerView.OVER_SCROLL_NEVER
+                binding?.pager?.registerOnPageChangeCallback(pageChangeCallback)
             }
-            handler.lowerToolbar()
 
             viewModel.courses().observe(viewLifecycleOwner, Observer {
                 if (it == null) return@Observer
                 startPostponedEnterTransition()
+                binding?.progress?.hide()
                 if (it.isEmpty()) {
-                    binding.toolbar.hide()
+                    binding?.pager?.hide()
+                    binding?.empty?.show()
+                    binding?.indicatorLayout?.hide()
                 } else {
-                    semesterAdapter.swapData(it)
+
+                    binding?.empty?.hide()
+                    binding?.pager?.show()
+                    binding?.indicatorLayout?.show()
+
+
+                    semesterAdapter.swapData(it.map { Semester(it) }, false)
                     viewModel.semesters.replaceWith(it.map { it.first().course.semester })
 
+                    binding?.indicator?.attachToPager(binding?.pager!!)
 
-                    binding.toolbar.show()
-                    binding.progress.hide()
-                    binding.pager.setCurrentItem(viewModel.getPage(), false)
+                    binding?.pager?.setCurrentItem(viewModel.getPage(), true)
                     updateToolbar(viewModel.getPage())
-                    binding.pager.registerOnPageChangeCallback(pageChangeCallback)
                 }
             })
         }
     }
 
     private fun updateToolbar(position: Int) {
-        binding.semester.text = viewModel.getSemesterName(position)
-
-        if (position == 0) {
-            binding.buttonBack.hide()
-        } else {
-            binding.buttonBack.show()
-        }
-        if (position == kotlin.math.max(semesterAdapter.itemCount - 1, 0)) {
-            binding.buttonForward.hide()
-        } else {
-            binding.buttonForward.show()
-        }
+        handler.setTitle(viewModel.getSemesterName(position))
     }
 }
 
-interface SubjectsFragmentHandler {
-    fun lowerToolbar()
+interface SubjectsFragmentHandler : BaseFragmentHandler {
     fun showDetailFromSubjects(courseId: String)
 }

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2020 Lukáš Anda. All rights reserved.
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="44dp"
+    android:height="52dp"
+    android:viewportWidth="44"
+    android:viewportHeight="52">
+
+    <path
+        android:pathData="M10.2552,28.0137 L19.0137,8.74485 M28.044,28.1632 L19.7377,9.01078 M24.5,20.5
+L15.5,20.5 M33,7 L33,13 M30,10 L36,10 M10.5,35.5 L20.5,35.5 M10.5,41.5
+L33.5,41.5 M5,50 L39,50 C40.6569,50,42,48.6569,42,47 L42,5
+C42,3.34315,40.6569,2,39,2 L5,2 C3.34315,2,2,3.34315,2,5 L2,47
+C2,48.6569,3.34315,50,5,50 Z"
+        android:strokeWidth="3"
+        android:strokeColor="#707070"
+        android:strokeLineCap="round" />
+</vector>

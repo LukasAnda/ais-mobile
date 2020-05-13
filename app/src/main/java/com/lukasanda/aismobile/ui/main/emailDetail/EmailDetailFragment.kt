@@ -20,28 +20,33 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.bottomsheets.BottomSheet
+import com.afollestad.materialdialogs.list.listItems
 import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.databinding.EmailDetailFragmentBinding
+import com.lukasanda.aismobile.ui.activity.BaseViews
+import com.lukasanda.aismobile.ui.fragment.BaseFragment
+import com.lukasanda.aismobile.ui.main.BaseFragmentHandler
 import com.lukasanda.aismobile.util.getInitialsFromName
 import com.lukasanda.aismobile.util.getNameFromSender
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import sk.lukasanda.base.ui.activity.BaseViews
-import sk.lukasanda.base.ui.fragment.BaseFragment
 
 class EmailDetailFragment :
     BaseFragment<EmailDetailFragment.Views, EmailDetailFragmentBinding, EmailDetailViewModel, EmailDetailHandler>() {
     inner class Views : BaseViews {
         override fun modifyViews() {
             setHasOptionsMenu(true)
+            handler.setTitle(" ")
             val args by navArgs<EmailDetailFragmentArgs>()
 
-            binding.sender.text = args.email.sender
-            binding.subject.text = args.email.subject
-            binding.date.text = args.email.date
+            binding?.sender?.text = args.email.sender
+            binding?.subject?.text = args.email.subject
+            binding?.date?.text = args.email.date
 
             val initials = args.email.sender.getNameFromSender().getInitialsFromName()
             val drawable =
@@ -49,15 +54,30 @@ class EmailDetailFragment :
                     .endConfig()
                     .buildRound(initials, ColorGenerator.MATERIAL.getColor(args.email.sender))
 
-            binding.icon.setImageDrawable(drawable)
+            binding?.icon?.setImageDrawable(drawable)
 
             viewModel.emailDetail().observe(viewLifecycleOwner, Observer {
-                it?.let {
-                    binding.progress.hide()
-                    binding.content.text = it
+                it?.let { detail ->
+                    binding?.progress?.hide()
+                    binding?.content?.text = detail.message
+
+                    if (detail.files.isNotEmpty()) {
+                        binding?.showDocuments?.show()
+                    } else {
+                        binding?.showDocuments?.hide()
+                    }
+                    binding?.showDocuments?.setOnClickListener {
+                        MaterialDialog(this@EmailDetailFragment.requireContext(), BottomSheet()).show {
+                            title(R.string.attachments)
+                            listItems(items = detail.files.map { it.second })
+                        }
+                    }
                 } ?: kotlin.run {
-                    binding.content.text = ""
-                    binding.progress.show()
+                    binding?.content?.text = ""
+                    binding?.progress?.show()
+                    binding?.showDocuments?.setOnClickListener {
+
+                    }
                 }
             })
 
@@ -92,6 +112,6 @@ class EmailDetailFragment :
     override lateinit var handler: EmailDetailHandler
 }
 
-interface EmailDetailHandler {
+interface EmailDetailHandler : BaseFragmentHandler {
     fun reply(email: Email)
 }

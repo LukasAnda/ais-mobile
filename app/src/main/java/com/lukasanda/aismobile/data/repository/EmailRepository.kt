@@ -20,13 +20,18 @@ import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.data.remote.AuthException
 import com.lukasanda.aismobile.data.remote.HTTPException
 import com.lukasanda.aismobile.data.remote.api.AISApi
-import com.lukasanda.aismobile.util.authenticatedOrThrow
+import com.lukasanda.aismobile.util.ResponseResult
+import com.lukasanda.aismobile.util.authenticatedOrThrow2
 import com.lukasanda.aismobile.util.getSuggestionRequestString
-import okhttp3.MediaType
+import com.lukasanda.aismobile.util.repeatIfException
+import com.lukasanda.dataprovider.Parser
+import com.lukasanda.dataprovider.data.EmailDetail
+import com.lukasanda.dataprovider.data.Suggestion
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody
 import org.joda.time.DateTime
-import sk.lukasanda.dataprovider.Parser
-import sk.lukasanda.dataprovider.data.Suggestion
+import org.joda.time.format.DateTimeFormat
+import timber.log.Timber
 
 class EmailRepository(
     private val emailDao: EmailDao,
@@ -34,49 +39,80 @@ class EmailRepository(
     private val service: AISApi
 ) {
 
+    suspend fun update2(updateType: UpdateType = UpdateType.Lazy): ResponseResult {
 
-    @Throws(AuthException::class, HTTPException::class)
-    suspend fun update(updateType: UpdateType = UpdateType.Lazy) {
-        val emailsCountResponse = service.emails().authenticatedOrThrow()
-        val emailsInfo = Parser.getEmailInfo(emailsCountResponse)
 
-        val emailsCount = emailsInfo.emailPages
-        prefs.sentDirectoryId = emailsInfo.saveDirectoryId
-        prefs.newEmailCount = emailsInfo.newEmailCount
+        runCatching {
+            repeatIfException(5, 2000) { service.emails().authenticatedOrThrow2() }
+                ?.let { Parser.getEmailInfo(it) }
+                ?.let {
+                    prefs.sentDirectoryId = it.saveDirectoryId
+                    prefs.newEmailCount = it.newEmailCount
+                    (0 until it.emailPages)
+                }
+                ?.takeUnless { updateType == UpdateType.Lazy && prefs.emailExpiration.isAfterNow }
 
-        println(emailsInfo)
+                ?.map {
+                    Timber.d("Updating page #$it")
+                    repeatIfException(5, 2000) { service.emailPage(it.toString()).authenticatedOrThrow2() }
+                }
+                ?.filterNotNull()
+                ?.map { Parser.getEmails(it) }
+                ?.filterNotNull()
+                ?.flatten()
+                ?.map {
+                    Email(
+                        it.eid.substringAfter("="),
+                        it.fid.substringAfter("="),
+                        it.senderId,
+                        it.sender,
+                        it.subject,
+                        it.date,
+                        it.opened
+                    )
+                }
+                ?.let {
+                    val latestMail = emailDao.getEmailsList().maxBy {
+                        DateTime.parse(
+                            it.date,
+                            DateTimeFormat.forPattern("dd. MM. yyyy HH:mm")
+                        )
+                    }
 
-        if (updateType == UpdateType.Lazy) {
-            if (prefs.emailExpiration.isAfterNow)
-                return
+                    Timber.d("Inserting ${it.size} messages")
+
+                    emailDao.update(it)
+
+                    it.sortedByDescending {
+                        DateTime.parse(
+                            it.date,
+                            DateTimeFormat.forPattern("dd. MM. yyyy HH:mm")
+                        )
+                    }.indexOfFirst { latestMail != null && it.eid == latestMail.eid && it.fid == latestMail.fid }
+                        .takeIf { it > 0 }
+                        ?.also { return ResponseResult.AuthenticatedWithResult(it) }
+                }
+        }.exceptionOrNull()?.takeIf { it is AuthException }?.let {
+            return ResponseResult.AuthError
         }
 
-        for (i in 0 until emailsCount) {
-            val emailPageResponse = service.emailPage(i.toString()).authenticatedOrThrow()
-            val emailsList = Parser.getEmails(emailPageResponse) ?: emptyList()
-            emailDao.insertEmails(emailsList.map {
-                Email(
-                    it.eid.substringAfter("="),
-                    it.fid.substringAfter("="),
-                    it.senderId,
-                    it.sender,
-                    it.subject,
-                    it.date,
-                    it.opened
-                )
-            })
-        }
-        prefs.emailExpiration = DateTime.now().plusMinutes(10)
+        return ResponseResult.Authenticated
+
     }
+
 
     @Throws(AuthException::class, HTTPException::class)
     suspend fun delete(email: Email) {
-        service.deleteEmail("${email.fid};eid=${email.eid};on=0;menu_akce=vymazat").authenticatedOrThrow()
+        service.deleteEmail("${email.fid};eid=${email.eid};on=0;menu_akce=vymazat").authenticatedOrThrow2()
         emailDao.deleteSingle(email)
     }
 
-    suspend fun getEmailDetail(email: Email): String {
-        val response = service.emailDetail("${email.eid};fid=${email.fid};on=0").authenticatedOrThrow()
+    suspend fun deleteAll() {
+        emailDao.deleteAll()
+    }
+
+    suspend fun getEmailDetail(email: Email): EmailDetail {
+        val response = service.emailDetail("${email.eid};fid=${email.fid};on=0").authenticatedOrThrow2()
         val message = Parser.getEmailDetail(response)
         if (!email.opened) {
             prefs.newEmailCount--
@@ -85,21 +121,21 @@ class EmailRepository(
         return message
     }
 
-    fun getEmails() = emailDao.getEmails()
+    fun getEmails() = emailDao.getAllEmails()
 
     suspend fun getSuggestions(query: String): List<Suggestion> {
         val suggestionResponse = service.getSuggestions(
             RequestBody.create(
-                MediaType.parse("text/plain"),
+                "text/plain".toMediaType(),
                 getSuggestionRequestString(query)
             )
-        ).authenticatedOrThrow()
+        ).authenticatedOrThrow2()
 
         return Parser.getSuggestions(suggestionResponse) ?: emptyList()
     }
 
     suspend fun sendMail(to: String, subject: String, message: String): Boolean {
-        val newMailResponse = service.newMessagePage().authenticatedOrThrow()
+        val newMailResponse = service.newMessagePage().authenticatedOrThrow2()
         val token = Parser.getNewMessageToken(newMailResponse)
         if (token.isEmpty()) {
             Log.d("TAG", "Empty token, something went wrong")
@@ -125,7 +161,7 @@ class EmailRepository(
         message: String,
         originalEmail: Email
     ): Boolean {
-        val newMailResponse = service.newMessagePage().authenticatedOrThrow()
+        val newMailResponse = service.newMessagePage().authenticatedOrThrow2()
         val token = Parser.getNewMessageToken(newMailResponse)
         if (token.isEmpty()) {
             Log.d("TAG", "Empty token, something went wrong")
@@ -152,6 +188,4 @@ class EmailRepository(
     enum class UpdateType {
         Lazy, Purge
     }
-
-
 }

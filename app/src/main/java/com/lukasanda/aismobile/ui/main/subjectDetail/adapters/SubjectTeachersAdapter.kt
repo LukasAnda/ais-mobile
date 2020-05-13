@@ -19,11 +19,11 @@ import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.lukasanda.aismobile.data.db.entity.Teacher
 import com.lukasanda.aismobile.databinding.TeacherContactItemBinding
+import com.lukasanda.aismobile.ui.recyclerview.BaseAdapter
+import com.lukasanda.aismobile.ui.recyclerview.BindingViewHolder
+import com.lukasanda.aismobile.ui.recyclerview.create
 import com.lukasanda.aismobile.util.getInitialsFromName
 import com.lukasanda.aismobile.util.getNameFromSender
-import sk.lukasanda.base.ui.recyclerview.BaseAdapter
-import sk.lukasanda.base.ui.recyclerview.BindingViewHolder
-import sk.lukasanda.base.ui.recyclerview.create
 
 class SubjectTeachersAdapter(listener: (Teacher) -> Unit) :
     BaseAdapter<Teacher, Teacher, TeacherItemHolder>(listener) {

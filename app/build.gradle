@@ -20,12 +20,12 @@ apply plugin: "androidx.navigation.safeargs.kotlin"
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.2"
+    buildToolsVersion "29.0.3"
 
     defaultConfig {
         applicationId "com.lukasanda.aismobile"
-        versionCode 1
-        versionName "1.0.0"
+        versionCode 8
+        versionName "1.0.0-beta8"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         minSdkVersion 21
@@ -59,8 +59,8 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    viewBinding {
-        enabled = true
+    buildFeatures{
+        viewBinding = true
     }
 
     androidExtensions {
@@ -86,7 +86,11 @@ android {
     }
 
     buildTypes {
+        debug{
+            resValue "bool", "FIREBASE_ANALYTICS_DEACTIVATED", "true"
+        }
         release {
+            resValue "bool", "FIREBASE_ANALYTICS_DEACTIVATED", "false"
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -96,11 +100,17 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.2'
+//    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.2'
 
     //application
     def multidex__version = "2.0.1"
     implementation "androidx.multidex:multidex:$multidex__version"
+
+    //download files
+    implementation "androidx.tonyodev.fetch2:xfetch2:3.1.4"
+
+    //crypto
+    implementation "de.adorsys.android:securestoragelibrary:1.2.4"
 
     //application components
     implementation "androidx.activity:activity-ktx:$libraries.activity__version"
@@ -140,17 +150,24 @@ dependencies {
     //date time
     implementation 'joda-time:joda-time:2.10.5'
 
+    //Loading
+    implementation 'com.github.LukasAnda:Wavee:1.1'
+
     //images
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     kapt 'com.github.bumptech.glide:compiler:4.11.0'
 
     //firebase
-    implementation 'com.google.firebase:firebase-core:17.2.2'
-    implementation 'com.google.firebase:firebase-analytics:17.2.2'
+    implementation 'com.google.firebase:firebase-core:17.3.0'
+    implementation 'com.google.firebase:firebase-analytics:17.3.0'
+    implementation 'com.google.firebase:firebase-crashlytics:17.0.0-beta03'
 
-    implementation 'com.afollestad.material-dialogs:core:3.1.1'
+
+    implementation 'com.afollestad.material-dialogs:core:3.3.0'
     implementation 'com.afollestad.material-dialogs:bottomsheets:3.1.1'
     implementation 'com.afollestad.material-dialogs:lifecycle:3.1.1'
+
+    implementation "ru.tinkoff.scrollingpagerindicator:scrollingpagerindicator:1.2.0"
 
     implementation project(path: ':base')
 
@@ -165,21 +182,29 @@ dependencies {
 
     implementation 'com.snakydesign.livedataextensions:lives:1.3.0'
 
-    implementation "androidx.room:room-runtime:2.2.3"
-    kapt "androidx.room:room-compiler:2.2.3"
-    implementation 'androidx.room:room-ktx:2.2.3'
+    implementation "androidx.room:room-runtime:2.2.5"
+    kapt "androidx.room:room-compiler:2.2.5"
+    implementation 'androidx.room:room-ktx:2.2.5'
     // Koin
     implementation "org.koin:koin-core:2.0.1"
     implementation "org.koin:koin-android:2.0.1"
     implementation "org.koin:koin-androidx-viewmodel:2.0.1"
 
     // Retrofit
-    implementation "com.squareup.retrofit2:retrofit:2.7.1"
+    implementation ("com.squareup.retrofit2:retrofit:2.8.1"){
+        exclude group: 'squareup.okhttp3', module: 'okhttp'
+    }
 //    implementation "com.squareup.retrofit2:adapter-rxjava2:2.5.0"
     implementation "com.squareup.retrofit2:converter-gson:2.7.1"
 
+    implementation 'com.squareup.retrofit2:converter-scalars:2.5.0'
+
+    implementation("com.squareup.okhttp3:okhttp:4.5.0")
+
     // OkHttp
-    implementation "com.squareup.okhttp3:logging-interceptor:3.12.0"
+    implementation "com.squareup.okhttp3:logging-interceptor:4.5.0"
+
+    implementation 'com.google.android.gms:play-services-auth:18.0.0'
 
     // Joda
 //    implementation "net.danlew:android.joda:2.10.1.2"
@@ -193,11 +218,18 @@ dependencies {
     // AutofitTextView
     implementation 'me.grantland:autofittextview:0.2.1'
 
+    implementation 'androidx.preference:preference:1.1.0'
+
+    implementation 'com.jakewharton.timber:timber:4.7.1'
+
     // Glide
 //    implementation 'com.github.bumptech.glide:glide:4.10.0'
 //    kapt 'com.github.bumptech.glide:compiler:4.10.0'
 
-    implementation "androidx.work:work-runtime-ktx:2.3.1"
+    implementation "androidx.work:work-runtime-ktx:2.3.4"
 
 
 }
+
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'
