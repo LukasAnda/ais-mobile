@@ -78,6 +78,12 @@
     <string name="settings_information">Informácie</string>
     <string name="settings_app_version">Verzia aplikácie</string>
 
+    <string name="rate_app_title">Ohodnoť prosím túto aplikáciu</string>
+    <string name="rate_app_subtitle">Ahoj, veľmi by mi pomohlo keby ohodnotíš túto aplikáciu na Google Play. Tvoj feedback sa tak rýchlejšie dostane ku mne a aj ostatní budú vedieť prečo je táto aplikácia taká super. Ďakujem :)</string>
+    <string name="rate_app_yes">Ohodnotiť teraz</string>
+    <string name="rate_app_no">Nie ďakujem</string>
+    <string name="rate_app_remind">Pripomeň mi neskôr</string>
+
     <string-array name="theme_entries">
         <item>Denná</item>
         <item>Nočná</item>
@@ -97,4 +103,7 @@
     <string name="profile_email">Email:</string>
 
     <string name="back">Späť</string>
+    <string name="settings_contact">Kontakt</string>
+    <string name="settings_email_contact">Napísať e-mail</string>
+    <string name="my_mail">lukas.anda@gmail.com</string>
 </resources>

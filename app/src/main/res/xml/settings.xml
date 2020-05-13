@@ -15,7 +15,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory android:title="@string/settings_general">
         <ListPreference
-            app:defaultValue="3"
+            app:defaultValue="0"
             app:entries="@array/theme_entries"
             app:entryValues="@array/theme_entry_values"
             app:icon="@drawable/ic_theme"
@@ -39,5 +39,11 @@
             android:title="@string/settings_app_version"
             app:icon="@drawable/ic_info"
             app:key="version" />
+
+        <Preference
+            android:title="@string/settings_email_contact"
+            app:icon="@drawable/ic_email"
+            app:key="email"
+            app:summary="@string/my_mail" />
     </PreferenceCategory>
 </PreferenceScreen>

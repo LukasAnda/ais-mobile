@@ -34,6 +34,7 @@ import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.core.ACTION_SEND_COMPOSED
 import com.lukasanda.aismobile.core.ACTION_SEND_REPLY
 import com.lukasanda.aismobile.core.AnalyticsTrait
+import com.lukasanda.aismobile.core.SCREEN_EMAIL_COMPOSE
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.data.db.entity.Suggestion
 import com.lukasanda.aismobile.databinding.ComposeEmailFragmentBinding
@@ -86,6 +87,7 @@ class ComposeEmailFragment :
 
     inner class Views : BaseViews {
         override fun modifyViews() {
+            logEvent(SCREEN_EMAIL_COMPOSE)
             setHasOptionsMenu(true)
 
             val args by navArgs<ComposeEmailFragmentArgs>()

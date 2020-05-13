@@ -40,6 +40,7 @@ import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.lukasanda.aismobile.BuildConfig
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.core.*
 import com.lukasanda.aismobile.data.cache.Prefs
@@ -74,6 +75,11 @@ import com.lukasanda.aismobile.ui.main.subjects.SubjectsFragmentHandler
 import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentDirections
 import com.lukasanda.aismobile.ui.main.timetable.TimetableFragmentHandler
 import com.lukasanda.aismobile.util.*
+import com.vorlonsoft.android.rate.AppRate
+import com.vorlonsoft.android.rate.StoreType
+import com.vorlonsoft.android.rate.Time
+import eu.dkaratzas.android.inapp.update.Constants
+import eu.dkaratzas.android.inapp.update.InAppUpdateManager
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -94,6 +100,42 @@ class MainActivity : BaseUIActivity<MainViewModel, MainActivity.Views, ActivityM
     inner class Views : BaseActivityViews {
 
         override fun modifyViews() {
+
+            AppRate.with(this@MainActivity)
+                .setStoreType(StoreType.GOOGLEPLAY) /* default is GOOGLEPLAY (Google Play), other options are AMAZON (Amazon Appstore), BAZAAR (Cafe Bazaar),
+                                           *         CHINESESTORES (19 chinese app stores), MI (Mi Appstore (Xiaomi Market)), SAMSUNG (Samsung Galaxy Apps),
+                                           *         SLIDEME (SlideME Marketplace), TENCENT (Tencent App Store), YANDEX (Yandex.Store),
+                                           *         setStoreType(BLACKBERRY, long) (BlackBerry World, long - your application ID),
+                                           *         setStoreType(APPLE, long) (Apple App Store, long - your application ID),
+                                           *         setStoreType(String...) (Any other store/stores, String... - an URI or array of URIs to your app) and
+                                           *         setStoreType(Intent...) (Any custom intent/intents, Intent... - an intent or array of intents) */
+                .setTimeToWait(Time.DAY, 0.toShort()) // default is 10 days, 0 means install millisecond, 10 means app is launched 10 or more time units later than installation
+                .setLaunchTimes(3.toByte()) // default is 10, 3 means app is launched 3 or more times
+                .setRemindTimeToWait(Time.DAY, 2.toShort()) // default is 1 day, 1 means app is launched 1 or more time units after neutral button clicked
+                .setRemindLaunchesNumber(1.toByte()) // default is 0, 1 means app is launched 1 or more times after neutral button clicked
+                .setSelectedAppLaunches(1.toByte()) // default is 1, 1 means each launch, 2 means every 2nd launch, 3 means every 3rd launch, etc
+                .setShowLaterButton(true) // default is true, true means to show the Neutral button ("Remind me later").
+                .set365DayPeriodMaxNumberDialogLaunchTimes(3.toShort()) // default is unlimited, 3 means 3 or less occurrences of the display of the Rate Dialog within a 365-day period
+                .setVersionCodeCheck(true) // default is false, true means to re-enable the Rate Dialog if a new version of app with different version code is installed
+                .setVersionNameCheck(true) // default is false, true means to re-enable the Rate Dialog if a new version of app with different version name is installed
+                .setDebug(BuildConfig.DEBUG) // default is false, true is for development only, true ensures that the Rate Dialog will be shown each time the app is launched
+                .setTitle(R.string.rate_app_title)
+                .setMessage(R.string.rate_app_subtitle)
+                .setTextRateNow(R.string.rate_app_yes)
+                .setTextNever(R.string.rate_app_no)
+                .setTextLater(R.string.rate_app_remind)
+                .monitor()
+
+
+            AppRate.showRateDialogIfMeetsConditions(this@MainActivity);
+
+            val inAppUpdateManager: InAppUpdateManager = InAppUpdateManager.Builder(this@MainActivity, 6666)
+                .resumeUpdates(true) // Resume the update, if the update was stalled. Default is true
+                .mode(Constants.UpdateMode.IMMEDIATE)
+
+            inAppUpdateManager.checkForAppUpdate()
+
+
             drawerHeaderBinding = DrawerHeaderViewBinding.bind(binding.navigationView.getHeaderView(0))
             this@MainActivity.navController?.let {
                 NavigationUI.setupWithNavController(binding.bottomMenu, it)

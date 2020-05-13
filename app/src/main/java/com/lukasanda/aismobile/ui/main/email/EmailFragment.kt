@@ -25,6 +25,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.core.ACTION_EMAIL_DELETE
 import com.lukasanda.aismobile.core.AnalyticsTrait
+import com.lukasanda.aismobile.core.SCREEN_EMAIL
 import com.lukasanda.aismobile.core.SwipeHelper
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.databinding.EmailFragmentBinding
@@ -60,6 +61,7 @@ class EmailFragment :
     inner class Views : BaseViews {
         override fun modifyViews() {
             postponeEnterTransition()
+            logEvent(SCREEN_EMAIL)
             handler.setTitle(getString(R.string.emails))
             binding?.recycler?.bindLinear(adapter)
 
@@ -97,10 +99,12 @@ class EmailFragment :
             viewModel.emails().observe(viewLifecycleOwner, Observer {
                 Timber.d("I have to show ${it.size} emails")
                 adapter.swapData(it.sortedByDescending {
-                    DateTime.parse(
-                        it.date,
-                        DateTimeFormat.forPattern("dd. MM. yyyy HH:mm")
-                    )
+                    it.date.takeIf { it.isEmpty() }?.let { DateTime.now() } ?: run {
+                        DateTime.parse(
+                            it.date,
+                            DateTimeFormat.forPattern("dd. MM. yyyy HH:mm")
+                        )
+                    }
                 })
                 startPostponedEnterTransition()
             })

@@ -48,7 +48,7 @@ class EmailRepository(
                 ?.let {
                     prefs.sentDirectoryId = it.saveDirectoryId
                     prefs.newEmailCount = it.newEmailCount
-                    (0 until it.emailPages)
+                    (0..it.emailPages)
                 }
                 ?.takeUnless { updateType == UpdateType.Lazy && prefs.emailExpiration.isAfterNow }
 

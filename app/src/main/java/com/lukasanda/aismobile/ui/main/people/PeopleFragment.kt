@@ -20,6 +20,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.core.ACTION_SEARCH_PEOPLE
 import com.lukasanda.aismobile.core.AnalyticsTrait
+import com.lukasanda.aismobile.core.SCREEN_PEOPLE
 import com.lukasanda.aismobile.data.db.entity.Suggestion
 import com.lukasanda.aismobile.databinding.PeopleFragmentBinding
 import com.lukasanda.aismobile.ui.activity.BaseViews
@@ -36,6 +37,7 @@ class PeopleFragment : BaseFragment<PeopleFragment.Views, PeopleFragmentBinding,
 
     inner class Views : BaseViews {
         override fun modifyViews() {
+            logEvent(SCREEN_PEOPLE)
             handler.setTitle(getString(R.string.people_at_stu))
 
             binding?.results?.bindLinear(peopleAdapter)

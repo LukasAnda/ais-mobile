@@ -17,6 +17,9 @@ import android.os.Bundle
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.viewpager2.widget.ViewPager2
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.lukasanda.aismobile.core.AnalyticsTrait
+import com.lukasanda.aismobile.core.SCREEN_TIMETABLE
 import com.lukasanda.aismobile.data.db.entity.WeekItem
 import com.lukasanda.aismobile.databinding.TimetableFragmentBinding
 import com.lukasanda.aismobile.ui.activity.BaseViews
@@ -30,7 +33,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
 class TimetableFragment :
-    BaseFragment<TimetableFragment.Views, TimetableFragmentBinding, TimetableViewModel, TimetableFragmentHandler>() {
+    BaseFragment<TimetableFragment.Views, TimetableFragmentBinding, TimetableViewModel, TimetableFragmentHandler>(), AnalyticsTrait {
 
     override lateinit var handler: TimetableFragmentHandler
     override val viewModel: TimetableViewModel by viewModel { parametersOf(Bundle()) }
@@ -70,6 +73,7 @@ class TimetableFragment :
 
     inner class Views : BaseViews {
         override fun modifyViews() {
+            logEvent(SCREEN_TIMETABLE)
             binding?.pager?.apply {
                 offscreenPageLimit = 3
                 adapter = weekAdapter
@@ -102,6 +106,8 @@ class TimetableFragment :
         }
 
     }
+
+    override fun getAnalytics() = FirebaseAnalytics.getInstance(requireContext())
 }
 
 interface TimetableFragmentHandler : BaseFragmentHandler {

@@ -16,7 +16,10 @@ package com.lukasanda.aismobile.ui.main.documents
 import android.os.Bundle
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.lukasanda.aismobile.R
+import com.lukasanda.aismobile.core.AnalyticsTrait
+import com.lukasanda.aismobile.core.SCREEN_DOCUMENTS
 import com.lukasanda.aismobile.data.db.entity.Document
 import com.lukasanda.aismobile.databinding.DocumentsFragmentBinding
 import com.lukasanda.aismobile.ui.activity.BaseViews
@@ -28,7 +31,7 @@ import com.lukasanda.aismobile.util.show
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
-class DocumentsFragment : BaseFragment<DocumentsFragment.Views, DocumentsFragmentBinding, DocumentsViewModel, DocumentsHandler>() {
+class DocumentsFragment : BaseFragment<DocumentsFragment.Views, DocumentsFragmentBinding, DocumentsViewModel, DocumentsHandler>(), AnalyticsTrait {
     private val adapter = DocumentsAdapter {
         it?.let {
             if (it.openable) {
@@ -43,6 +46,7 @@ class DocumentsFragment : BaseFragment<DocumentsFragment.Views, DocumentsFragmen
 
     inner class Views : BaseViews {
         override fun modifyViews() {
+            logEvent(SCREEN_DOCUMENTS)
             val args by navArgs<DocumentsFragmentArgs>()
             val folder = args.folder ?: ""
             handler.setTitle(getString(R.string.documents))
@@ -76,6 +80,7 @@ class DocumentsFragment : BaseFragment<DocumentsFragment.Views, DocumentsFragmen
     override fun createViews() = Views()
 
     override lateinit var handler: DocumentsHandler
+    override fun getAnalytics() = FirebaseAnalytics.getInstance(requireContext())
 }
 
 interface DocumentsHandler : BaseFragmentHandler {

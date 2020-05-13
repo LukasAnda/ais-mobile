@@ -46,7 +46,7 @@ class CourseRepository(
     fun get(courseId: String) = courseDao.getCourse(courseId)
 
     suspend fun update2(handler: CourseUpdateHandler? = null): ResponseResult = withContext(Dispatchers.IO) {
-        Timber.d("Saved semester update time: ${prefs.courseExpiration}$")
+        Timber.d("Saved semester update time: ${prefs.courseExpiration}, is afternow : ${prefs.courseExpiration.isAfterNow}")
 
         if (prefs.courseExpiration.isAfterNow) return@withContext ResponseResult.Authenticated
 

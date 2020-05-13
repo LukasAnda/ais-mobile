@@ -21,7 +21,10 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.lukasanda.aismobile.R
+import com.lukasanda.aismobile.core.AnalyticsTrait
+import com.lukasanda.aismobile.core.SCREEN_COURSE_DETAIL
 import com.lukasanda.aismobile.data.db.entity.Teacher
 import com.lukasanda.aismobile.databinding.SubjectDetailFragmentBinding
 import com.lukasanda.aismobile.ui.activity.BaseViews
@@ -34,7 +37,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
 class SubjectDetailFragment :
-    BaseFragment<SubjectDetailFragment.Views, SubjectDetailFragmentBinding, SubjectDetailViewModel, SubjectDetailHandler>() {
+    BaseFragment<SubjectDetailFragment.Views, SubjectDetailFragmentBinding, SubjectDetailViewModel, SubjectDetailHandler>(), AnalyticsTrait {
     val sheetsAdapter = SubjectTablesAdapter {}
     val teachersAdapter = SubjectTeachersAdapter {
         handler.writeToTeacher(it)
@@ -43,6 +46,7 @@ class SubjectDetailFragment :
     inner class Views : BaseViews {
         override fun modifyViews() {
             setHasOptionsMenu(true)
+            logEvent(SCREEN_COURSE_DETAIL)
             handler.setTitle(" ")
 
             postponeEnterTransition()
@@ -92,6 +96,7 @@ class SubjectDetailFragment :
     override fun createViews() = Views()
 
     override lateinit var handler: SubjectDetailHandler
+    override fun getAnalytics() = FirebaseAnalytics.getInstance(requireContext())
 }
 
 interface SubjectDetailHandler : BaseFragmentHandler {
