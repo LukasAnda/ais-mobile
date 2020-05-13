@@ -17,6 +17,9 @@ import android.os.Bundle
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.lukasanda.aismobile.core.AnalyticsTrait
+import com.lukasanda.aismobile.core.SCREEN_INDEX
 import com.lukasanda.aismobile.data.db.entity.Semester
 import com.lukasanda.aismobile.databinding.SubjectsFragmentBinding
 import com.lukasanda.aismobile.ui.activity.BaseViews
@@ -30,7 +33,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
 class SubjectsFragment :
-    BaseFragment<SubjectsFragment.Views, SubjectsFragmentBinding, SubjectsViewModel, SubjectsFragmentHandler>() {
+    BaseFragment<SubjectsFragment.Views, SubjectsFragmentBinding, SubjectsViewModel, SubjectsFragmentHandler>(), AnalyticsTrait {
     override val viewModel: SubjectsViewModel by viewModel { parametersOf(Bundle()) }
 
     override fun setBinding(): SubjectsFragmentBinding = SubjectsFragmentBinding.inflate(layoutInflater)
@@ -69,6 +72,7 @@ class SubjectsFragment :
 
     inner class Views : BaseViews {
         override fun modifyViews() {
+            logEvent(SCREEN_INDEX)
             postponeEnterTransition()
 
             binding?.pager?.apply {
@@ -109,6 +113,8 @@ class SubjectsFragment :
     private fun updateToolbar(position: Int) {
         handler.setTitle(viewModel.getSemesterName(position))
     }
+
+    override fun getAnalytics() = FirebaseAnalytics.getInstance(requireContext())
 }
 
 interface SubjectsFragmentHandler : BaseFragmentHandler {

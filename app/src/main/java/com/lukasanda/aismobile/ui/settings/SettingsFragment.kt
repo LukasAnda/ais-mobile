@@ -13,6 +13,9 @@
 
 package com.lukasanda.aismobile.ui.settings
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -24,6 +27,19 @@ class SettingsFragment : PreferenceFragmentCompat() {
         setPreferencesFromResource(R.xml.settings, rootKey)
 
         findPreference<Preference>("version")?.summary = BuildConfig.VERSION_NAME
+
+        findPreference<Preference>("email")?.setOnPreferenceClickListener {
+            val mailto = "mailto:${it.summary}"
+
+            val emailIntent = Intent(Intent.ACTION_SENDTO)
+            emailIntent.data = Uri.parse(mailto)
+
+            try {
+                startActivity(emailIntent)
+            } catch (e: ActivityNotFoundException) {
+            }
+            true
+        }
     }
 
 }

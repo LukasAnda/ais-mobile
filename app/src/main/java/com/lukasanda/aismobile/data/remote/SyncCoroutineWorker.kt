@@ -37,6 +37,7 @@ import org.joda.time.DateTime
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import retrofit2.Response
+import timber.log.Timber
 
 private const val NOTIFICATION_DEBUG = 0
 private const val NOTIFICATION_TIMETABLE = 1
@@ -193,6 +194,8 @@ class SyncCoroutineWorker(
     private suspend fun saveProfile(educationResponse: String, wifiResponse: String) {
 
         val aisId = Parser.getId(educationResponse) ?: return
+
+        Timber.d("New id is $aisId")
         prefs.id = aisId
 
         val wifiInfo = Parser.getWifiInfo(wifiResponse) ?: return

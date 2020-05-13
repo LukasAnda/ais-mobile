@@ -38,10 +38,12 @@ object Parser {
 
         return try {
             val items = cleaner.clean(webResponse)
-            val node =
-                items.evaluateXPath("/body/div[2]/div/div/form/table[2]/tbody/tr[1]/td[2]/small").first() as TagNode
-            val id = node.allChildren.first() as ContentNode
-            id.content.toInt()
+            return items.findElementByAttValue("name", "formular", true, true).let {
+                it.getElementListByName("table", true).component2()
+            }.let { it.childTagList.first().childTagList.firstOrNull() }
+                ?.getAllElementsList(true)
+                ?.lastOrNull() { it.content().isNotEmpty() }
+                ?.let { it.content().toInt() }
         } catch (e: Exception) {
             null
         }
@@ -54,16 +56,18 @@ object Parser {
 
         return try {
             val items = cleaner.clean(webResponse)
-            val node =
-                items.evaluateXPath("/body/div[2]/div/div/form/table/tbody/tr[1]/td[2]/small/b").first() as TagNode
-            val name = node.allChildren.first() as ContentNode
 
-            val node2 =
-                items.evaluateXPath("/body/div[2]/div/div/form/table/tbody/tr[2]/td[2]/small/b").first() as TagNode
-            val password = node2.allChildren.first() as ContentNode
+            val table = items.findElementByAttValue("name", "wqqwqqwwqyw0", true, true).findElementByName("tbody", true)
 
 
-            WifiInfo(name.content, password.content)
+            val node = table.childTagList.component1().childTagList.last()
+            val name = node.getAllElementsList(true).map { it.content() }.filter { it.isNotEmpty() }.firstOrNull() ?: ""
+
+            val node2 = table.childTagList.component2().childTagList.last()
+            val password = node2.getAllElementsList(true).map { it.content() }.filter { it.isNotEmpty() }.firstOrNull() ?: ""
+
+
+            WifiInfo(name, password)
         } catch (e: Exception) {
             null
         }
@@ -274,7 +278,7 @@ object Parser {
             val items = cleaner.clean(webResponse)
             val teachers = items.getElementListHavingAttribute("href", true)
                 .filter { it.getAttributeByName("href").contains("clovek.pl") }
-                .filter { it.parent.name == "small" }.map {
+                .filter { it.parent.name == "div" || it.parent.name == "span" }.map {
                     val name = it.content()
                     val id = it.getAttributeByName("href").substringAfter("id=").substringBefore(";")
                     Teacher(name, id)
@@ -330,16 +334,10 @@ object Parser {
             val emailCountElement = items.findElementByAttValue("href", "/auth/posta/", true, true)
             val emailCount = emailCountElement.content().toInt()
 
-            val image =
-                items.findElementByAttValue("sysid", "tree-8", true, true) ?: return EmailInfo(
-                    1,
-                    sentDirectoryLink,
-                    emailCount
-                )
-            val row = image.parent.parent
+            val link = items.getElementListByAttValue("sysid", "tree-vpravo-zarazka", true, true)?.map { it.parent.getAttributeByName("href") }?.firstOrNull() ?: ""
 
 
-            EmailInfo(row.childTagList.size - 4, sentDirectoryLink, emailCount)
+            EmailInfo(link.substringAfter("on=").toIntOrNull() ?: 0, sentDirectoryLink, emailCount)
         } catch (e: Exception) {
             EmailInfo(-1, "", 0)
         }
@@ -347,6 +345,10 @@ object Parser {
 
     fun getEmails(webResponse: String): List<Email>? {
         if (webResponse.isEmpty()) return null
+
+//        val doc = Jsoup.parse(webResponse)
+//
+//        val table = doc.select("#tmtab_1")
 
         val cleaner = HtmlCleaner()
         val returnList = mutableListOf<Email>()
@@ -368,7 +370,7 @@ object Parser {
                 ).firstOrNull()?.getAttributeByName("href")?.substringAfterLast("id=") ?: ""
 
                 val date = it.getElementList(
-                    { it.name == "small" && it.content().matches(Regex("^([1-9]|([012][0-9])|(3[01]))\\. ([0]{0,1}[1-9]|1[012])\\. \\d\\d\\d\\d\\s([0-1]?[0-9]|2?[0-3]):([0-5]\\d)\$")) },
+                    { it.content().matches(Regex("^([1-9]|([012][0-9])|(3[01]))\\. ([0]{0,1}[1-9]|1[012])\\. \\d\\d\\d\\d\\s([0-1]?[0-9]|2?[0-3]):([0-5]\\d)\$")) },
                     true
                 ).firstOrNull()?.content()
                     ?: ""
@@ -413,14 +415,14 @@ object Parser {
             val items = cleaner.clean(webResponse)
             val form = items.findElementByAttValue("name", "wqqwqqwwqyw0", true, true)
             val table = form.findElementByName("tbody", true).findElementByName("tbody", true)
-            val message = table.childTagList.last().findElementByName("small", true)
-                .allChildren.map {
+            val message = table.childTagList.last().getAllElementsList(true).find { it.name == "span" || it.name == "div" }?.allChildren
+                ?.map {
                     if (it is ContentNode) it.content else if (it is TagNode && it.hasAttribute(
                             "href"
                         )
                     ) it.content() else "\n"
-                }.joinToString("")
-                .replace("&nbsp;", " ")
+                }?.joinToString("")
+                ?.replace("&nbsp;", " ") ?: ""
 
             //Second table
             val documentsTable = form.getElementListByName("table", false)[1].findElementByName("tbody", true)
@@ -473,7 +475,7 @@ object Parser {
             topTable?.childTagList?.forEach {
                 if (it.childTagList.size == 1) return@forEach
 
-                val name = it.childTagList.component2().findElementByName("small", true).content()
+                val name = it.childTagList.component2().getAllElementsList(true).map { it.content() }.filter { it.isNotEmpty() }.firstOrNull() ?: ""
                 val link: String = it.getElementList({ it.name == "a" && it.getAttributeByName("href").contains("slozka.pl") }, true).firstOrNull()?.getAttributeByName("href") ?: ""
                 val id = link.substringAfter("download=").substringBefore(";")
                 val parentId = link.substringAfter("id=").substringBefore(";")
@@ -487,7 +489,7 @@ object Parser {
             bottomTable?.childTagList?.forEach {
                 if (it.childTagList.size == 1) return@forEach
 
-                val name = it.childTagList.component2().findElementByName("small", true).content()
+                val name = it.childTagList.component2().getAllElementsList(true).map { it.content() }.filter { it.isNotEmpty() }.firstOrNull() ?: ""
                 val link: String = it.getElementList(
                     { it.name == "a" && it.getAttributeByName("href").contains("slozka.pl") },
                     true

@@ -19,6 +19,9 @@ import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.lukasanda.aismobile.core.AnalyticsTrait
+import com.lukasanda.aismobile.core.SCREEN_PPL_DETAIL
 import com.lukasanda.aismobile.data.cache.SafePrefs
 import com.lukasanda.aismobile.data.db.entity.Suggestion
 import com.lukasanda.aismobile.databinding.PeopleDetailFragmentBinding
@@ -30,13 +33,15 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
-class PeopleDetailFragment : BaseFragment<PeopleDetailFragment.Views, PeopleDetailFragmentBinding, PeopleDetailViewModel, PeopleDetailHandler>() {
+class PeopleDetailFragment : BaseFragment<PeopleDetailFragment.Views, PeopleDetailFragmentBinding, PeopleDetailViewModel, PeopleDetailHandler>(), AnalyticsTrait {
 
     private val safePrefs by inject<SafePrefs>()
 
     inner class Views : BaseViews {
         override fun modifyViews() {
             val args by navArgs<PeopleDetailFragmentArgs>()
+
+            logEvent(SCREEN_PPL_DETAIL)
 
             val infoAdapter = PeopleDetailAdapter {
                 if (it.info.second.contains("@")) {
@@ -75,6 +80,7 @@ class PeopleDetailFragment : BaseFragment<PeopleDetailFragment.Views, PeopleDeta
     override fun createViews() = Views()
 
     override lateinit var handler: PeopleDetailHandler
+    override fun getAnalytics() = FirebaseAnalytics.getInstance(requireContext())
 }
 
 interface PeopleDetailHandler : BaseFragmentHandler {

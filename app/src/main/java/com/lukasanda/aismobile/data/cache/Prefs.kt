@@ -43,7 +43,7 @@ class Prefs(private val context: Context) {
         @SuppressLint("ApplySharedPref")
         set(value) {
             field = value
-            prefs.edit().putLong(COURSE_CACHE_EXPIRATION, value.millis).commit()
+            prefs.edit().putLong(SESSION_EXPIRATION, value.millis).commit()
         }
 
     var timetableExpiration: DateTime = DateTime.now().minusWeeks(1)
@@ -96,7 +96,7 @@ class Prefs(private val context: Context) {
 
     var theme: Int
         get() {
-            val entry = prefs.getString(THEME, "2") ?: "2"
+            val entry = prefs.getString(THEME, "0") ?: "0"
 
             return entry.toInt()
         }

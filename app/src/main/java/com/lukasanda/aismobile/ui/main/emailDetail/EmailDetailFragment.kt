@@ -25,7 +25,10 @@ import com.afollestad.materialdialogs.bottomsheets.BottomSheet
 import com.afollestad.materialdialogs.list.listItems
 import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.lukasanda.aismobile.R
+import com.lukasanda.aismobile.core.AnalyticsTrait
+import com.lukasanda.aismobile.core.SCREEN_EMAIL_DETAIL
 import com.lukasanda.aismobile.data.db.entity.Email
 import com.lukasanda.aismobile.databinding.EmailDetailFragmentBinding
 import com.lukasanda.aismobile.ui.activity.BaseViews
@@ -37,10 +40,11 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
 class EmailDetailFragment :
-    BaseFragment<EmailDetailFragment.Views, EmailDetailFragmentBinding, EmailDetailViewModel, EmailDetailHandler>() {
+    BaseFragment<EmailDetailFragment.Views, EmailDetailFragmentBinding, EmailDetailViewModel, EmailDetailHandler>(), AnalyticsTrait {
     inner class Views : BaseViews {
         override fun modifyViews() {
             setHasOptionsMenu(true)
+            logEvent(SCREEN_EMAIL_DETAIL)
             handler.setTitle(" ")
             val args by navArgs<EmailDetailFragmentArgs>()
 
@@ -110,6 +114,7 @@ class EmailDetailFragment :
     override fun createViews() = Views()
 
     override lateinit var handler: EmailDetailHandler
+    override fun getAnalytics() = FirebaseAnalytics.getInstance(requireContext())
 }
 
 interface EmailDetailHandler : BaseFragmentHandler {

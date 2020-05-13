@@ -14,37 +14,39 @@
 package com.lukasanda.aismobile.ui.login
 
 //import com.lukasanda.aismobile.data.remote.SyncWorker
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.lukasanda.aismobile.R
 import com.lukasanda.aismobile.core.*
+import com.lukasanda.aismobile.data.cache.Prefs
 import com.lukasanda.aismobile.data.cache.SafePrefs
 import com.lukasanda.aismobile.databinding.ActivityLoginBinding
 import com.lukasanda.aismobile.ui.activity.BaseActivityViews
 import com.lukasanda.aismobile.ui.activity.BaseUIActivity
-import com.lukasanda.aismobile.util.hide
-import com.lukasanda.aismobile.util.show
-import com.lukasanda.aismobile.util.startSingleWorker
+import com.lukasanda.aismobile.util.*
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
 class LoginActivity : BaseUIActivity<LoginViewModel, LoginActivity.Views, ActivityLoginBinding>(), AnalyticsTrait {
-    private val prefs by inject<SafePrefs>()
+    private val safePrefs by inject<SafePrefs>()
+    private val prefs by inject<Prefs>()
     private var hasPressedBack = false
 
     inner class Views : BaseActivityViews {
         override fun setNavigationGraph(): Int? = null
 
         override fun modifyViews() {
-            binding.emailEditText.setText(prefs.email)
-            binding.passwordEditText.setText(prefs.password)
+            binding.emailEditText.setText(safePrefs.email)
+            binding.passwordEditText.setText(safePrefs.password)
 
-            if (prefs.email.isNotEmpty() && prefs.password.isNotEmpty()) {
+            if (safePrefs.email.isNotEmpty() && safePrefs.password.isNotEmpty()) {
                 viewModel.login(
                     binding.emailEditText.text.toString(),
                     binding.passwordEditText.text.toString()
@@ -90,8 +92,21 @@ class LoginActivity : BaseUIActivity<LoginViewModel, LoginActivity.Views, Activi
                     }
                 }
             })
+
+            createLiveData<String>(prefs.prefs, prefs.THEME).observe(this@LoginActivity, Observer { number ->
+                val it = number.takeIf { it.isNotEmpty() } ?: "2"
+                Log.d("TAG", "Main activity Actual value: $it")
+                ThemeHelper.applyTheme(it.toInt())
+                delegate.localNightMode = ThemeHelper.getLocalTheme(it.toInt())
+
+            })
         }
 
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        recreate()
     }
 
     override fun onBackPressed() {

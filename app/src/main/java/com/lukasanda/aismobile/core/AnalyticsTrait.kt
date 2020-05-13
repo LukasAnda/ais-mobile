@@ -33,6 +33,16 @@ const val ACTION_PEOPLE_DETAIL = "action_ppl_detail"
 const val ACTION_SEARCH_PEOPLE = "action_ppl_search"
 const val ACTION_LOGOUT = "action_logout"
 
+const val SCREEN_TIMETABLE = "screen_timetable"
+const val SCREEN_INDEX = "screen_index"
+const val SCREEN_EMAIL = "screen_email"
+const val SCREEN_EMAIL_COMPOSE = "screen_email_compose"
+const val SCREEN_DOCUMENTS = "screen_documents"
+const val SCREEN_PEOPLE = "screen_people"
+const val SCREEN_COURSE_DETAIL = "screen_course_detail"
+const val SCREEN_EMAIL_DETAIL = "screen_course_detail"
+const val SCREEN_PPL_DETAIL = "screen_ppl_detail"
+
 
 const val EVENT_WRONG_PASSWORD = "event_wrong_password"
 
